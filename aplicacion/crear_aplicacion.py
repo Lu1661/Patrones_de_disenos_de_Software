@@ -2,12 +2,15 @@
 
 from pathlib import Path
 
-from flask import Flask, jsonify
+from flask import Flask, jsonify, redirect, request, session, url_for
 from mysql.connector import Error as ErrorMySQL
 from mysql.connector import IntegrityError
 
 from aplicacion.configuracion.configuracion_entorno import ConfiguracionEntorno
 from aplicacion.dependencias import configurar_dependencias
+from aplicacion.presentacion.controladores.controlador_autenticacion import (
+    autenticacion_bp,
+)
 from aplicacion.presentacion.controladores.controlador_configuracion import (
     configuracion_bp,
 )
@@ -37,12 +40,38 @@ def crear_aplicacion() -> Flask:
     aplicacion.config.from_object(ConfiguracionEntorno)
     configurar_dependencias(aplicacion)
 
+    aplicacion.register_blueprint(autenticacion_bp)
     aplicacion.register_blueprint(inicio_bp)
     aplicacion.register_blueprint(configuracion_bp)
     aplicacion.register_blueprint(productos_bp)
     aplicacion.register_blueprint(inventario_bp)
     aplicacion.register_blueprint(ventas_bp)
     aplicacion.register_blueprint(reportes_bp)
+
+    # ============================================================
+    # BLOQUE: PROTECCION GENERAL DE PANTALLAS Y API
+    # Este bloque exige una sesion administrativa para usar el sistema.
+    # Las peticiones de la API reciben JSON y las pantallas van al login.
+    # ============================================================
+    @aplicacion.before_request
+    def comprobar_sesion_administrativa():
+        rutas_libres = {"autenticacion.login", "static"}
+
+        if request.endpoint in rutas_libres or session.get("usuario_admin"):
+            return None
+
+        if request.path.startswith("/api/"):
+            return (
+                jsonify(
+                    {
+                        "exito": False,
+                        "mensaje": "Debes iniciar sesión para continuar.",
+                    }
+                ),
+                401,
+            )
+
+        return redirect(url_for("autenticacion.login"))
 
     # ============================================================
     # BLOQUE: MANEJO UNIFORME DE ERRORES DEL BACKEND

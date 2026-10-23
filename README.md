@@ -12,7 +12,7 @@ Proyecto académico del curso Patrones de Diseño de Software.
 
 ## Estado actual
 
-Las fases 1 a 12 están terminadas. El proyecto cuenta con estructura modular, base de datos MySQL, entidades del dominio, los seis patrones solicitados, repositorios, backend Flask, una interfaz web responsive, reportes financieros integrados y una suite automatizada de pruebas.
+Las fases 1 a 12 y el paso adicional 13.5 están terminados. El proyecto cuenta con estructura modular, base de datos MySQL, entidades del dominio, los seis patrones solicitados, repositorios, backend Flask, una interfaz web responsive, reportes financieros integrados, acceso administrativo y una suite automatizada de pruebas.
 
 ## Preparación local
 
@@ -33,6 +33,8 @@ python ejecutar.py
 
 La aplicación quedará disponible en `http://127.0.0.1:5000`.
 
+El sistema solicita el acceso administrativo antes de mostrar la interfaz. Las credenciales académicas iniciales se encuentran en `ARRANQUE.txt` y se pueden cambiar mediante `ADMIN_USUARIO` y `ADMIN_PASSWORD` en el archivo `.env`.
+
 ## Pruebas automatizadas
 
 ```powershell
@@ -51,7 +53,7 @@ La suite contiene pruebas unitarias para las entidades, cálculos y seis patrone
 - `GET` y `POST` `/api/ventas`
 - `POST` `/api/reportes/generar`
 
-Las respuestas utilizan JSON y mantienen la estructura `exito`, `mensaje` y `datos`. Los registros de producto y venta se ejecutan dentro de transacciones para evitar productos incompletos, ventas sin detalle o descuentos parciales de stock.
+Las respuestas utilizan JSON y mantienen la estructura `exito`, `mensaje` y `datos`. Todas las rutas de la API requieren una sesión administrativa activa. Los registros de producto y venta se ejecutan dentro de transacciones para evitar productos incompletos, ventas sin detalle o descuentos parciales de stock.
 
 ## Módulos de la interfaz
 

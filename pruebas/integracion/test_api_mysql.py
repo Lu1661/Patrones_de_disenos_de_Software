@@ -88,8 +88,17 @@ def test_flujo_completo_api_mysql():
         conexion.commit()
 
         aplicacion = crear_aplicacion()
-        aplicacion.config.update(TESTING=True)
+        aplicacion.config.update(
+            TESTING=True,
+            ADMIN_USUARIO="admin",
+            ADMIN_PASSWORD="admin",
+        )
         cliente = aplicacion.test_client()
+        acceso = cliente.post(
+            "/login",
+            data={"usuario": "admin", "password": "admin"},
+        )
+        assert acceso.status_code == 302
 
         def publicar(ruta: str, datos: dict, estado: int):
             respuesta = cliente.post(ruta, json=datos)

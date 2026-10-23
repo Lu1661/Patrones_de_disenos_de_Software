@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Acceso administrativo al Sistema Empresarial de Reportes Financieros">
+    <title>Acceso administrativo | SERF</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/estilos.css') }}">
+</head>
+<body class="pagina-login">
+    <main class="contenedor-login">
+        <section class="tarjeta-login" aria-labelledby="titulo-login">
+            <div class="marca-login">
+                <span class="logotipo" aria-hidden="true">FC</span>
+                <div>
+                    <strong>FinanCorp</strong>
+                    <span>Sistema SERF</span>
+                </div>
+            </div>
+
+            <p class="etiqueta">Acceso administrativo</p>
+            <h1 id="titulo-login">Iniciar sesión</h1>
+            <p class="descripcion-login">Ingresa con la cuenta autorizada para gestionar la información financiera.</p>
+
+            {% if mensaje_error %}
+            <div class="alerta-login" role="alert">{{ mensaje_error }}</div>
+            {% endif %}
+
+            <form class="formulario formulario-login" method="post" action="{{ url_for('autenticacion.login') }}">
+                <label>
+                    Usuario
+                    <input type="text" name="usuario" autocomplete="username" required autofocus>
+                </label>
+                <label>
+                    Contraseña
+                    <input type="password" name="password" autocomplete="current-password" required>
+                </label>
+                <button class="boton boton-primario" type="submit">Ingresar al sistema</button>
+            </form>
+
+            <p class="nota-login">Proyecto académico de gestión financiera empresarial.</p>
+        </section>
+    </main>
+</body>
+</html>

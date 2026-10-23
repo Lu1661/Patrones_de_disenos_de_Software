@@ -41,8 +41,11 @@
                     <h1 id="titulo-seccion">Resumen general</h1>
                 </div>
                 <div class="usuario-actual">
-                    <span class="avatar" aria-hidden="true">€</span>
-                    <div><strong>Moneda corporativa</strong><span>EUR</span></div>
+                    <span class="avatar" aria-hidden="true">A</span>
+                    <div><strong>{{ session.get('usuario_admin', 'admin') }}</strong><span>Administrador</span></div>
+                    <form method="post" action="{{ url_for('autenticacion.logout') }}">
+                        <button class="boton-salir" type="submit">Salir</button>
+                    </form>
                 </div>
             </header>
 
