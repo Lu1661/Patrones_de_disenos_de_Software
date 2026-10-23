@@ -12,7 +12,7 @@ Proyecto académico del curso Patrones de Diseño de Software.
 
 ## Estado actual
 
-Las fases 1 a 7 están terminadas. El proyecto cuenta con estructura modular, base de datos MySQL, entidades del dominio, los seis patrones solicitados y repositorios para conservar la información. Los módulos web funcionales se implementarán en las fases siguientes.
+Las fases 1 a 8 están terminadas. El proyecto cuenta con estructura modular, base de datos MySQL, entidades del dominio, los seis patrones solicitados, repositorios y un backend Flask funcional. La interfaz web se implementará en la fase siguiente.
 
 ## Preparación local
 
@@ -32,6 +32,17 @@ python ejecutar.py
 ```
 
 La aplicación quedará disponible en `http://127.0.0.1:5000`.
+
+## API disponible
+
+- `GET` y `POST` `/api/configuracion/filiales`
+- `GET` y `POST` `/api/configuracion/tipos-cambio`
+- `GET` y `POST` `/api/productos`
+- `GET` `/api/inventario?id_filial=1`
+- `POST` `/api/inventario/reponer`
+- `GET` y `POST` `/api/ventas`
+
+Las respuestas utilizan JSON y mantienen la estructura `exito`, `mensaje` y `datos`. Los registros de producto y venta se ejecutan dentro de transacciones para evitar productos incompletos, ventas sin detalle o descuentos parciales de stock.
 
 ## Organización
 

@@ -2,10 +2,19 @@
 
 from pathlib import Path
 
-from flask import Flask
+from flask import Flask, jsonify
+from mysql.connector import Error as ErrorMySQL
+from mysql.connector import IntegrityError
 
 from aplicacion.configuracion.configuracion_entorno import ConfiguracionEntorno
+from aplicacion.dependencias import configurar_dependencias
+from aplicacion.presentacion.controladores.controlador_configuracion import (
+    configuracion_bp,
+)
+from aplicacion.presentacion.controladores.controlador_inventario import inventario_bp
 from aplicacion.presentacion.controladores.controlador_inicio import inicio_bp
+from aplicacion.presentacion.controladores.controlador_productos import productos_bp
+from aplicacion.presentacion.controladores.controlador_ventas import ventas_bp
 
 
 def crear_aplicacion() -> Flask:
@@ -25,7 +34,50 @@ def crear_aplicacion() -> Flask:
         static_url_path="/recursos",
     )
     aplicacion.config.from_object(ConfiguracionEntorno)
+    configurar_dependencias(aplicacion)
+
     aplicacion.register_blueprint(inicio_bp)
+    aplicacion.register_blueprint(configuracion_bp)
+    aplicacion.register_blueprint(productos_bp)
+    aplicacion.register_blueprint(inventario_bp)
+    aplicacion.register_blueprint(ventas_bp)
+
+    # ============================================================
+    # BLOQUE: MANEJO UNIFORME DE ERRORES DEL BACKEND
+    # Este bloque evita mostrar detalles internos de MySQL y entrega al
+    # frontend mensajes sencillos junto con el codigo HTTP apropiado.
+    # ============================================================
+    @aplicacion.errorhandler(ValueError)
+    def manejar_validacion(error: ValueError):
+        return jsonify({"exito": False, "mensaje": str(error)}), 400
+
+    @aplicacion.errorhandler(IntegrityError)
+    def manejar_conflicto(_error: IntegrityError):
+        return (
+            jsonify(
+                {
+                    "exito": False,
+                    "mensaje": "El registro ya existe o esta siendo utilizado.",
+                }
+            ),
+            409,
+        )
+
+    @aplicacion.errorhandler(ErrorMySQL)
+    def manejar_error_mysql(_error: ErrorMySQL):
+        return (
+            jsonify(
+                {
+                    "exito": False,
+                    "mensaje": "No fue posible completar la operacion en MySQL.",
+                }
+            ),
+            500,
+        )
+
+    @aplicacion.errorhandler(RuntimeError)
+    def manejar_configuracion(error: RuntimeError):
+        return jsonify({"exito": False, "mensaje": str(error)}), 503
 
     return aplicacion
 
