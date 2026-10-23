@@ -12,7 +12,7 @@ Proyecto académico del curso Patrones de Diseño de Software.
 
 ## Estado actual
 
-Las fases 1 a 9 están terminadas. El proyecto cuenta con estructura modular, base de datos MySQL, entidades del dominio, los seis patrones solicitados, repositorios, backend Flask y una interfaz web responsive desarrollada con HTML, CSS y JavaScript.
+Las fases 1 a 10 están terminadas. El proyecto cuenta con estructura modular, base de datos MySQL, entidades del dominio, los seis patrones solicitados, repositorios, backend Flask, una interfaz web responsive y la integración validada entre sus tres capas.
 
 ## Preparación local
 
@@ -53,6 +53,10 @@ Las respuestas utilizan JSON y mantienen la estructura `exito`, `mensaje` y `dat
 - Registro y consulta de ventas con conversión a EUR.
 
 La interfaz utiliza las rutas del backend mediante JavaScript y adapta formularios, navegación y tablas para equipos de escritorio y dispositivos móviles.
+
+## Flujo integrado
+
+El uso normal del sistema sigue este orden: registrar los tipos de cambio, crear una filial, registrar un producto con su stock inicial y finalmente realizar ventas. Cada venta consulta la tasa correspondiente, calcula los importes y descuenta el inventario dentro de una misma transacción. Si alguna operación falla, MySQL revierte el proceso para conservar datos consistentes.
 
 ## Organización
 

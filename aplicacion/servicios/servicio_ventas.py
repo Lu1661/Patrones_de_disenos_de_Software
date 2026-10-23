@@ -99,6 +99,18 @@ class ServicioVentas:
             if inventario is None:
                 raise ValueError("El producto no existe en el inventario de la filial.")
 
+            # ============================================================
+            # BLOQUE: VALIDACION DEL STOCK ANTES DE REGISTRAR LA VENTA
+            # Este bloque informa al usuario cuantas unidades hay disponibles
+            # y evita crear una venta que deje el inventario en negativo.
+            # Cumple: RF-03 y CU-03.
+            # ============================================================
+            if not inventario.tiene_stock(cantidad):
+                raise ValueError(
+                    "Stock insuficiente. "
+                    f"Disponible: {inventario.stock_disponible}."
+                )
+
             precio_recibido = datos.get("precio_unitario_local")
             precio = (
                 precio_recibido

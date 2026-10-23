@@ -16,7 +16,7 @@
 }
 
 * { box-sizing: border-box; }
-body { margin: 0; min-width: 320px; min-height: 100vh; background: var(--fondo); }
+body { margin: 0; min-height: 100vh; background: var(--fondo); }
 button, input, select, textarea { font: inherit; }
 button { cursor: pointer; }
 .aplicacion { display: flex; min-height: 100vh; }
