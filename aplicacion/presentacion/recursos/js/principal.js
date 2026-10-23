@@ -6,6 +6,7 @@ const estado = {
     productos: [],
     inventario: [],
     ventas: [],
+    reporte: null,
 };
 
 let temporizadorNotificacion;
@@ -333,6 +334,87 @@ function mostrarResumenVenta(venta) {
         </div>`;
 }
 
+function actualizarCamposPeriodoReporte() {
+    const tipo = document.querySelector("#tipo-reporte").value;
+    document.querySelector("#campo-mes-reporte").classList.toggle("oculto", tipo !== "mensual");
+    document.querySelector("#campo-trimestre-reporte").classList.toggle("oculto", tipo !== "trimestral");
+}
+
+// ============================================================
+// BLOQUE: PRESENTACION DEL REPORTE FINANCIERO
+// Convierte la respuesta de la fachada en indicadores, comparaciones y
+// una tabla imprimible sin realizar calculos financieros en el navegador.
+// Cumple: RF-05 a RF-09 y CU-06 a CU-09.
+// ============================================================
+function mostrarReporte(reporte) {
+    estado.reporte = reporte;
+    const maximoFilial = Math.max(
+        ...reporte.comparativo_filiales.map((item) => Number(item.total_eur)),
+        0,
+    );
+    const barras = reporte.comparativo_filiales.length
+        ? reporte.comparativo_filiales.map((item) => {
+            const porcentaje = maximoFilial > 0 ? (Number(item.total_eur) / maximoFilial) * 100 : 0;
+            return `
+                <div class="barra-filial">
+                    <strong>${textoSeguro(item.filial)}</strong>
+                    <span class="pista-barra"><span class="valor-barra" style="width:${porcentaje.toFixed(2)}%"></span></span>
+                    <span>${formatearImporte(item.total_eur, "EUR")}</span>
+                </div>`;
+        }).join("")
+        : '<p class="estado-vacio visible">No existen ventas para comparar.</p>';
+
+    const filas = reporte.ventas.map((venta) => `
+        <tr>
+            <td data-label="Factura"><strong>${textoSeguro(venta.numero_factura)}</strong><br><small>${formatearFecha(venta.fecha_venta, true)}</small></td>
+            <td data-label="Filial">${textoSeguro(venta.filial)}</td>
+            <td data-label="Producto">${textoSeguro(venta.producto)}<br><small>${textoSeguro(venta.categoria)}</small></td>
+            <td data-label="Cantidad">${venta.cantidad}</td>
+            <td data-label="Venta local">${formatearImporte(venta.total_local, venta.codigo_divisa)}</td>
+            <td data-label="Ingreso EUR">${formatearImporte(venta.total_eur, "EUR")}</td>
+            <td data-label="Gasto EUR">${formatearImporte(venta.gasto_eur, "EUR")}</td>
+        </tr>`).join("");
+
+    const firma = reporte.firma ? `
+        <section class="firma-reporte">
+            <h4>Firma digital académica</h4>
+            <p><strong>Emisor:</strong> ${textoSeguro(reporte.firma.emisor)}</p>
+            <p><strong>Fecha:</strong> ${textoSeguro(reporte.firma.fecha)}</p>
+            <p><strong>Identificador:</strong> ${textoSeguro(reporte.firma.identificador)}</p>
+            <p><strong>SHA-256:</strong> ${textoSeguro(reporte.firma.sha256)}</p>
+        </section>` : "";
+    const claseResultado = Number(reporte.resultado_financiero_eur) >= 0
+        ? "resultado-positivo"
+        : "resultado-negativo";
+
+    document.querySelector("#resultado-reporte").innerHTML = `
+        <article class="reporte-documento" id="reporte-imprimible">
+            ${reporte.con_marca_agua ? '<div class="marca-agua-reporte">CONFIDENCIAL</div>' : ""}
+            <div class="contenido-reporte">
+                <header class="cabecera-reporte">
+                    <div><p class="etiqueta">FinanCorp S.A. · SERF</p><h3>${textoSeguro(reporte.titulo)}</h3><p>${textoSeguro(reporte.periodo)} · ${textoSeguro(reporte.alcance)}</p></div>
+                    <div class="datos-emision"><strong>Generado ${formatearFecha(reporte.fecha_generacion, true)}</strong><span>Desde ${formatearFecha(reporte.fecha_inicio)} hasta ${formatearFecha(reporte.fecha_fin)}</span></div>
+                </header>
+                <div class="acciones-reporte"><button class="boton boton-secundario" id="boton-imprimir-reporte" type="button">Imprimir o guardar como PDF</button></div>
+                <section class="metricas-reporte">
+                    <div class="metrica-reporte"><span>Ingresos</span><strong>${formatearImporte(reporte.total_ingresos_eur, "EUR")}</strong></div>
+                    <div class="metrica-reporte"><span>Gastos de importación</span><strong>${formatearImporte(reporte.total_gastos_eur, "EUR")}</strong></div>
+                    <div class="metrica-reporte ${claseResultado}"><span>Resultado financiero</span><strong>${formatearImporte(reporte.resultado_financiero_eur, "EUR")}</strong></div>
+                    <div class="metrica-reporte"><span>Ventas</span><strong>${reporte.cantidad_ventas}</strong></div>
+                </section>
+                <section class="seccion-reporte"><h4>Comparación de ingresos por filial</h4><div class="grafico-filiales">${barras}</div></section>
+                <section class="seccion-reporte">
+                    <h4>Detalle de ventas del periodo</h4>
+                    <div class="tabla-contenedor"><table><thead><tr><th>Factura</th><th>Filial</th><th>Producto</th><th>Cantidad</th><th>Venta local</th><th>Ingreso EUR</th><th>Gasto EUR</th></tr></thead><tbody>${filas}</tbody></table></div>
+                    ${filas ? "" : '<p class="estado-vacio visible">Periodo sin movimientos registrados.</p>'}
+                </section>
+                ${firma}
+                <details class="detalle-patrones"><summary>Ver estructura consolidada del reporte</summary><pre>${textoSeguro(reporte.contenido_emitido)}</pre></details>
+            </div>
+        </article>`;
+    document.querySelector("#boton-imprimir-reporte").addEventListener("click", () => window.print());
+}
+
 // ============================================================
 // BLOQUE: FORMULARIOS DE LOS PROCESOS DEL NEGOCIO
 // Cada envio conserva los datos cuando existe un error y actualiza las
@@ -411,6 +493,24 @@ function prepararFormularios() {
         } catch (error) { mostrarNotificacion(error.message, true); }
         finally { bloquearBoton(formulario, false); }
     });
+
+    document.querySelector("#formulario-reporte").addEventListener("submit", async (evento) => {
+        evento.preventDefault();
+        const formulario = evento.currentTarget;
+        bloquearBoton(formulario, true);
+        try {
+            const datos = datosFormulario(formulario);
+            datos.con_marca_agua = formulario.elements.con_marca_agua.checked;
+            datos.con_firma = formulario.elements.con_firma.checked;
+            const respuesta = await solicitar("/api/reportes/generar", {
+                method: "POST",
+                body: JSON.stringify(datos),
+            });
+            mostrarReporte(respuesta.datos);
+            mostrarNotificacion(respuesta.mensaje);
+        } catch (error) { mostrarNotificacion(error.message, true); }
+        finally { bloquearBoton(formulario, false); }
+    });
 }
 
 function prepararEventosDeConsulta() {
@@ -434,6 +534,7 @@ function prepararEventosDeConsulta() {
         try { await cargarVentas(); }
         catch (error) { mostrarNotificacion(error.message, true); }
     });
+    document.querySelector("#tipo-reporte").addEventListener("change", actualizarCamposPeriodoReporte);
 }
 
 async function iniciarAplicacion() {
@@ -446,6 +547,11 @@ async function iniciarAplicacion() {
     document.querySelector("#formulario-venta [name='fecha_venta']").value = fechaHoraLocal();
     document.querySelector("#ventas-desde").value = inicioMesISO();
     document.querySelector("#ventas-hasta").value = hoyISO();
+    const ahora = new Date();
+    document.querySelector("#anio-reporte").value = ahora.getFullYear();
+    document.querySelector("#mes-reporte").value = String(ahora.getMonth() + 1);
+    document.querySelector("#trimestre-reporte").value = String(Math.ceil((ahora.getMonth() + 1) / 3));
+    actualizarCamposPeriodoReporte();
 
     try {
         await actualizarDatosGenerales();

@@ -12,7 +12,7 @@ Proyecto académico del curso Patrones de Diseño de Software.
 
 ## Estado actual
 
-Las fases 1 a 10 están terminadas. El proyecto cuenta con estructura modular, base de datos MySQL, entidades del dominio, los seis patrones solicitados, repositorios, backend Flask, una interfaz web responsive y la integración validada entre sus tres capas.
+Las fases 1 a 11 están terminadas. El proyecto cuenta con estructura modular, base de datos MySQL, entidades del dominio, los seis patrones solicitados, repositorios, backend Flask, una interfaz web responsive y reportes financieros integrados.
 
 ## Preparación local
 
@@ -41,6 +41,7 @@ La aplicación quedará disponible en `http://127.0.0.1:5000`.
 - `GET` `/api/inventario?id_filial=1`
 - `POST` `/api/inventario/reponer`
 - `GET` y `POST` `/api/ventas`
+- `POST` `/api/reportes/generar`
 
 Las respuestas utilizan JSON y mantienen la estructura `exito`, `mensaje` y `datos`. Los registros de producto y venta se ejecutan dentro de transacciones para evitar productos incompletos, ventas sin detalle o descuentos parciales de stock.
 
@@ -51,12 +52,15 @@ Las respuestas utilizan JSON y mantienen la estructura `exito`, `mensaje` y `dat
 - Registro y consulta de productos importados.
 - Consulta y reposición de inventario por filial.
 - Registro y consulta de ventas con conversión a EUR.
+- Reportes mensuales, trimestrales y anuales por filial o consolidados.
 
 La interfaz utiliza las rutas del backend mediante JavaScript y adapta formularios, navegación y tablas para equipos de escritorio y dispositivos móviles.
 
 ## Flujo integrado
 
 El uso normal del sistema sigue este orden: registrar los tipos de cambio, crear una filial, registrar un producto con su stock inicial y finalmente realizar ventas. Cada venta consulta la tasa correspondiente, calcula los importes y descuenta el inventario dentro de una misma transacción. Si alguna operación falla, MySQL revierte el proceso para conservar datos consistentes.
+
+Los reportes consultan las ventas históricas sin modificar datos. Presentan ingresos, gastos de importación y resultado financiero en EUR, una comparación sencilla entre filiales y una vista preparada para impresión. La marca de agua y la firma con SHA-256 son opciones académicas del reporte.
 
 ## Organización
 

@@ -14,6 +14,7 @@ from aplicacion.presentacion.controladores.controlador_configuracion import (
 from aplicacion.presentacion.controladores.controlador_inventario import inventario_bp
 from aplicacion.presentacion.controladores.controlador_inicio import inicio_bp
 from aplicacion.presentacion.controladores.controlador_productos import productos_bp
+from aplicacion.presentacion.controladores.controlador_reportes import reportes_bp
 from aplicacion.presentacion.controladores.controlador_ventas import ventas_bp
 
 
@@ -41,6 +42,7 @@ def crear_aplicacion() -> Flask:
     aplicacion.register_blueprint(productos_bp)
     aplicacion.register_blueprint(inventario_bp)
     aplicacion.register_blueprint(ventas_bp)
+    aplicacion.register_blueprint(reportes_bp)
 
     # ============================================================
     # BLOQUE: MANEJO UNIFORME DE ERRORES DEL BACKEND

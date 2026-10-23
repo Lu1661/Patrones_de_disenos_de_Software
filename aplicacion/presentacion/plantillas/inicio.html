@@ -203,4 +203,53 @@
         <p class="estado-vacio" id="vacio-ventas">No existen ventas para el periodo seleccionado.</p>
     </article>
 </section>
+
+<section class="seccion-modulo" id="seccion-reportes" data-titulo="Reportes financieros">
+    <div class="encabezado-modulo">
+        <div><p class="etiqueta">Análisis corporativo</p><h2>Reportes financieros</h2><p>Consulta ingresos, gastos y resultados por filial o de forma consolidada.</p></div>
+    </div>
+
+    <div class="cuadricula-reportes">
+        <article class="panel panel-parametros-reporte">
+            <div class="cabecera-panel"><div><h3>Configurar reporte</h3><p>Selecciona el periodo y las opciones de presentación.</p></div></div>
+            <form id="formulario-reporte" class="formulario">
+                <label>Tipo de reporte
+                    <select name="tipo" id="tipo-reporte" required>
+                        <option value="mensual">Mensual</option>
+                        <option value="trimestral">Trimestral</option>
+                        <option value="anual">Anual</option>
+                    </select>
+                </label>
+                <label>Año<input name="anio" id="anio-reporte" type="number" min="2000" step="1" required></label>
+                <label id="campo-mes-reporte">Mes
+                    <select name="mes" id="mes-reporte">
+                        <option value="1">Enero</option><option value="2">Febrero</option><option value="3">Marzo</option><option value="4">Abril</option>
+                        <option value="5">Mayo</option><option value="6">Junio</option><option value="7">Julio</option><option value="8">Agosto</option>
+                        <option value="9">Septiembre</option><option value="10">Octubre</option><option value="11">Noviembre</option><option value="12">Diciembre</option>
+                    </select>
+                </label>
+                <label id="campo-trimestre-reporte" class="oculto">Trimestre
+                    <select name="trimestre" id="trimestre-reporte">
+                        <option value="1">Primer trimestre</option>
+                        <option value="2">Segundo trimestre</option>
+                        <option value="3">Tercer trimestre</option>
+                        <option value="4">Cuarto trimestre</option>
+                    </select>
+                </label>
+                <label>Filial
+                    <select name="id_filial" class="selector-filiales"><option value="">Consolidado corporativo</option></select>
+                </label>
+                <label class="opcion-reporte"><input name="con_marca_agua" type="checkbox"><span>Agregar marca de agua</span></label>
+                <label class="opcion-reporte"><input name="con_firma" type="checkbox"><span>Agregar firma digital académica</span></label>
+                <button class="boton boton-primario" type="submit">Generar reporte</button>
+            </form>
+        </article>
+
+        <div id="resultado-reporte" class="resultado-reporte">
+            <article class="panel estado-inicial-reporte">
+                <div class="resumen-vacio resumen-vacio-claro"><span aria-hidden="true">€</span><p>Configura el periodo para generar el reporte financiero.</p></div>
+            </article>
+        </div>
+    </div>
+</section>
 {% endblock %}

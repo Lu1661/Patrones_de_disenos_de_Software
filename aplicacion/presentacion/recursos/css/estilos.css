@@ -157,6 +157,45 @@ tbody tr:hover { background: #fafcfd; }
 .notificacion.visible { opacity: 1; transform: none; }
 .notificacion.error { background: #983c3c; }
 .fondo-menu { display: none; }
+.oculto { display: none !important; }
+
+.cuadricula-reportes { display: grid; grid-template-columns: 310px minmax(0, 1fr); gap: 20px; align-items: start; }
+.panel-parametros-reporte { position: sticky; top: 20px; }
+.opcion-reporte { display: flex !important; align-items: center; gap: 9px !important; font-weight: 600 !important; }
+.opcion-reporte input { width: 17px; min-height: 17px; margin: 0; }
+.resultado-reporte { min-width: 0; }
+.estado-inicial-reporte { min-height: 330px; display: grid; place-items: center; }
+.resumen-vacio-claro { color: var(--texto-suave); }
+.resumen-vacio-claro span { color: var(--verde); border-color: #bcd7d1; background: #edf7f4; }
+.resumen-vacio-claro p { color: var(--texto-suave); }
+
+.reporte-documento { position: relative; overflow: hidden; padding: 32px; border: 1px solid var(--borde); border-radius: 12px; background: #fff; box-shadow: var(--sombra); }
+.marca-agua-reporte { position: absolute; inset: 44% auto auto 50%; z-index: 0; color: rgb(30 91 130 / 7%); font-size: clamp(2rem, 6vw, 5rem); font-weight: 800; letter-spacing: .08em; pointer-events: none; transform: translate(-50%, -50%) rotate(-25deg); white-space: nowrap; }
+.contenido-reporte { position: relative; z-index: 1; }
+.cabecera-reporte { display: flex; justify-content: space-between; gap: 22px; padding-bottom: 20px; border-bottom: 2px solid var(--azul-oscuro); }
+.cabecera-reporte h3 { margin: 5px 0 4px; color: var(--azul-oscuro); font-size: 1.45rem; }
+.cabecera-reporte p { margin: 0; color: var(--texto-suave); }
+.datos-emision { display: grid; gap: 5px; min-width: 190px; text-align: right; font-size: .76rem; }
+.datos-emision strong { color: var(--azul-oscuro); }
+.acciones-reporte { display: flex; justify-content: flex-end; margin: 18px 0; }
+.metricas-reporte { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin: 22px 0; }
+.metrica-reporte { padding: 16px; border: 1px solid var(--borde); border-radius: 9px; background: #f8fafb; }
+.metrica-reporte span { display: block; color: var(--texto-suave); font-size: .68rem; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; }
+.metrica-reporte strong { display: block; margin-top: 7px; color: var(--azul-oscuro); font-size: 1.08rem; }
+.resultado-positivo strong { color: var(--verde); }
+.resultado-negativo strong { color: #a33c3c; }
+.seccion-reporte { margin-top: 25px; }
+.seccion-reporte h4 { margin: 0 0 14px; color: var(--azul-oscuro); font-size: .96rem; }
+.grafico-filiales { display: grid; gap: 10px; }
+.barra-filial { display: grid; grid-template-columns: minmax(110px, 180px) minmax(120px, 1fr) auto; align-items: center; gap: 10px; font-size: .76rem; }
+.pista-barra { height: 11px; overflow: hidden; border-radius: 999px; background: #e6edf1; }
+.valor-barra { display: block; height: 100%; border-radius: inherit; background: var(--verde); }
+.detalle-patrones { margin-top: 22px; border: 1px solid var(--borde); border-radius: 9px; background: #f8fafb; }
+.detalle-patrones summary { padding: 13px 15px; color: var(--azul-oscuro); cursor: pointer; font-size: .78rem; font-weight: 800; }
+.detalle-patrones pre { max-height: 360px; overflow: auto; margin: 0; padding: 0 15px 15px; color: #475a69; white-space: pre-wrap; font: .74rem/1.6 Consolas, monospace; }
+.firma-reporte { margin-top: 24px; padding: 15px; border-left: 4px solid var(--verde); background: #edf7f4; }
+.firma-reporte h4 { margin: 0 0 8px; color: var(--verde); }
+.firma-reporte p { margin: 3px 0; color: #405765; font-size: .72rem; overflow-wrap: anywhere; }
 
 @media (max-width: 1120px) {
     .cuadricula-indicadores { grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -165,6 +204,9 @@ tbody tr:hover { background: #fafcfd; }
     .cabecera-filtros { align-items: flex-start; flex-direction: column; }
     .filtros-en-linea { width: 100%; flex-wrap: wrap; }
     .resumen-venta { min-height: 280px; }
+    .cuadricula-reportes { grid-template-columns: 1fr; }
+    .panel-parametros-reporte { position: static; }
+    .metricas-reporte { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 
 @media (max-width: 820px) {
@@ -211,4 +253,29 @@ tbody tr:hover { background: #fafcfd; }
     .dato-principal { justify-items: end; }
     .acciones-formulario { display: grid; grid-template-columns: 1fr 1fr; }
     .notificacion { right: 14px; bottom: 14px; left: 14px; max-width: none; }
+    .reporte-documento { padding: 20px 16px; }
+    .cabecera-reporte { flex-direction: column; }
+    .datos-emision { text-align: left; }
+    .metricas-reporte { grid-template-columns: 1fr 1fr; }
+    .barra-filial { grid-template-columns: 1fr; gap: 5px; }
+}
+
+@media print {
+    @page { margin: 14mm; }
+    * { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+    body { background: #fff; }
+    .barra-lateral, .encabezado, .notificacion, .fondo-menu,
+    .seccion-modulo:not(#seccion-reportes), .encabezado-modulo,
+    .panel-parametros-reporte, .acciones-reporte { display: none !important; }
+    .aplicacion, .area-principal, .contenido, #seccion-reportes,
+    .cuadricula-reportes, .resultado-reporte { display: block !important; width: 100%; margin: 0; padding: 0; }
+    .reporte-documento { overflow: visible; padding: 0; border: 0; box-shadow: none; }
+    .tabla-contenedor { overflow: visible; }
+    table { display: table; }
+    thead { position: static; display: table-header-group; width: auto; height: auto; overflow: visible; clip: auto; }
+    tbody { display: table-row-group; }
+    tr { display: table-row; }
+    th, td { display: table-cell; }
+    tbody td::before { display: none; }
+    .detalle-patrones { display: none; }
 }

@@ -20,6 +20,8 @@ from aplicacion.persistencia.repositorios.repositorio_tipos_cambio import (
 from aplicacion.persistencia.repositorios.repositorio_ventas import (
     RepositorioVentas,
 )
+from aplicacion.reportes.servicio_reportes import ServicioReportes
+from aplicacion.servicios.fachada_serf import FachadaSERF
 from aplicacion.servicios import (
     ServicioFiliales,
     ServicioInventario,
@@ -78,6 +80,12 @@ def configurar_dependencias(aplicacion: Flask) -> None:
             repositorio_productos,
             repositorio_filiales,
             repositorio_tasas,
+        ),
+        "reportes": ServicioReportes(
+            repositorio_ventas,
+            repositorio_filiales,
+            repositorio_productos,
+            FachadaSERF(configuracion=configuracion),
         ),
     }
     aplicacion.extensions["servicios_serf"] = servicios
