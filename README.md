@@ -12,7 +12,7 @@ Proyecto académico del curso Patrones de Diseño de Software.
 
 ## Estado actual
 
-Las fases 1 a 6 están terminadas. El proyecto cuenta con estructura modular, base de datos MySQL, entidades del dominio y los seis patrones solicitados aplicados al proceso que les corresponde. Los repositorios y módulos web funcionales se implementarán en las fases siguientes.
+Las fases 1 a 7 están terminadas. El proyecto cuenta con estructura modular, base de datos MySQL, entidades del dominio, los seis patrones solicitados y repositorios para conservar la información. Los módulos web funcionales se implementarán en las fases siguientes.
 
 ## Preparación local
 
