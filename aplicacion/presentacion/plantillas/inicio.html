@@ -3,13 +3,204 @@
 {% block titulo %}Inicio | SERF{% endblock %}
 
 {% block contenido %}
-<section class="panel-bienvenida">
-    <p class="etiqueta">Sistema Empresarial de Reportes Financieros</p>
-    <h1>Estructura inicial preparada</h1>
-    <p>
-        El proyecto puede iniciar correctamente. Los modulos funcionales se
-        incorporaran de forma progresiva en las siguientes fases.
-    </p>
+<section class="seccion-modulo activa" id="seccion-resumen" data-titulo="Resumen general">
+    <div class="bienvenida">
+        <div>
+            <p class="etiqueta">Sistema Empresarial de Reportes Financieros</p>
+            <h2>Control financiero en una sola vista</h2>
+            <p>Administra los productos importados, las existencias y las ventas de las filiales de FinanCorp.</p>
+        </div>
+        <span class="fecha-actual" id="fecha-actual"></span>
+    </div>
+
+    <div class="cuadricula-indicadores">
+        <article class="indicador indicador-azul"><span class="indicador-icono" aria-hidden="true">FI</span><div><strong id="total-filiales">0</strong><span>Filiales registradas</span></div></article>
+        <article class="indicador indicador-verde"><span class="indicador-icono" aria-hidden="true">PR</span><div><strong id="total-productos">0</strong><span>Productos activos</span></div></article>
+        <article class="indicador indicador-ambar"><span class="indicador-icono" aria-hidden="true">TC</span><div><strong id="total-tasas">0</strong><span>Tasas activas</span></div></article>
+        <article class="indicador indicador-morado"><span class="indicador-icono" aria-hidden="true">VE</span><div><strong id="total-ventas">0</strong><span>Ventas del mes</span></div></article>
+    </div>
+
+    <div class="cuadricula-doble">
+        <article class="panel">
+            <div class="cabecera-panel"><div><p class="etiqueta">Accesos directos</p><h3>Operaciones frecuentes</h3></div></div>
+            <div class="accesos-directos">
+                <button type="button" data-ir-a="productos"><span>+</span><strong>Nuevo producto</strong><small>Registrar lote importado</small></button>
+                <button type="button" data-ir-a="ventas"><span>+</span><strong>Nueva venta</strong><small>Descontar stock local</small></button>
+                <button type="button" data-ir-a="inventario"><span>→</span><strong>Ver inventario</strong><small>Consultar existencias</small></button>
+            </div>
+        </article>
+        <article class="panel panel-informativo">
+            <div class="cabecera-panel"><div><p class="etiqueta">Proceso recomendado</p><h3>Orden de configuración</h3></div></div>
+            <ol class="lista-pasos">
+                <li><span>1</span><div><strong>Registra las tasas</strong><small>CNY/EUR y moneda local/EUR.</small></div></li>
+                <li><span>2</span><div><strong>Crea la filial</strong><small>Define la sede y su moneda operativa.</small></div></li>
+                <li><span>3</span><div><strong>Ingresa productos y ventas</strong><small>El sistema realizará las conversiones.</small></div></li>
+            </ol>
+        </article>
+    </div>
+</section>
+
+<section class="seccion-modulo" id="seccion-configuracion" data-titulo="Configuración corporativa">
+    <div class="encabezado-modulo">
+        <div><p class="etiqueta">Administración</p><h2>Configuración corporativa</h2><p>Registra las tasas oficiales y las filiales antes de iniciar las operaciones.</p></div>
+    </div>
+
+    <div class="cuadricula-doble al-inicio">
+        <article class="panel">
+            <div class="cabecera-panel"><div><p class="etiqueta">Monedas</p><h3>Nueva tasa hacia EUR</h3></div></div>
+            <form id="formulario-tasa" class="formulario">
+                <label>Divisa de origen<select name="codigo_divisa_origen" required><option value="">Seleccionar</option><option value="CNY">CNY - Yuan chino</option><option value="PEN">PEN - Sol peruano</option><option value="USD">USD - Dólar estadounidense</option></select></label>
+                <div class="fila-campos">
+                    <label>Tasa de conversión<input name="tasa" type="number" min="0.00000001" step="0.00000001" placeholder="0.25000000" required></label>
+                    <label>Fecha de vigencia<input name="fecha_vigencia" type="date" required></label>
+                </div>
+                <button class="boton boton-primario" type="submit">Guardar tasa</button>
+            </form>
+        </article>
+
+        <article class="panel">
+            <div class="cabecera-panel"><div><p class="etiqueta">Sedes</p><h3>Nueva filial</h3></div></div>
+            <form id="formulario-filial" class="formulario">
+                <div class="fila-campos">
+                    <label>Código<input name="codigo" maxlength="15" placeholder="PE-LIM-01" required></label>
+                    <label>Moneda local<select name="codigo_divisa" required><option value="">Seleccionar</option><option value="PEN">PEN</option><option value="USD">USD</option><option value="EUR">EUR</option><option value="CNY">CNY</option></select></label>
+                </div>
+                <label>Nombre de la filial<input name="nombre" placeholder="Filial Lima" required></label>
+                <div class="fila-campos">
+                    <label>País<input name="pais" placeholder="Perú" required></label>
+                    <label>Ciudad<input name="ciudad" placeholder="Lima" required></label>
+                </div>
+                <button class="boton boton-primario" type="submit">Registrar filial</button>
+            </form>
+        </article>
+    </div>
+
+    <div class="cuadricula-doble al-inicio">
+        <article class="panel">
+            <div class="cabecera-panel"><div><h3>Tasas registradas</h3><p>Historial más reciente de conversiones.</p></div></div>
+            <div class="tabla-contenedor"><table><thead><tr><th>Divisa</th><th>Tasa EUR</th><th>Vigencia</th><th>Estado</th></tr></thead><tbody id="tabla-tasas"></tbody></table></div>
+            <p class="estado-vacio" id="vacio-tasas">No existen tasas registradas.</p>
+        </article>
+        <article class="panel">
+            <div class="cabecera-panel"><div><h3>Filiales registradas</h3><p>Sedes comerciales disponibles.</p></div></div>
+            <div class="tabla-contenedor"><table><thead><tr><th>Código</th><th>Filial</th><th>Ubicación</th><th>Moneda</th></tr></thead><tbody id="tabla-filiales"></tbody></table></div>
+            <p class="estado-vacio" id="vacio-filiales">No existen filiales registradas.</p>
+        </article>
+    </div>
+</section>
+
+<section class="seccion-modulo" id="seccion-productos" data-titulo="Productos importados">
+    <div class="encabezado-modulo">
+        <div><p class="etiqueta">Catálogo corporativo</p><h2>Productos importados</h2><p>Registra los lotes adquiridos en China y su inventario inicial.</p></div>
+        <button class="boton boton-secundario" type="button" data-alternar="panel-producto">+ Registrar producto</button>
+    </div>
+
+    <article class="panel panel-formulario" id="panel-producto">
+        <div class="cabecera-panel"><div><h3>Nuevo producto tecnológico</h3><p>La tasa CNY/EUR debe estar configurada para calcular el costo corporativo.</p></div></div>
+        <form id="formulario-producto" class="formulario formulario-amplio">
+            <div class="fila-campos tres-columnas">
+                <label>SKU<input name="sku" maxlength="30" placeholder="LAP-001" required></label>
+                <label>Nombre comercial<input name="nombre" placeholder="Laptop Business 14" required></label>
+                <label>Categoría<select name="categoria" required><option value="">Seleccionar</option><option>Laptop</option><option>Smartphone</option><option>Accesorio</option><option>Redes</option></select></label>
+            </div>
+            <label>Descripción técnica<textarea name="descripcion_tecnica" rows="3" placeholder="Características principales del producto" required></textarea></label>
+            <div class="fila-campos tres-columnas">
+                <label>Costo unitario CNY<input name="costo_unitario_cny" type="number" min="0.01" step="0.01" required></label>
+                <label>Proveedor<input name="proveedor" placeholder="Shenzhen Tech Ltd." required></label>
+                <label>Fecha de importación<input name="fecha_importacion" type="date" required></label>
+            </div>
+            <div class="fila-campos tres-columnas">
+                <label>Filial de destino<select name="id_filial" class="selector-filiales" required><option value="">Seleccionar filial</option></select></label>
+                <label>Stock inicial<input name="stock_inicial" type="number" min="0" step="1" required></label>
+                <label>Precio de venta local<input name="precio_venta_local" type="number" min="0.01" step="0.01" required></label>
+            </div>
+            <div class="acciones-formulario"><button class="boton boton-fantasma" type="reset">Limpiar</button><button class="boton boton-primario" type="submit">Guardar producto</button></div>
+        </form>
+    </article>
+
+    <article class="panel">
+        <div class="cabecera-panel"><div><h3>Catálogo de productos</h3><p>Costos originales y valorización corporativa.</p></div><input class="buscador" id="buscar-producto" type="search" placeholder="Buscar por SKU o nombre"></div>
+        <div class="tabla-contenedor"><table><thead><tr><th>SKU</th><th>Producto</th><th>Categoría</th><th>Costo CNY</th><th>Costo EUR</th><th>Importación</th></tr></thead><tbody id="tabla-productos"></tbody></table></div>
+        <p class="estado-vacio" id="vacio-productos">No existen productos registrados.</p>
+    </article>
+</section>
+
+<section class="seccion-modulo" id="seccion-inventario" data-titulo="Inventario por filial">
+    <div class="encabezado-modulo">
+        <div><p class="etiqueta">Control de existencias</p><h2>Inventario por filial</h2><p>Consulta el stock local y registra nuevas recepciones.</p></div>
+    </div>
+
+    <article class="panel panel-filtros">
+        <label>Filial<select id="filtro-filial-inventario" class="selector-filiales"><option value="">Seleccionar filial</option></select></label>
+        <button class="boton boton-primario" id="boton-consultar-inventario" type="button">Consultar inventario</button>
+    </article>
+
+    <div class="cuadricula-inventario">
+        <article class="panel">
+            <div class="cabecera-panel"><div><h3>Existencias disponibles</h3><p id="subtitulo-inventario">Selecciona una filial para consultar.</p></div></div>
+            <div class="tabla-contenedor"><table><thead><tr><th>SKU</th><th>Producto</th><th>Stock</th><th>Precio local</th><th>Estado</th></tr></thead><tbody id="tabla-inventario"></tbody></table></div>
+            <p class="estado-vacio" id="vacio-inventario">No hay información para mostrar.</p>
+        </article>
+
+        <article class="panel panel-reposicion">
+            <div class="cabecera-panel"><div><p class="etiqueta">Recepción</p><h3>Reponer stock</h3></div></div>
+            <form id="formulario-reposicion" class="formulario">
+                <label>Filial<select name="id_filial" class="selector-filiales" required><option value="">Seleccionar filial</option></select></label>
+                <label>Producto<select name="id_producto" id="producto-reposicion" required><option value="">Seleccionar producto</option></select></label>
+                <label>Cantidad recibida<input name="cantidad" type="number" min="1" step="1" required></label>
+                <button class="boton boton-primario" type="submit">Actualizar stock</button>
+            </form>
+        </article>
+    </div>
+</section>
+
+<section class="seccion-modulo" id="seccion-ventas" data-titulo="Ventas de filiales">
+    <div class="encabezado-modulo">
+        <div><p class="etiqueta">Operación comercial</p><h2>Ventas de filiales</h2><p>Registra comprobantes en moneda local con conversión automática a EUR.</p></div>
+    </div>
+
+    <div class="cuadricula-ventas">
+        <article class="panel">
+            <div class="cabecera-panel"><div><h3>Registrar nueva venta</h3><p>El stock se descontará al confirmar la operación.</p></div></div>
+            <form id="formulario-venta" class="formulario">
+                <div class="fila-campos">
+                    <label>Número de factura<input name="numero_factura" maxlength="40" placeholder="F001-000001" required></label>
+                    <label>Fecha y hora<input name="fecha_venta" type="datetime-local" required></label>
+                </div>
+                <label>Filial<select name="id_filial" id="filial-venta" class="selector-filiales" required><option value="">Seleccionar filial</option></select></label>
+                <label>Producto<select name="id_producto" id="producto-venta" required><option value="">Seleccionar una filial primero</option></select></label>
+                <div class="detalle-stock" id="detalle-stock">Selecciona un producto para consultar su disponibilidad.</div>
+                <div class="fila-campos">
+                    <label>Cantidad<input name="cantidad" type="number" min="1" step="1" required></label>
+                    <label>Método de pago<select name="metodo_pago" required><option value="">Seleccionar</option><option>Efectivo</option><option>Tarjeta</option><option>Transferencia</option></select></label>
+                </div>
+                <div class="fila-campos">
+                    <label>Cliente<input name="cliente" placeholder="Nombre del cliente" required></label>
+                    <label>Vendedor responsable<input name="vendedor" placeholder="Nombre del vendedor" required></label>
+                </div>
+                <button class="boton boton-primario" type="submit">Confirmar venta</button>
+            </form>
+        </article>
+
+        <article class="panel resumen-venta" id="resumen-ultima-venta">
+            <p class="etiqueta">Última operación</p>
+            <h3>Resumen de venta</h3>
+            <div class="resumen-vacio"><span aria-hidden="true">€</span><p>Cuando registres una venta, aquí verás sus importes en moneda local y EUR.</p></div>
+        </article>
+    </div>
+
+    <article class="panel">
+        <div class="cabecera-panel cabecera-filtros">
+            <div><h3>Historial de ventas</h3><p>Consulta las operaciones por periodo y filial.</p></div>
+            <div class="filtros-en-linea">
+                <label>Desde<input id="ventas-desde" type="date"></label>
+                <label>Hasta<input id="ventas-hasta" type="date"></label>
+                <label>Filial<select id="ventas-filial" class="selector-filiales"><option value="">Todas</option></select></label>
+                <button class="boton boton-secundario" id="boton-consultar-ventas" type="button">Consultar</button>
+            </div>
+        </div>
+        <div class="tabla-contenedor"><table><thead><tr><th>Factura</th><th>Fecha</th><th>Filial</th><th>Cliente</th><th>Total local</th><th>Total EUR</th></tr></thead><tbody id="tabla-ventas"></tbody></table></div>
+        <p class="estado-vacio" id="vacio-ventas">No existen ventas para el periodo seleccionado.</p>
+    </article>
 </section>
 {% endblock %}
-
