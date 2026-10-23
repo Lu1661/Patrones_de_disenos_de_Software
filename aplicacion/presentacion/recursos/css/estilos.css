@@ -1,0 +1,63 @@
+:root {
+    color-scheme: light;
+    font-family: Arial, Helvetica, sans-serif;
+    color: #172033;
+    background: #eef2f7;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    min-height: 100vh;
+}
+
+.encabezado {
+    padding: 18px 7%;
+    color: #ffffff;
+    background: #173b6c;
+}
+
+.marca {
+    font-weight: 700;
+}
+
+.nombre-sistema {
+    margin-left: 12px;
+    padding-left: 12px;
+    border-left: 1px solid #8ea6c5;
+}
+
+.contenido {
+    width: min(920px, 86%);
+    margin: 70px auto;
+}
+
+.panel-bienvenida {
+    padding: 42px;
+    border-radius: 14px;
+    background: #ffffff;
+    box-shadow: 0 14px 35px rgb(23 59 108 / 12%);
+}
+
+.panel-bienvenida h1 {
+    margin: 8px 0 14px;
+    font-size: clamp(2rem, 5vw, 3.4rem);
+}
+
+.panel-bienvenida p {
+    max-width: 650px;
+    line-height: 1.65;
+}
+
+.etiqueta {
+    margin: 0;
+    color: #2b66ad;
+    font-size: 0.82rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+

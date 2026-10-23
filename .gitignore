@@ -1,0 +1,25 @@
+# Entorno virtual y archivos generados por Python
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Configuracion local y credenciales
+.env
+*.pem
+*.key
+*.crt
+
+# Archivos de editores y sistema operativo
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Registros y archivos temporales
+*.log
+temp/
+
