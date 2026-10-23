@@ -1,0 +1,94 @@
+"""Pruebas unitarias de las reglas principales del dominio."""
+
+from datetime import date, timedelta
+from decimal import Decimal
+
+import pytest
+
+from aplicacion.dominio.entidades.detalle_venta import DetalleVenta
+from aplicacion.dominio.entidades.inventario_filial import InventarioFilial
+from aplicacion.dominio.entidades.producto_importado import ProductoImportado
+from aplicacion.dominio.entidades.transaccion_venta import TransaccionVenta
+
+
+# ============================================================
+# BLOQUE: PRUEBAS DE ENTIDADES Y CALCULOS DEL NEGOCIO
+# Estas pruebas comprueban conversiones, stock, totales y fechas sin
+# depender de Flask ni de una conexion a MySQL.
+# ============================================================
+def test_producto_convierte_costo_cny_a_eur():
+    producto = ProductoImportado.crear_con_conversion(
+        sku="LAP-001",
+        nombre="Laptop de prueba",
+        descripcion_tecnica="Equipo para prueba unitaria",
+        categoria="Laptop",
+        costo_unitario_cny="100.00",
+        tasa_cny_eur="0.13000000",
+        proveedor="Proveedor de prueba",
+        fecha_importacion=date.today(),
+    )
+
+    assert producto.costo_unitario_cny == Decimal("100.00")
+    assert producto.costo_unitario_eur == Decimal("13.00")
+
+
+def test_inventario_impide_stock_negativo():
+    inventario = InventarioFilial(
+        id_filial=1,
+        id_producto=1,
+        stock_disponible=5,
+        precio_venta_local="120.00",
+    )
+
+    with pytest.raises(ValueError, match="Stock insuficiente"):
+        inventario.descontar_stock(6)
+
+    assert inventario.stock_disponible == 5
+    inventario.descontar_stock(2)
+    assert inventario.stock_disponible == 3
+
+
+def test_venta_calcula_ingresos_gastos_y_resultado_en_eur():
+    detalle = DetalleVenta(
+        id_producto=1,
+        cantidad=2,
+        precio_unitario_local="120.00",
+        costo_unitario_eur="13.00",
+    )
+    venta = TransaccionVenta(
+        numero_factura="F001-1",
+        id_filial=1,
+        fecha_venta=date.today(),
+        cliente="Cliente de prueba",
+        vendedor="Vendedor de prueba",
+        metodo_pago="Tarjeta",
+        codigo_divisa="PEN",
+        tasa_eur_aplicada="0.25000000",
+        detalles=[detalle],
+    )
+
+    assert venta.total_local == Decimal("240.00")
+    assert venta.total_eur == Decimal("60.00")
+    assert venta.total_costo_eur == Decimal("26.00")
+    assert venta.resultado_financiero_eur == Decimal("34.00")
+
+
+def test_producto_rechaza_fecha_futura_y_categoria_desconocida():
+    datos = {
+        "sku": "LAP-002",
+        "nombre": "Laptop futura",
+        "descripcion_tecnica": "Equipo para validar errores",
+        "categoria": "Laptop",
+        "costo_unitario_cny": "100.00",
+        "tasa_cny_eur": "0.13000000",
+        "proveedor": "Proveedor de prueba",
+        "fecha_importacion": date.today() + timedelta(days=1),
+    }
+
+    with pytest.raises(ValueError, match="fecha futura"):
+        ProductoImportado.crear_con_conversion(**datos)
+
+    datos["fecha_importacion"] = date.today()
+    datos["categoria"] = "Electrodomestico"
+    with pytest.raises(ValueError, match="categoria"):
+        ProductoImportado.crear_con_conversion(**datos)

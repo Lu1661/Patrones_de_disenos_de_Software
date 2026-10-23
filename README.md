@@ -12,7 +12,7 @@ Proyecto académico del curso Patrones de Diseño de Software.
 
 ## Estado actual
 
-Las fases 1 a 11 están terminadas. El proyecto cuenta con estructura modular, base de datos MySQL, entidades del dominio, los seis patrones solicitados, repositorios, backend Flask, una interfaz web responsive y reportes financieros integrados.
+Las fases 1 a 12 están terminadas. El proyecto cuenta con estructura modular, base de datos MySQL, entidades del dominio, los seis patrones solicitados, repositorios, backend Flask, una interfaz web responsive, reportes financieros integrados y una suite automatizada de pruebas.
 
 ## Preparación local
 
@@ -32,6 +32,14 @@ python ejecutar.py
 ```
 
 La aplicación quedará disponible en `http://127.0.0.1:5000`.
+
+## Pruebas automatizadas
+
+```powershell
+python -m pytest -q
+```
+
+La suite contiene pruebas unitarias para las entidades, cálculos y seis patrones, además de pruebas de integración para Flask y MySQL. La prueba MySQL utiliza las variables del archivo `.env`, crea datos temporales y los elimina al finalizar. Si MySQL no está configurado, esa prueba se omite sin impedir la ejecución de las pruebas unitarias.
 
 ## API disponible
 
