@@ -12,7 +12,7 @@ Proyecto académico del curso Patrones de Diseño de Software.
 
 ## Estado actual
 
-La Fase 3 prepara la estructura modular del proyecto y una pantalla mínima de arranque. Las entidades, tablas, procesos del negocio y patrones se implementarán en las fases siguientes.
+Las fases 1 a 5 están terminadas. El proyecto cuenta con estructura modular, base de datos MySQL y entidades del dominio con reglas para monedas, filiales, productos, inventario y ventas. Los patrones, repositorios y módulos web funcionales se implementarán en las fases siguientes.
 
 ## Preparación local
 
