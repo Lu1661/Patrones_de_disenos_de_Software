@@ -74,6 +74,32 @@ def crear_aplicacion() -> Flask:
         return redirect(url_for("autenticacion.login"))
 
     # ============================================================
+    # BLOQUE: ENCABEZADOS DE SEGURIDAD DEL NAVEGADOR
+    # Este bloque limita la carga de recursos externos, el uso en marcos
+    # y el almacenamiento local de las pantallas financieras protegidas.
+    # ============================================================
+    @aplicacion.after_request
+    def agregar_encabezados_seguridad(respuesta):
+        respuesta.headers["Content-Security-Policy"] = (
+            "default-src 'self'; "
+            "script-src 'self'; "
+            "style-src 'self' 'unsafe-inline'; "
+            "img-src 'self' data:; "
+            "form-action 'self'; "
+            "frame-ancestors 'none'; "
+            "base-uri 'self'"
+        )
+        respuesta.headers["X-Content-Type-Options"] = "nosniff"
+        respuesta.headers["X-Frame-Options"] = "DENY"
+        respuesta.headers["Referrer-Policy"] = "no-referrer"
+        respuesta.headers["Permissions-Policy"] = (
+            "camera=(), microphone=(), geolocation=()"
+        )
+        if request.endpoint != "static":
+            respuesta.headers["Cache-Control"] = "no-store"
+        return respuesta
+
+    # ============================================================
     # BLOQUE: MANEJO UNIFORME DE ERRORES DEL BACKEND
     # Este bloque evita mostrar detalles internos de MySQL y entrega al
     # frontend mensajes sencillos junto con el codigo HTTP apropiado.

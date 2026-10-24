@@ -12,7 +12,7 @@ Proyecto académico del curso Patrones de Diseño de Software.
 
 ## Estado actual
 
-Las fases 1 a 13 y el paso adicional 13.5 están terminados. El proyecto cuenta con estructura modular, base de datos MySQL, entidades del dominio, los seis patrones solicitados, repositorios, backend Flask, una interfaz web responsive, reportes financieros integrados, acceso administrativo y una suite automatizada de pruebas.
+Las fases 1 a 14 y el paso adicional 13.5 están terminados. El proyecto cuenta con estructura modular, base de datos MySQL, entidades del dominio, los seis patrones solicitados, repositorios, backend Flask, una interfaz web responsive, reportes financieros integrados, acceso administrativo y una suite automatizada de pruebas.
 
 ## Preparación local
 
@@ -34,6 +34,12 @@ python ejecutar.py
 La aplicación quedará disponible en `http://127.0.0.1:5000`.
 
 El sistema solicita el acceso administrativo antes de mostrar la interfaz. Las credenciales académicas iniciales se encuentran en `ARRANQUE.txt` y se pueden cambiar mediante `ADMIN_USUARIO` y `ADMIN_PASSWORD` en el archivo `.env`.
+
+## Seguridad del entorno académico
+
+La aplicación escucha únicamente en `127.0.0.1`, protege la interfaz y la API mediante sesión, utiliza una cookie `HttpOnly` con `SameSite=Lax` y agrega encabezados básicos de seguridad. Si `CLAVE_SECRETA` no está definida o conserva el texto de ejemplo, SERF genera una clave temporal diferente al iniciar. Para conservar sesiones entre reinicios se debe establecer una clave privada en `.env`.
+
+`COOKIE_SEGURA` debe permanecer en `false` durante las pruebas locales con HTTP. Solo debe cambiarse a `true` cuando la aplicación se ejecute mediante HTTPS. La cuenta `admin / admin` es exclusivamente académica y puede reemplazarse desde `.env` sin modificar el código.
 
 ## Pruebas automatizadas
 

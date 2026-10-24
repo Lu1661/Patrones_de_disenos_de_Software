@@ -10,5 +10,5 @@ aplicacion = crear_aplicacion()
 
 if __name__ == "__main__":
     modo_debug = os.getenv("FLASK_DEBUG", "false").lower() == "true"
-    aplicacion.run(debug=modo_debug)
+    aplicacion.run(host="127.0.0.1", debug=modo_debug)
 
