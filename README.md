@@ -12,7 +12,7 @@ Proyecto académico del curso Patrones de Diseño de Software.
 
 ## Estado actual
 
-Las fases 1 a 12 y el paso adicional 13.5 están terminados. El proyecto cuenta con estructura modular, base de datos MySQL, entidades del dominio, los seis patrones solicitados, repositorios, backend Flask, una interfaz web responsive, reportes financieros integrados, acceso administrativo y una suite automatizada de pruebas.
+Las fases 1 a 13 y el paso adicional 13.5 están terminados. El proyecto cuenta con estructura modular, base de datos MySQL, entidades del dominio, los seis patrones solicitados, repositorios, backend Flask, una interfaz web responsive, reportes financieros integrados, acceso administrativo y una suite automatizada de pruebas.
 
 ## Preparación local
 
