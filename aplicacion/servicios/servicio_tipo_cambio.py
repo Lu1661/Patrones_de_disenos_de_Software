@@ -71,3 +71,44 @@ class ServicioTiposCambio:
         )
         return tipo_cambio
 
+    def actualizar(self, id_tipo_cambio: int, datos: dict) -> TipoCambio:
+        """Actualiza una tasa conservando su identificador e historial."""
+
+        actual = self._repositorio.obtener_por_id(id_tipo_cambio)
+        if actual is None:
+            raise ValueError("El tipo de cambio indicado no existe.")
+        tipo_cambio = TipoCambio(
+            codigo_divisa_origen=str(
+                obtener_requerido(datos, "codigo_divisa_origen")
+            ),
+            tasa=obtener_requerido(datos, "tasa"),
+            fecha_vigencia=convertir_fecha(
+                obtener_requerido(datos, "fecha_vigencia"),
+                "fecha_vigencia",
+            ),
+            activa=actual.activa,
+            id_tipo_cambio=id_tipo_cambio,
+        )
+        self._repositorio.actualizar(tipo_cambio)
+        if actual.activa and actual.codigo_divisa_origen != tipo_cambio.codigo_divisa_origen:
+            self._configuracion.eliminar_tasa(actual.codigo_divisa_origen)
+        if tipo_cambio.activa:
+            self._configuracion.actualizar_tasa(
+                tipo_cambio.codigo_divisa_origen,
+                tipo_cambio.tasa,
+            )
+        return tipo_cambio
+
+    def desactivar(self, id_tipo_cambio: int) -> TipoCambio:
+        """Desactiva una tasa no corporativa y conserva el historial."""
+
+        tipo_cambio = self._repositorio.obtener_por_id(id_tipo_cambio)
+        if tipo_cambio is None or not tipo_cambio.activa:
+            raise ValueError("La tasa indicada no existe o ya esta inactiva.")
+        if tipo_cambio.codigo_divisa_origen == "EUR":
+            raise ValueError("La tasa EUR/EUR es obligatoria y no puede eliminarse.")
+        self._repositorio.desactivar(id_tipo_cambio)
+        self._configuracion.eliminar_tasa(tipo_cambio.codigo_divisa_origen)
+        tipo_cambio.activa = False
+        return tipo_cambio
+

@@ -102,7 +102,7 @@ CREATE TABLE IF NOT EXISTS tipos_cambio (
 -- ============================================================
 CREATE TABLE IF NOT EXISTS productos_importados (
     id_producto BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
-    sku VARCHAR(30) NOT NULL,
+    codigo VARCHAR(30) NOT NULL,
     nombre VARCHAR(120) NOT NULL,
     descripcion_tecnica TEXT NOT NULL,
     categoria VARCHAR(20) NOT NULL,
@@ -115,7 +115,7 @@ CREATE TABLE IF NOT EXISTS productos_importados (
     fecha_actualizacion TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
         ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY (id_producto),
-    UNIQUE KEY uq_productos_sku (sku),
+    UNIQUE KEY uq_productos_codigo (codigo),
     KEY idx_productos_nombre (nombre),
     KEY idx_productos_categoria (categoria),
     CONSTRAINT chk_productos_categoria

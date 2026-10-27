@@ -4,11 +4,21 @@ const estado = {
     filiales: [],
     tasas: [],
     productos: [],
+    inventariosProductos: [],
     inventario: [],
     ventas: [],
     reporte: null,
 };
 
+const esAdministrador = document.body.dataset.esAdministrador === "true";
+const registrosPorPagina = 10;
+const paginasActuales = {
+    tasas: 1,
+    filiales: 1,
+    productos: 1,
+    inventario: 1,
+    ventas: 1,
+};
 let temporizadorNotificacion;
 
 // ============================================================
@@ -53,8 +63,15 @@ function bloquearBoton(formulario, bloquear) {
     const boton = formulario.querySelector("button[type='submit']");
     if (!boton) return;
     boton.disabled = bloquear;
-    boton.dataset.textoOriginal ||= boton.textContent;
-    boton.textContent = bloquear ? "Procesando..." : boton.dataset.textoOriginal;
+    if (bloquear) {
+        boton.dataset.textoOriginal = boton.textContent;
+        boton.textContent = "Procesando...";
+    } else {
+        if (boton.textContent === "Procesando...") {
+            boton.textContent = boton.dataset.textoOriginal || boton.textContent;
+        }
+        delete boton.dataset.textoOriginal;
+    }
 }
 
 function hoyISO() {
@@ -102,6 +119,81 @@ function obtenerProducto(idProducto) {
     return estado.productos.find((producto) => Number(producto.id_producto) === Number(idProducto));
 }
 
+function obtenerInventariosProducto(idProducto) {
+    return estado.inventariosProductos.filter(
+        (item) => Number(item.id_producto) === Number(idProducto),
+    );
+}
+
+function mostrarFilialesProducto(idProducto) {
+    const inventarios = obtenerInventariosProducto(idProducto);
+    if (!inventarios.length) return "—";
+    return inventarios.map((item) => {
+        const filial = obtenerFilial(item.id_filial);
+        return `<span class="dato-en-linea">${textoSeguro(filial?.codigo || "Filial")}</span>`;
+    }).join("");
+}
+
+function mostrarPreciosProducto(idProducto) {
+    const inventarios = obtenerInventariosProducto(idProducto);
+    if (!inventarios.length) return "—";
+    return inventarios.map((item) => {
+        const filial = obtenerFilial(item.id_filial);
+        return `<span class="dato-en-linea"><strong>${formatearImporte(item.precio_venta_local, filial?.codigo_divisa || "EUR")}</strong></span>`;
+    }).join("");
+}
+
+function botonesAdministrativos(entidad, identificador, puedeEliminar = true) {
+    if (!esAdministrador) return "";
+    const eliminar = puedeEliminar
+        ? `<button class="boton-tabla boton-tabla-peligro" type="button" data-accion-administrativa="eliminar" data-entidad="${entidad}" data-id="${identificador}">Eliminar</button>`
+        : "";
+    return `<div class="acciones-tabla"><button class="boton-tabla" type="button" data-accion-administrativa="editar" data-entidad="${entidad}" data-id="${identificador}">Editar</button>${eliminar}</div>`;
+}
+
+// ============================================================
+// BLOQUE: PAGINACION SENCILLA DE LAS TABLAS
+// Este bloque divide los registros en grupos de diez y permite
+// avanzar o retroceder sin alterar la informacion original.
+// ============================================================
+function obtenerPagina(registros, modulo) {
+    const totalPaginas = Math.max(1, Math.ceil(registros.length / registrosPorPagina));
+    paginasActuales[modulo] = Math.min(Math.max(paginasActuales[modulo], 1), totalPaginas);
+    const inicio = (paginasActuales[modulo] - 1) * registrosPorPagina;
+    return registros.slice(inicio, inicio + registrosPorPagina);
+}
+
+function mostrarPaginacion(modulo, totalRegistros) {
+    const contenedor = document.querySelector(`#paginacion-${modulo}`);
+    if (!contenedor) return;
+    const totalPaginas = Math.ceil(totalRegistros / registrosPorPagina);
+    if (totalPaginas <= 1) {
+        contenedor.innerHTML = "";
+        return;
+    }
+    const pagina = paginasActuales[modulo];
+    contenedor.innerHTML = `
+        <button class="boton-paginacion" type="button" data-paginacion="${modulo}" data-pagina="${pagina - 1}" ${pagina === 1 ? "disabled" : ""}>Anterior</button>
+        <span>Página ${pagina} de ${totalPaginas}</span>
+        <button class="boton-paginacion" type="button" data-paginacion="${modulo}" data-pagina="${pagina + 1}" ${pagina === totalPaginas ? "disabled" : ""}>Siguiente</button>`;
+}
+
+function mostrarModuloPaginado(modulo) {
+    if (modulo === "tasas") mostrarTasas();
+    if (modulo === "filiales") mostrarFiliales();
+    if (modulo === "productos") mostrarProductos(document.querySelector("#buscar-producto").value);
+    if (modulo === "inventario") mostrarInventario();
+    if (modulo === "ventas") mostrarVentas();
+}
+
+function manejarPaginacion(evento) {
+    const boton = evento.target.closest("[data-paginacion]");
+    if (!boton || boton.disabled) return;
+    const modulo = boton.dataset.paginacion;
+    paginasActuales[modulo] = Number(boton.dataset.pagina);
+    mostrarModuloPaginado(modulo);
+}
+
 // ============================================================
 // BLOQUE: NAVEGACION RESPONSIVA ENTRE MODULOS
 // Cambia la seccion visible sin recargar la pagina y mantiene el menu
@@ -133,11 +225,6 @@ function prepararNavegacion() {
     document.querySelectorAll("[data-ir-a]").forEach((boton) => {
         boton.addEventListener("click", () => mostrarSeccion(boton.dataset.irA));
     });
-    document.querySelectorAll("[data-alternar]").forEach((boton) => {
-        boton.addEventListener("click", () => {
-            document.querySelector(`#${boton.dataset.alternar}`).classList.toggle("oculto");
-        });
-    });
     document.querySelector("#boton-menu").addEventListener("click", () => {
         const barra = document.querySelector("#barra-lateral");
         const abierta = barra.classList.toggle("abierta");
@@ -168,50 +255,62 @@ function mostrarIndicadores() {
 
 function mostrarFiliales() {
     const cuerpo = document.querySelector("#tabla-filiales");
-    cuerpo.innerHTML = estado.filiales.map((filial) => `
+    const filialesActivas = estado.filiales.filter((filial) => filial.activa);
+    const filialesPagina = obtenerPagina(filialesActivas, "filiales");
+    cuerpo.innerHTML = filialesPagina.map((filial) => `
         <tr>
             <td data-label="Código"><strong>${textoSeguro(filial.codigo)}</strong></td>
             <td data-label="Filial">${textoSeguro(filial.nombre)}</td>
             <td data-label="Ubicación">${textoSeguro(filial.ciudad)}, ${textoSeguro(filial.pais)}</td>
             <td data-label="Moneda"><span class="insignia insignia-neutra">${textoSeguro(filial.codigo_divisa)}</span></td>
+            ${esAdministrador ? `<td data-label="Acciones">${botonesAdministrativos("filial", filial.id_filial)}</td>` : ""}
         </tr>`).join("");
-    document.querySelector("#vacio-filiales").classList.toggle("visible", estado.filiales.length === 0);
+    document.querySelector("#vacio-filiales").classList.toggle("visible", filialesActivas.length === 0);
+    mostrarPaginacion("filiales", filialesActivas.length);
     llenarSelectoresFiliales();
 }
 
 function mostrarTasas() {
-    document.querySelector("#tabla-tasas").innerHTML = estado.tasas.slice(0, 8).map((tasa) => `
+    const tasasPagina = obtenerPagina(estado.tasas, "tasas");
+    document.querySelector("#tabla-tasas").innerHTML = tasasPagina.map((tasa) => `
         <tr>
             <td data-label="Divisa"><strong>${textoSeguro(tasa.codigo_divisa_origen)}/EUR</strong></td>
             <td data-label="Tasa EUR">${textoSeguro(tasa.tasa)}</td>
             <td data-label="Vigencia">${formatearFecha(tasa.fecha_vigencia)}</td>
             <td data-label="Estado"><span class="insignia ${tasa.activa ? "insignia-correcta" : "insignia-neutra"}">${tasa.activa ? "Activa" : "Histórica"}</span></td>
+            ${esAdministrador ? `<td data-label="Acciones">${tasa.activa && tasa.codigo_divisa_origen !== "EUR" ? botonesAdministrativos("tasa", tasa.id_tipo_cambio) : ""}</td>` : ""}
         </tr>`).join("");
     document.querySelector("#vacio-tasas").classList.toggle("visible", estado.tasas.length === 0);
+    mostrarPaginacion("tasas", estado.tasas.length);
 }
 
 function mostrarProductos(filtro = "") {
     const texto = filtro.trim().toLowerCase();
-    const productos = estado.productos.filter((producto) =>
-        !texto || producto.sku.toLowerCase().includes(texto) || producto.nombre.toLowerCase().includes(texto));
-    document.querySelector("#tabla-productos").innerHTML = productos.map((producto) => `
+    const productos = estado.productos.filter((producto) => producto.activo && (
+        !texto || producto.codigo.toLowerCase().includes(texto) || producto.nombre.toLowerCase().includes(texto)));
+    const productosPagina = obtenerPagina(productos, "productos");
+    document.querySelector("#tabla-productos").innerHTML = productosPagina.map((producto) => `
         <tr>
-            <td data-label="SKU"><strong>${textoSeguro(producto.sku)}</strong></td>
+            <td data-label="Código"><strong>${textoSeguro(producto.codigo)}</strong></td>
             <td data-label="Producto"><span class="dato-principal"><strong>${textoSeguro(producto.nombre)}</strong><small>${textoSeguro(producto.proveedor)}</small></span></td>
             <td data-label="Categoría">${textoSeguro(producto.categoria)}</td>
             <td data-label="Costo CNY">${formatearImporte(producto.costo_unitario_cny, "CNY")}</td>
             <td data-label="Costo EUR">${formatearImporte(producto.costo_unitario_eur, "EUR")}</td>
             <td data-label="Importación">${formatearFecha(producto.fecha_importacion)}</td>
+            <td data-label="Filial">${mostrarFilialesProducto(producto.id_producto)}</td>
+            <td data-label="Precio venta">${mostrarPreciosProducto(producto.id_producto)}</td>
+            ${esAdministrador ? `<td data-label="Acciones">${botonesAdministrativos("producto", producto.id_producto)}</td>` : ""}
         </tr>`).join("");
     document.querySelector("#vacio-productos").classList.toggle("visible", productos.length === 0);
+    mostrarPaginacion("productos", productos.length);
 }
 
 function llenarProductosInventario() {
     const selector = document.querySelector("#producto-reposicion");
     const valorActual = selector.value;
-    selector.innerHTML = '<option value="">Seleccionar producto</option>' + estado.inventario.map((item) => {
+    selector.innerHTML = '<option value="">Seleccionar producto</option>' + estado.inventario.filter((item) => obtenerProducto(item.id_producto)?.activo).map((item) => {
         const producto = obtenerProducto(item.id_producto);
-        return `<option value="${item.id_producto}">${textoSeguro(producto?.sku || "")} · ${textoSeguro(producto?.nombre || "Producto")}</option>`;
+        return `<option value="${item.id_producto}">${textoSeguro(producto?.codigo || "")} · ${textoSeguro(producto?.nombre || "Producto")}</option>`;
     }).join("");
     if ([...selector.options].some((opcion) => opcion.value === valorActual)) selector.value = valorActual;
 }
@@ -222,24 +321,28 @@ function mostrarInventario() {
     document.querySelector("#subtitulo-inventario").textContent = filial
         ? `${filial.nombre} · precios expresados en ${filial.codigo_divisa}`
         : "Selecciona una filial para consultar.";
-    document.querySelector("#tabla-inventario").innerHTML = estado.inventario.map((item) => {
+    const inventarioActivo = estado.inventario.filter((item) => obtenerProducto(item.id_producto)?.activo);
+    const inventarioPagina = obtenerPagina(inventarioActivo, "inventario");
+    document.querySelector("#tabla-inventario").innerHTML = inventarioPagina.map((item) => {
         const producto = obtenerProducto(item.id_producto);
         const stockBajo = Number(item.stock_disponible) <= 5;
         return `
             <tr>
-                <td data-label="SKU"><strong>${textoSeguro(producto?.sku || item.id_producto)}</strong></td>
+                <td data-label="Código"><strong>${textoSeguro(producto?.codigo || item.id_producto)}</strong></td>
                 <td data-label="Producto">${textoSeguro(producto?.nombre || "Producto")}</td>
                 <td data-label="Stock"><strong>${item.stock_disponible}</strong></td>
                 <td data-label="Precio local">${formatearImporte(item.precio_venta_local, filial?.codigo_divisa || "EUR")}</td>
                 <td data-label="Estado"><span class="insignia ${stockBajo ? "insignia-alerta" : "insignia-correcta"}">${stockBajo ? "Stock bajo" : "Disponible"}</span></td>
             </tr>`;
     }).join("");
-    document.querySelector("#vacio-inventario").classList.toggle("visible", estado.inventario.length === 0);
+    document.querySelector("#vacio-inventario").classList.toggle("visible", inventarioActivo.length === 0);
+    mostrarPaginacion("inventario", inventarioActivo.length);
     llenarProductosInventario();
 }
 
 function mostrarVentas() {
-    document.querySelector("#tabla-ventas").innerHTML = estado.ventas.map((venta) => {
+    const ventasPagina = obtenerPagina(estado.ventas, "ventas");
+    document.querySelector("#tabla-ventas").innerHTML = ventasPagina.map((venta) => {
         const filial = obtenerFilial(venta.id_filial);
         return `
             <tr>
@@ -252,10 +355,12 @@ function mostrarVentas() {
             </tr>`;
     }).join("");
     document.querySelector("#vacio-ventas").classList.toggle("visible", estado.ventas.length === 0);
+    mostrarPaginacion("ventas", estado.ventas.length);
     mostrarIndicadores();
 }
 
 async function cargarInventario(idFilial) {
+    paginasActuales.inventario = 1;
     if (!idFilial) {
         estado.inventario = [];
         mostrarInventario();
@@ -275,18 +380,21 @@ async function cargarVentas() {
     if (filial) parametros.set("id_filial", filial);
     const respuesta = await solicitar(`/api/ventas?${parametros}`);
     estado.ventas = respuesta.datos;
+    paginasActuales.ventas = 1;
     mostrarVentas();
 }
 
 async function actualizarDatosGenerales() {
-    const [filiales, tasas, productos] = await Promise.all([
+    const [filiales, tasas, productos, inventariosProductos] = await Promise.all([
         solicitar("/api/configuracion/filiales"),
         solicitar("/api/configuracion/tipos-cambio"),
         solicitar("/api/productos"),
+        solicitar("/api/inventario/catalogo"),
     ]);
     estado.filiales = filiales.datos;
     estado.tasas = tasas.datos;
     estado.productos = productos.datos;
+    estado.inventariosProductos = inventariosProductos.datos;
     mostrarFiliales();
     mostrarTasas();
     mostrarProductos(document.querySelector("#buscar-producto").value);
@@ -295,6 +403,7 @@ async function actualizarDatosGenerales() {
 
 async function prepararVentaPorFilial(idFilial) {
     const selector = document.querySelector("#producto-venta");
+    document.querySelector("#precio-unitario-venta").value = "";
     document.querySelector("#detalle-stock").textContent = "Consultando productos disponibles...";
     if (!idFilial) {
         selector.innerHTML = '<option value="">Seleccionar una filial primero</option>';
@@ -302,10 +411,13 @@ async function prepararVentaPorFilial(idFilial) {
         return;
     }
     const respuesta = await solicitar(`/api/inventario?id_filial=${encodeURIComponent(idFilial)}`);
-    const disponibles = respuesta.datos.filter((item) => Number(item.stock_disponible) > 0);
+    const disponibles = respuesta.datos.filter((item) => (
+        Number(item.stock_disponible) > 0
+        && obtenerProducto(item.id_producto)?.activo
+    ));
     selector.innerHTML = '<option value="">Seleccionar producto</option>' + disponibles.map((item) => {
         const producto = obtenerProducto(item.id_producto);
-        return `<option value="${item.id_producto}" data-stock="${item.stock_disponible}" data-precio="${item.precio_venta_local}">${textoSeguro(producto?.sku || "")} · ${textoSeguro(producto?.nombre || "Producto")}</option>`;
+        return `<option value="${item.id_producto}" data-stock="${item.stock_disponible}" data-precio="${item.precio_venta_local}">${textoSeguro(producto?.codigo || "")} · ${textoSeguro(producto?.nombre || "Producto")}</option>`;
     }).join("");
     document.querySelector("#detalle-stock").textContent = disponibles.length
         ? "Selecciona un producto para consultar su disponibilidad."
@@ -316,8 +428,12 @@ function actualizarDetalleStock() {
     const selector = document.querySelector("#producto-venta");
     const opcion = selector.selectedOptions[0];
     const filial = obtenerFilial(document.querySelector("#filial-venta").value);
+    const precioUnitario = document.querySelector("#precio-unitario-venta");
+    precioUnitario.value = opcion?.value
+        ? formatearImporte(opcion.dataset.precio, filial?.codigo_divisa || "EUR")
+        : "";
     document.querySelector("#detalle-stock").textContent = opcion?.value
-        ? `Disponible: ${opcion.dataset.stock} unidades · Precio: ${formatearImporte(opcion.dataset.precio, filial?.codigo_divisa || "EUR")}`
+        ? `Disponible: ${opcion.dataset.stock} unidades`
         : "Selecciona un producto para consultar su disponibilidad.";
 }
 
@@ -415,6 +531,125 @@ function mostrarReporte(reporte) {
     document.querySelector("#boton-imprimir-reporte").addEventListener("click", () => window.print());
 }
 
+function restablecerFormularioTasa() {
+    const formulario = document.querySelector("#formulario-tasa");
+    delete formulario.dataset.id;
+    formulario.reset();
+    formulario.elements.fecha_vigencia.value = hoyISO();
+    document.querySelector("#titulo-formulario-tasa").textContent = "Nueva tasa hacia EUR";
+    document.querySelector("#boton-guardar-tasa").textContent = "Guardar tasa";
+    document.querySelector("#boton-cancelar-tasa").classList.add("oculto");
+}
+
+function restablecerFormularioFilial() {
+    const formulario = document.querySelector("#formulario-filial");
+    delete formulario.dataset.id;
+    formulario.reset();
+    document.querySelector("#titulo-formulario-filial").textContent = "Nueva filial";
+    document.querySelector("#boton-guardar-filial").textContent = "Registrar filial";
+    document.querySelector("#boton-cancelar-filial").classList.add("oculto");
+}
+
+function restablecerFormularioProducto() {
+    const formulario = document.querySelector("#formulario-producto");
+    delete formulario.dataset.id;
+    formulario.elements.id_filial.disabled = false;
+    formulario.elements.stock_inicial.disabled = false;
+    formulario.elements.precio_venta_local.disabled = false;
+    formulario.reset();
+    formulario.elements.fecha_importacion.value = hoyISO();
+    document.querySelector("#titulo-formulario-producto").textContent = "Nuevo producto tecnológico";
+    document.querySelector("#ayuda-formulario-producto").textContent = "La tasa CNY/EUR debe estar configurada para calcular el costo corporativo.";
+    document.querySelector("#boton-limpiar-producto").textContent = "Limpiar";
+    document.querySelector("#boton-guardar-producto").textContent = "Guardar producto";
+}
+
+function editarTasa(idTipoCambio) {
+    const tasa = estado.tasas.find((item) => Number(item.id_tipo_cambio) === Number(idTipoCambio));
+    if (!tasa || !tasa.activa) return;
+    const formulario = document.querySelector("#formulario-tasa");
+    formulario.dataset.id = tasa.id_tipo_cambio;
+    formulario.elements.codigo_divisa_origen.value = tasa.codigo_divisa_origen;
+    formulario.elements.tasa.value = tasa.tasa;
+    formulario.elements.fecha_vigencia.value = tasa.fecha_vigencia;
+    document.querySelector("#titulo-formulario-tasa").textContent = "Editar tasa hacia EUR";
+    document.querySelector("#boton-guardar-tasa").textContent = "Guardar cambios";
+    document.querySelector("#boton-cancelar-tasa").classList.remove("oculto");
+    mostrarSeccion("configuracion");
+    formulario.scrollIntoView({ behavior: "smooth", block: "center" });
+}
+
+function editarFilial(idFilial) {
+    const filial = obtenerFilial(idFilial);
+    if (!filial || !filial.activa) return;
+    const formulario = document.querySelector("#formulario-filial");
+    formulario.dataset.id = filial.id_filial;
+    formulario.elements.codigo.value = filial.codigo;
+    formulario.elements.codigo_divisa.value = filial.codigo_divisa;
+    formulario.elements.nombre.value = filial.nombre;
+    formulario.elements.pais.value = filial.pais;
+    formulario.elements.ciudad.value = filial.ciudad;
+    document.querySelector("#titulo-formulario-filial").textContent = "Editar filial";
+    document.querySelector("#boton-guardar-filial").textContent = "Guardar cambios";
+    document.querySelector("#boton-cancelar-filial").classList.remove("oculto");
+    mostrarSeccion("configuracion");
+    formulario.scrollIntoView({ behavior: "smooth", block: "center" });
+}
+
+function editarProducto(idProducto) {
+    const producto = obtenerProducto(idProducto);
+    if (!producto || !producto.activo) return;
+    const formulario = document.querySelector("#formulario-producto");
+    formulario.dataset.id = producto.id_producto;
+    formulario.elements.codigo.value = producto.codigo;
+    formulario.elements.nombre.value = producto.nombre;
+    formulario.elements.categoria.value = producto.categoria;
+    formulario.elements.descripcion_tecnica.value = producto.descripcion_tecnica;
+    formulario.elements.costo_unitario_cny.value = producto.costo_unitario_cny;
+    formulario.elements.proveedor.value = producto.proveedor;
+    formulario.elements.fecha_importacion.value = producto.fecha_importacion;
+    formulario.elements.id_filial.disabled = true;
+    formulario.elements.stock_inicial.disabled = true;
+    formulario.elements.precio_venta_local.disabled = true;
+    document.querySelector("#titulo-formulario-producto").textContent = "Editar producto tecnológico";
+    document.querySelector("#ayuda-formulario-producto").textContent = "El inventario y el precio local se administran desde su módulo correspondiente.";
+    document.querySelector("#boton-limpiar-producto").textContent = "Cancelar";
+    document.querySelector("#boton-guardar-producto").textContent = "Guardar cambios";
+    mostrarSeccion("productos");
+    formulario.scrollIntoView({ behavior: "smooth", block: "center" });
+}
+
+async function manejarAccionAdministrativa(evento) {
+    const boton = evento.target.closest("[data-accion-administrativa]");
+    if (!boton || !esAdministrador) return;
+    const accion = boton.dataset.accionAdministrativa;
+    const entidad = boton.dataset.entidad;
+    const identificador = Number(boton.dataset.id);
+    if (accion === "editar") {
+        if (entidad === "tasa") editarTasa(identificador);
+        if (entidad === "filial") editarFilial(identificador);
+        if (entidad === "producto") editarProducto(identificador);
+        return;
+    }
+    const nombres = { tasa: "la tasa", filial: "la filial", producto: "el producto" };
+    if (!window.confirm(`¿Deseas eliminar ${nombres[entidad]}? El historial se conservará.`)) return;
+    const rutas = {
+        tasa: "/api/configuracion/tipos-cambio",
+        filial: "/api/configuracion/filiales",
+        producto: "/api/productos",
+    };
+    try {
+        const respuesta = await solicitar(`${rutas[entidad]}/${identificador}`, { method: "DELETE" });
+        if (entidad === "tasa") restablecerFormularioTasa();
+        if (entidad === "filial") restablecerFormularioFilial();
+        if (entidad === "producto") restablecerFormularioProducto();
+        await actualizarDatosGenerales();
+        mostrarNotificacion(respuesta.mensaje);
+    } catch (error) {
+        mostrarNotificacion(error.message, true);
+    }
+}
+
 // ============================================================
 // BLOQUE: FORMULARIOS DE LOS PROCESOS DEL NEGOCIO
 // Cada envio conserva los datos cuando existe un error y actualiza las
@@ -426,9 +661,10 @@ function prepararFormularios() {
         const formulario = evento.currentTarget;
         bloquearBoton(formulario, true);
         try {
-            const respuesta = await solicitar("/api/configuracion/tipos-cambio", { method: "POST", body: JSON.stringify(datosFormulario(formulario)) });
-            formulario.reset();
-            formulario.elements.fecha_vigencia.value = hoyISO();
+            const id = formulario.dataset.id;
+            const ruta = id ? `/api/configuracion/tipos-cambio/${id}` : "/api/configuracion/tipos-cambio";
+            const respuesta = await solicitar(ruta, { method: id ? "PUT" : "POST", body: JSON.stringify(datosFormulario(formulario)) });
+            restablecerFormularioTasa();
             await actualizarDatosGenerales();
             mostrarNotificacion(respuesta.mensaje);
         } catch (error) { mostrarNotificacion(error.message, true); }
@@ -440,8 +676,10 @@ function prepararFormularios() {
         const formulario = evento.currentTarget;
         bloquearBoton(formulario, true);
         try {
-            const respuesta = await solicitar("/api/configuracion/filiales", { method: "POST", body: JSON.stringify(datosFormulario(formulario)) });
-            formulario.reset();
+            const id = formulario.dataset.id;
+            const ruta = id ? `/api/configuracion/filiales/${id}` : "/api/configuracion/filiales";
+            const respuesta = await solicitar(ruta, { method: id ? "PUT" : "POST", body: JSON.stringify(datosFormulario(formulario)) });
+            restablecerFormularioFilial();
             await actualizarDatosGenerales();
             mostrarNotificacion(respuesta.mensaje);
         } catch (error) { mostrarNotificacion(error.message, true); }
@@ -453,9 +691,10 @@ function prepararFormularios() {
         const formulario = evento.currentTarget;
         bloquearBoton(formulario, true);
         try {
-            const respuesta = await solicitar("/api/productos", { method: "POST", body: JSON.stringify(datosFormulario(formulario)) });
-            formulario.reset();
-            formulario.elements.fecha_importacion.value = hoyISO();
+            const id = formulario.dataset.id;
+            const ruta = id ? `/api/productos/${id}` : "/api/productos";
+            const respuesta = await solicitar(ruta, { method: id ? "PUT" : "POST", body: JSON.stringify(datosFormulario(formulario)) });
+            restablecerFormularioProducto();
             await actualizarDatosGenerales();
             mostrarNotificacion(respuesta.mensaje);
         } catch (error) { mostrarNotificacion(error.message, true); }
@@ -514,7 +753,15 @@ function prepararFormularios() {
 }
 
 function prepararEventosDeConsulta() {
-    document.querySelector("#buscar-producto").addEventListener("input", (evento) => mostrarProductos(evento.target.value));
+    document.addEventListener("click", manejarAccionAdministrativa);
+    document.addEventListener("click", manejarPaginacion);
+    document.querySelector("#boton-cancelar-tasa").addEventListener("click", restablecerFormularioTasa);
+    document.querySelector("#boton-cancelar-filial").addEventListener("click", restablecerFormularioFilial);
+    document.querySelector("#boton-limpiar-producto").addEventListener("click", restablecerFormularioProducto);
+    document.querySelector("#buscar-producto").addEventListener("input", (evento) => {
+        paginasActuales.productos = 1;
+        mostrarProductos(evento.target.value);
+    });
     document.querySelector("#boton-consultar-inventario").addEventListener("click", async () => {
         const filial = document.querySelector("#filtro-filial-inventario").value;
         if (!filial) return mostrarNotificacion("Selecciona una filial.", true);

@@ -45,7 +45,7 @@ def crear_servicio_con_una_venta(
         id_filial=1,
     )
     producto = ProductoImportado(
-        sku="LAP-001",
+        codigo="LAP-001",
         nombre="Laptop de prueba",
         descripcion_tecnica="Equipo para el reporte unitario",
         categoria="Laptop",

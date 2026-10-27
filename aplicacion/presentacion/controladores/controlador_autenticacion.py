@@ -1,10 +1,12 @@
 """Controlador del acceso administrativo al sistema."""
 
+from functools import wraps
 from hmac import compare_digest
 
 from flask import (
     Blueprint,
     current_app,
+    jsonify,
     redirect,
     render_template,
     request,
@@ -14,6 +16,28 @@ from flask import (
 
 
 autenticacion_bp = Blueprint("autenticacion", __name__)
+
+
+def requiere_administrador(funcion):
+    """Permite ejecutar una operacion solamente a la cuenta administrativa."""
+
+    @wraps(funcion)
+    def funcion_protegida(*args, **kwargs):
+        # ============================================================
+        # BLOQUE: AUTORIZACION DE OPERACIONES ADMINISTRATIVAS
+        # Este bloque protege las modificaciones aunque alguien intente
+        # llamar la API directamente sin utilizar los botones del sistema.
+        # ============================================================
+        if not session.get("usuario_admin"):
+            return jsonify(
+                {
+                    "exito": False,
+                    "mensaje": "Esta operacion requiere un usuario administrador.",
+                }
+            ), 403
+        return funcion(*args, **kwargs)
+
+    return funcion_protegida
 
 
 @autenticacion_bp.route("/login", methods=["GET", "POST"])

@@ -111,12 +111,13 @@ class ServicioVentas:
                     f"Disponible: {inventario.stock_disponible}."
                 )
 
-            precio_recibido = datos.get("precio_unitario_local")
-            precio = (
-                precio_recibido
-                if precio_recibido not in (None, "")
-                else inventario.precio_venta_local
-            )
+            # ============================================================
+            # BLOQUE: PRECIO UNITARIO DEFINIDO POR EL INVENTARIO
+            # Este bloque toma el precio oficial de la filial e impide que
+            # el navegador pueda reemplazarlo por un importe manipulado.
+            # Cumple: RF-02 y CU-02.
+            # ============================================================
+            precio = inventario.precio_venta_local
             detalle = DetalleVenta(
                 id_producto=id_producto,
                 cantidad=cantidad,

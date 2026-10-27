@@ -55,7 +55,7 @@ def test_flujo_completo_api_mysql():
     cursor = conexion.cursor(dictionary=True)
     sufijo = secrets.token_hex(4).upper()
     codigo_filial = f"PY-{sufijo}"
-    sku = f"PY-SKU-{sufijo}"
+    codigo = f"PY-COD-{sufijo}"
     factura = f"PY-FV-{sufijo}"
     ids_activos = {}
     ids_tasas = []
@@ -105,6 +105,16 @@ def test_flujo_completo_api_mysql():
             assert respuesta.status_code == estado, respuesta.get_json()
             return respuesta.get_json()
 
+        def actualizar(ruta: str, datos: dict, estado: int = 200):
+            respuesta = cliente.put(ruta, json=datos)
+            assert respuesta.status_code == estado, respuesta.get_json()
+            return respuesta.get_json()
+
+        def eliminar(ruta: str, estado: int = 200):
+            respuesta = cliente.delete(ruta)
+            assert respuesta.status_code == estado, respuesta.get_json()
+            return respuesta.get_json()
+
         for divisa, tasa in (("CNY", "0.13000000"), ("PEN", "0.25000000")):
             tipo_cambio = publicar(
                 "/api/configuracion/tipos-cambio",
@@ -129,7 +139,7 @@ def test_flujo_completo_api_mysql():
             201,
         )["datos"]
         producto_datos = {
-            "sku": sku,
+            "codigo": codigo,
             "nombre": "Producto Pytest",
             "descripcion_tecnica": "Producto temporal de integracion",
             "categoria": "Laptop",
@@ -141,6 +151,53 @@ def test_flujo_completo_api_mysql():
             "precio_venta_local": "120.00",
         }
         producto = publicar("/api/productos", producto_datos, 201)["datos"]["producto"]
+        assert producto["codigo"] == codigo
+        assert "sku" not in producto
+
+        precios_catalogo = cliente.get("/api/inventario/catalogo")
+        assert precios_catalogo.status_code == 200
+        precio_producto = next(
+            item
+            for item in precios_catalogo.get_json()["datos"]
+            if item["id_producto"] == producto["id_producto"]
+        )
+        assert precio_producto["precio_venta_local"] == "120.00"
+
+        tasa_editada = actualizar(
+            f"/api/configuracion/tipos-cambio/{ids_tasas[0]}",
+            {
+                "codigo_divisa_origen": "CNY",
+                "tasa": "0.13000000",
+                "fecha_vigencia": fecha_tasa.isoformat(),
+            },
+        )["datos"]
+        assert tasa_editada["activa"] is True
+
+        filial_editada = actualizar(
+            f"/api/configuracion/filiales/{filial['id_filial']}",
+            {
+                "codigo": codigo_filial,
+                "nombre": "Filial Pytest Editada",
+                "pais": "Peru",
+                "ciudad": "Lima",
+                "codigo_divisa": "PEN",
+            },
+        )["datos"]
+        assert filial_editada["nombre"] == "Filial Pytest Editada"
+
+        producto_editado = actualizar(
+            f"/api/productos/{producto['id_producto']}",
+            {
+                "codigo": codigo,
+                "nombre": "Producto Pytest Editado",
+                "descripcion_tecnica": "Producto temporal editado",
+                "categoria": "Laptop",
+                "costo_unitario_cny": "100.00",
+                "proveedor": "Proveedor Pytest",
+                "fecha_importacion": date.today().isoformat(),
+            },
+        )["datos"]
+        assert producto_editado["nombre"] == "Producto Pytest Editado"
 
         duplicado = publicar("/api/productos", producto_datos, 409)
         assert duplicado["exito"] is False
@@ -154,8 +211,10 @@ def test_flujo_completo_api_mysql():
             "cliente": "Cliente Pytest",
             "vendedor": "Vendedor Pytest",
             "metodo_pago": "Tarjeta",
+            "precio_unitario_local": "9999.99",
         }
         venta = publicar("/api/ventas", venta_datos, 201)["datos"]
+        assert venta["detalles"][0]["precio_unitario_local"] == "120.00"
         assert venta["total_local"] == "480.00"
         assert venta["total_eur"] == "120.00"
 
@@ -191,6 +250,37 @@ def test_flujo_completo_api_mysql():
         assert reporte["total_gastos_eur"] == "52.00"
         assert reporte["resultado_financiero_eur"] == "68.00"
         assert len(reporte["firma"]["sha256"]) == 64
+
+        producto_eliminado = eliminar(
+            f"/api/productos/{producto['id_producto']}"
+        )["datos"]
+        filial_eliminada = eliminar(
+            f"/api/configuracion/filiales/{filial['id_filial']}"
+        )["datos"]
+        tasa_eliminada = eliminar(
+            f"/api/configuracion/tipos-cambio/{ids_tasas[0]}"
+        )["datos"]
+        assert producto_eliminado["activo"] is False
+        assert filial_eliminada["activa"] is False
+        assert tasa_eliminada["activa"] is False
+
+        # Los registros siguen en MySQL porque la eliminacion es logica.
+        conexion.commit()
+        cursor.execute(
+            "SELECT activo FROM productos_importados WHERE id_producto=%s",
+            (producto["id_producto"],),
+        )
+        assert cursor.fetchone()["activo"] == 0
+        cursor.execute(
+            "SELECT activa FROM filiales WHERE id_filial=%s",
+            (filial["id_filial"],),
+        )
+        assert cursor.fetchone()["activa"] == 0
+        cursor.execute(
+            "SELECT activa FROM tipos_cambio WHERE id_tipo_cambio=%s",
+            (ids_tasas[0],),
+        )
+        assert cursor.fetchone()["activa"] == 0
     finally:
         try:
             cursor.execute(
@@ -198,8 +288,8 @@ def test_flujo_completo_api_mysql():
                 (f"{factura}%",),
             )
             cursor.execute(
-                "SELECT id_producto FROM productos_importados WHERE sku=%s",
-                (sku,),
+                "SELECT id_producto FROM productos_importados WHERE codigo=%s",
+                (codigo,),
             )
             productos = [fila["id_producto"] for fila in cursor.fetchall()]
             if productos:
@@ -243,8 +333,8 @@ def test_flujo_completo_api_mysql():
             )
             assert cursor.fetchone()["total"] == 0
             cursor.execute(
-                "SELECT COUNT(*) AS total FROM productos_importados WHERE sku=%s",
-                (sku,),
+                "SELECT COUNT(*) AS total FROM productos_importados WHERE codigo=%s",
+                (codigo,),
             )
             assert cursor.fetchone()["total"] == 0
             cursor.execute(

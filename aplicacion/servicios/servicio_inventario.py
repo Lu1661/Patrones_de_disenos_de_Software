@@ -18,6 +18,11 @@ class ServicioInventario:
 
         return self._repositorio.listar_por_filial(id_filial)
 
+    def listar_todos(self) -> list[InventarioFilial]:
+        """Retorna los precios locales para mostrarlos en el catalogo."""
+
+        return self._repositorio.listar_todos()
+
     def reponer(self, datos: dict) -> InventarioFilial:
         """Incrementa el stock y retorna el nuevo estado del inventario."""
 

@@ -95,7 +95,7 @@ Reglas:
 ### 5.4 Producto importado
 
 - `id_producto`
-- `sku`
+- `codigo`
 - `nombre`
 - `descripcion_tecnica`
 - `categoria`
@@ -114,7 +114,7 @@ Categorias permitidas:
 
 Reglas:
 
-- El SKU es unico.
+- El codigo es unico.
 - El nombre, la categoria y el proveedor son obligatorios.
 - El costo en CNY debe ser mayor que cero.
 - El costo en EUR se calcula con la tasa CNY/EUR vigente.
@@ -202,7 +202,7 @@ Reglas:
 
 ### 7.1 Registrar producto importado
 
-- SKU
+- Codigo
 - Nombre comercial
 - Descripcion tecnica
 - Categoria

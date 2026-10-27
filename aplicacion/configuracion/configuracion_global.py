@@ -60,6 +60,13 @@ class ConfiguracionGlobal:
             raise ValueError("La tasa EUR hacia EUR debe ser igual a 1.")
         self._tasas_cambio[codigo] = tasa
 
+    def eliminar_tasa(self, codigo_divisa_origen: str) -> None:
+        """Retira de memoria una tasa inactiva sin eliminar la base EUR."""
+
+        codigo = normalizar_codigo_iso(codigo_divisa_origen)
+        if codigo != "EUR":
+            self._tasas_cambio.pop(codigo, None)
+
     def obtener_tasa(self, codigo_divisa_origen: str) -> Decimal:
         """Obtiene una tasa registrada o informa que debe configurarse."""
 

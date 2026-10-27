@@ -48,6 +48,23 @@ class RepositorioInventario(RepositorioBase):
             finally:
                 cursor.close()
 
+    def listar_todos(self) -> list[InventarioFilial]:
+        """Lista los precios y existencias asociados a todos los productos."""
+
+        consulta = """
+            SELECT id_inventario, id_filial, id_producto,
+                   stock_disponible, precio_venta_local
+            FROM inventarios_filial
+            ORDER BY id_producto, id_filial
+        """
+        with self._usar_conexion() as conexion:
+            cursor = conexion.cursor(dictionary=True)
+            try:
+                cursor.execute(consulta)
+                return [self._convertir_fila(fila) for fila in cursor.fetchall()]
+            finally:
+                cursor.close()
+
     def obtener(
         self,
         id_filial: int,

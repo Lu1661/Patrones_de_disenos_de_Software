@@ -14,10 +14,10 @@
     </div>
 
     <div class="cuadricula-indicadores">
-        <article class="indicador indicador-azul"><span class="indicador-icono" aria-hidden="true">FI</span><div><strong id="total-filiales">0</strong><span>Filiales registradas</span></div></article>
-        <article class="indicador indicador-verde"><span class="indicador-icono" aria-hidden="true">PR</span><div><strong id="total-productos">0</strong><span>Productos activos</span></div></article>
-        <article class="indicador indicador-ambar"><span class="indicador-icono" aria-hidden="true">TC</span><div><strong id="total-tasas">0</strong><span>Tasas activas</span></div></article>
-        <article class="indicador indicador-morado"><span class="indicador-icono" aria-hidden="true">VE</span><div><strong id="total-ventas">0</strong><span>Ventas del mes</span></div></article>
+        <article class="indicador"><div><strong id="total-filiales">0</strong><span>Filiales registradas</span></div></article>
+        <article class="indicador"><div><strong id="total-productos">0</strong><span>Productos activos</span></div></article>
+        <article class="indicador"><div><strong id="total-tasas">0</strong><span>Tasas activas</span></div></article>
+        <article class="indicador"><div><strong id="total-ventas">0</strong><span>Ventas del mes</span></div></article>
     </div>
 
     <div class="cuadricula-doble">
@@ -47,19 +47,19 @@
 
     <div class="cuadricula-doble al-inicio">
         <article class="panel">
-            <div class="cabecera-panel"><div><p class="etiqueta">Monedas</p><h3>Nueva tasa hacia EUR</h3></div></div>
+            <div class="cabecera-panel"><div><p class="etiqueta">Monedas</p><h3 id="titulo-formulario-tasa">Nueva tasa hacia EUR</h3></div></div>
             <form id="formulario-tasa" class="formulario">
                 <label>Divisa de origen<select name="codigo_divisa_origen" required><option value="">Seleccionar</option><option value="CNY">CNY - Yuan chino</option><option value="PEN">PEN - Sol peruano</option><option value="USD">USD - Dólar estadounidense</option></select></label>
                 <div class="fila-campos">
                     <label>Tasa de conversión<input name="tasa" type="number" min="0.00000001" step="0.00000001" placeholder="0.25000000" required></label>
                     <label>Fecha de vigencia<input name="fecha_vigencia" type="date" required></label>
                 </div>
-                <button class="boton boton-primario" type="submit">Guardar tasa</button>
+                <div class="acciones-formulario"><button class="boton boton-fantasma oculto" id="boton-cancelar-tasa" type="button">Cancelar</button><button class="boton boton-primario" id="boton-guardar-tasa" type="submit">Guardar tasa</button></div>
             </form>
         </article>
 
         <article class="panel">
-            <div class="cabecera-panel"><div><p class="etiqueta">Sedes</p><h3>Nueva filial</h3></div></div>
+            <div class="cabecera-panel"><div><p class="etiqueta">Sedes</p><h3 id="titulo-formulario-filial">Nueva filial</h3></div></div>
             <form id="formulario-filial" class="formulario">
                 <div class="fila-campos">
                     <label>Código<input name="codigo" maxlength="15" placeholder="PE-LIM-01" required></label>
@@ -70,7 +70,7 @@
                     <label>País<input name="pais" placeholder="Perú" required></label>
                     <label>Ciudad<input name="ciudad" placeholder="Lima" required></label>
                 </div>
-                <button class="boton boton-primario" type="submit">Registrar filial</button>
+                <div class="acciones-formulario"><button class="boton boton-fantasma oculto" id="boton-cancelar-filial" type="button">Cancelar</button><button class="boton boton-primario" id="boton-guardar-filial" type="submit">Registrar filial</button></div>
             </form>
         </article>
     </div>
@@ -78,13 +78,15 @@
     <div class="cuadricula-doble al-inicio">
         <article class="panel">
             <div class="cabecera-panel"><div><h3>Tasas registradas</h3><p>Historial más reciente de conversiones.</p></div></div>
-            <div class="tabla-contenedor"><table><thead><tr><th>Divisa</th><th>Tasa EUR</th><th>Vigencia</th><th>Estado</th></tr></thead><tbody id="tabla-tasas"></tbody></table></div>
+            <div class="tabla-contenedor"><table><thead><tr><th>Divisa</th><th>Tasa EUR</th><th>Vigencia</th><th>Estado</th>{% if session.get('usuario_admin') %}<th>Acciones</th>{% endif %}</tr></thead><tbody id="tabla-tasas"></tbody></table></div>
             <p class="estado-vacio" id="vacio-tasas">No existen tasas registradas.</p>
+            <div class="paginacion" id="paginacion-tasas"></div>
         </article>
         <article class="panel">
             <div class="cabecera-panel"><div><h3>Filiales registradas</h3><p>Sedes comerciales disponibles.</p></div></div>
-            <div class="tabla-contenedor"><table><thead><tr><th>Código</th><th>Filial</th><th>Ubicación</th><th>Moneda</th></tr></thead><tbody id="tabla-filiales"></tbody></table></div>
+            <div class="tabla-contenedor"><table><thead><tr><th>Código</th><th>Filial</th><th>Ubicación</th><th>Moneda</th>{% if session.get('usuario_admin') %}<th>Acciones</th>{% endif %}</tr></thead><tbody id="tabla-filiales"></tbody></table></div>
             <p class="estado-vacio" id="vacio-filiales">No existen filiales registradas.</p>
+            <div class="paginacion" id="paginacion-filiales"></div>
         </article>
     </div>
 </section>
@@ -92,14 +94,13 @@
 <section class="seccion-modulo" id="seccion-productos" data-titulo="Productos importados">
     <div class="encabezado-modulo">
         <div><p class="etiqueta">Catálogo corporativo</p><h2>Productos importados</h2><p>Registra los lotes adquiridos en China y su inventario inicial.</p></div>
-        <button class="boton boton-secundario" type="button" data-alternar="panel-producto">+ Registrar producto</button>
     </div>
 
     <article class="panel panel-formulario" id="panel-producto">
-        <div class="cabecera-panel"><div><h3>Nuevo producto tecnológico</h3><p>La tasa CNY/EUR debe estar configurada para calcular el costo corporativo.</p></div></div>
+        <div class="cabecera-panel"><div><h3 id="titulo-formulario-producto">Nuevo producto tecnológico</h3><p id="ayuda-formulario-producto">La tasa CNY/EUR debe estar configurada para calcular el costo corporativo.</p></div></div>
         <form id="formulario-producto" class="formulario formulario-amplio">
             <div class="fila-campos tres-columnas">
-                <label>SKU<input name="sku" maxlength="30" placeholder="LAP-001" required></label>
+                <label>Código<input name="codigo" maxlength="30" placeholder="LAP-001" required></label>
                 <label>Nombre comercial<input name="nombre" placeholder="Laptop Business 14" required></label>
                 <label>Categoría<select name="categoria" required><option value="">Seleccionar</option><option>Laptop</option><option>Smartphone</option><option>Accesorio</option><option>Redes</option></select></label>
             </div>
@@ -114,14 +115,15 @@
                 <label>Stock inicial<input name="stock_inicial" type="number" min="0" step="1" required></label>
                 <label>Precio de venta local<input name="precio_venta_local" type="number" min="0.01" step="0.01" required></label>
             </div>
-            <div class="acciones-formulario"><button class="boton boton-fantasma" type="reset">Limpiar</button><button class="boton boton-primario" type="submit">Guardar producto</button></div>
+            <div class="acciones-formulario"><button class="boton boton-fantasma" id="boton-limpiar-producto" type="button">Limpiar</button><button class="boton boton-primario" id="boton-guardar-producto" type="submit">Guardar producto</button></div>
         </form>
     </article>
 
     <article class="panel">
-        <div class="cabecera-panel"><div><h3>Catálogo de productos</h3><p>Costos originales y valorización corporativa.</p></div><input class="buscador" id="buscar-producto" type="search" placeholder="Buscar por SKU o nombre"></div>
-        <div class="tabla-contenedor"><table><thead><tr><th>SKU</th><th>Producto</th><th>Categoría</th><th>Costo CNY</th><th>Costo EUR</th><th>Importación</th></tr></thead><tbody id="tabla-productos"></tbody></table></div>
+        <div class="cabecera-panel"><div><h3>Catálogo de productos</h3><p>Costos originales y valorización corporativa.</p></div><input class="buscador" id="buscar-producto" type="search" placeholder="Buscar por código o nombre"></div>
+        <div class="tabla-contenedor"><table><thead><tr><th>Código</th><th>Producto</th><th>Categoría</th><th>Costo CNY</th><th>Costo EUR</th><th>Importación</th><th>Filial</th><th>Precio venta</th>{% if session.get('usuario_admin') %}<th>Acciones</th>{% endif %}</tr></thead><tbody id="tabla-productos"></tbody></table></div>
         <p class="estado-vacio" id="vacio-productos">No existen productos registrados.</p>
+        <div class="paginacion" id="paginacion-productos"></div>
     </article>
 </section>
 
@@ -138,8 +140,9 @@
     <div class="cuadricula-inventario">
         <article class="panel">
             <div class="cabecera-panel"><div><h3>Existencias disponibles</h3><p id="subtitulo-inventario">Selecciona una filial para consultar.</p></div></div>
-            <div class="tabla-contenedor"><table><thead><tr><th>SKU</th><th>Producto</th><th>Stock</th><th>Precio local</th><th>Estado</th></tr></thead><tbody id="tabla-inventario"></tbody></table></div>
+            <div class="tabla-contenedor"><table><thead><tr><th>Código</th><th>Producto</th><th>Stock</th><th>Precio local</th><th>Estado</th></tr></thead><tbody id="tabla-inventario"></tbody></table></div>
             <p class="estado-vacio" id="vacio-inventario">No hay información para mostrar.</p>
+            <div class="paginacion" id="paginacion-inventario"></div>
         </article>
 
         <article class="panel panel-reposicion">
@@ -165,13 +168,14 @@
             <form id="formulario-venta" class="formulario">
                 <div class="fila-campos">
                     <label>Número de factura<input name="numero_factura" maxlength="40" placeholder="F001-000001" required></label>
-                    <label>Fecha y hora<input name="fecha_venta" type="datetime-local" required></label>
+                    <label>Fecha de venta<input name="fecha_venta" type="datetime-local" required></label>
                 </div>
                 <label>Filial<select name="id_filial" id="filial-venta" class="selector-filiales" required><option value="">Seleccionar filial</option></select></label>
                 <label>Producto<select name="id_producto" id="producto-venta" required><option value="">Seleccionar una filial primero</option></select></label>
                 <div class="detalle-stock" id="detalle-stock">Selecciona un producto para consultar su disponibilidad.</div>
-                <div class="fila-campos">
+                <div class="fila-campos tres-columnas">
                     <label>Cantidad<input name="cantidad" type="number" min="1" step="1" required></label>
+                    <label>Precio unitario<input id="precio-unitario-venta" type="text" placeholder="Selecciona un producto" readonly></label>
                     <label>Método de pago<select name="metodo_pago" required><option value="">Seleccionar</option><option>Efectivo</option><option>Tarjeta</option><option>Transferencia</option></select></label>
                 </div>
                 <div class="fila-campos">
@@ -201,6 +205,7 @@
         </div>
         <div class="tabla-contenedor"><table><thead><tr><th>Factura</th><th>Fecha</th><th>Filial</th><th>Cliente</th><th>Total local</th><th>Total EUR</th></tr></thead><tbody id="tabla-ventas"></tbody></table></div>
         <p class="estado-vacio" id="vacio-ventas">No existen ventas para el periodo seleccionado.</p>
+        <div class="paginacion" id="paginacion-ventas"></div>
     </article>
 </section>
 

@@ -21,7 +21,7 @@ CATEGORIAS_PERMITIDAS = ("Laptop", "Smartphone", "Accesorio", "Redes")
 class ProductoImportado:
     """Producto tecnologico comprado en CNY y valorizado en EUR."""
 
-    sku: str
+    codigo: str
     nombre: str
     descripcion_tecnica: str
     categoria: str
@@ -39,7 +39,7 @@ class ProductoImportado:
         # de que el producto pueda asignarse al inventario de una filial.
         # Cumple: RF-01 y CU-01.
         # ============================================================
-        self.sku = limpiar_texto(self.sku, "SKU").upper()
+        self.codigo = limpiar_texto(self.codigo, "codigo").upper()
         self.nombre = limpiar_texto(self.nombre, "nombre del producto")
         self.descripcion_tecnica = limpiar_texto(
             self.descripcion_tecnica,
@@ -77,7 +77,7 @@ class ProductoImportado:
     def crear_con_conversion(
         cls,
         *,
-        sku: str,
+        codigo: str,
         nombre: str,
         descripcion_tecnica: str,
         categoria: str,
@@ -93,7 +93,7 @@ class ProductoImportado:
         costo_eur = redondear_moneda(costo_cny * tasa)
 
         return cls(
-            sku=sku,
+            codigo=codigo,
             nombre=nombre,
             descripcion_tecnica=descripcion_tecnica,
             categoria=categoria,

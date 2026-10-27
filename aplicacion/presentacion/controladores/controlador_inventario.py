@@ -13,6 +13,15 @@ from aplicacion.servicios.utilidades import convertir_entero
 inventario_bp = Blueprint("inventario", __name__, url_prefix="/api/inventario")
 
 
+@inventario_bp.get("/catalogo")
+def listar_inventario_catalogo():
+    """Retorna los precios locales que complementan el catalogo."""
+
+    servicio = obtener_servicio("inventario")
+    inventario = servicio.listar_todos()
+    return respuesta_exitosa(inventario, "Precios de venta consultados.")
+
+
 @inventario_bp.get("")
 def listar_inventario():
     """Retorna las existencias de la filial indicada."""

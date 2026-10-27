@@ -73,6 +73,24 @@ class RepositorioTiposCambio(RepositorioBase):
             finally:
                 cursor.close()
 
+    def obtener_por_id(self, id_tipo_cambio: int) -> TipoCambio | None:
+        """Busca una tasa por su identificador administrativo."""
+
+        consulta = """
+            SELECT id_tipo_cambio, codigo_divisa_origen,
+                   codigo_divisa_destino, tasa, fecha_vigencia, activa
+            FROM tipos_cambio
+            WHERE id_tipo_cambio = %s
+        """
+        with self._usar_conexion() as conexion:
+            cursor = conexion.cursor(dictionary=True)
+            try:
+                cursor.execute(consulta, (id_tipo_cambio,))
+                fila = cursor.fetchone()
+                return self._convertir_fila(fila) if fila else None
+            finally:
+                cursor.close()
+
     def registrar(
         self,
         tipo_cambio: TipoCambio,
@@ -112,6 +130,60 @@ class RepositorioTiposCambio(RepositorioBase):
                 )
                 tipo_cambio.id_tipo_cambio = cursor.lastrowid
                 return cursor.lastrowid
+            finally:
+                cursor.close()
+
+    def actualizar(self, tipo_cambio: TipoCambio) -> None:
+        """Actualiza una tasa y conserva una sola tasa activa por divisa."""
+
+        with self._usar_conexion(escritura=True) as conexion:
+            cursor = conexion.cursor()
+            try:
+                if tipo_cambio.activa:
+                    cursor.execute(
+                        """
+                        UPDATE tipos_cambio
+                        SET activa = FALSE
+                        WHERE codigo_divisa_origen = %s
+                          AND codigo_divisa_destino = 'EUR'
+                          AND id_tipo_cambio <> %s
+                          AND activa = TRUE
+                        """,
+                        (
+                            tipo_cambio.codigo_divisa_origen,
+                            tipo_cambio.id_tipo_cambio,
+                        ),
+                    )
+                cursor.execute(
+                    """
+                    UPDATE tipos_cambio
+                    SET codigo_divisa_origen = %s, tasa = %s,
+                        fecha_vigencia = %s
+                    WHERE id_tipo_cambio = %s
+                    """,
+                    (
+                        tipo_cambio.codigo_divisa_origen,
+                        tipo_cambio.tasa,
+                        tipo_cambio.fecha_vigencia,
+                        tipo_cambio.id_tipo_cambio,
+                    ),
+                )
+            finally:
+                cursor.close()
+
+    def desactivar(self, id_tipo_cambio: int) -> None:
+        """Marca una tasa como historica sin eliminarla fisicamente."""
+
+        with self._usar_conexion(escritura=True) as conexion:
+            cursor = conexion.cursor()
+            try:
+                cursor.execute(
+                    "UPDATE tipos_cambio SET activa = FALSE "
+                    "WHERE id_tipo_cambio = %s AND activa = TRUE",
+                    (id_tipo_cambio,),
+                )
+                if cursor.rowcount == 0:
+                    raise ValueError("La tasa indicada no existe o ya esta inactiva.")
             finally:
                 cursor.close()
 

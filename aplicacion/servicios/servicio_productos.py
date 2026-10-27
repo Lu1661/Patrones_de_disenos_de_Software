@@ -73,7 +73,7 @@ class ServicioProductos:
             raise ValueError("No existe una tasa activa para CNY/EUR.")
 
         producto = ProductoImportado.crear_con_conversion(
-            sku=str(obtener_requerido(datos, "sku")),
+            codigo=str(obtener_requerido(datos, "codigo")),
             nombre=str(obtener_requerido(datos, "nombre")),
             descripcion_tecnica=str(
                 obtener_requerido(datos, "descripcion_tecnica")
@@ -104,4 +104,47 @@ class ServicioProductos:
             self._repositorio_inventario.crear(inventario, conexion)
 
         return producto, inventario
+
+    def actualizar(self, id_producto: int, datos: dict) -> ProductoImportado:
+        """Actualiza el catalogo sin modificar stock ni precios locales."""
+
+        actual = self._repositorio_productos.obtener_por_id(id_producto)
+        if actual is None:
+            raise ValueError("El producto indicado no existe.")
+        fecha_importacion = convertir_fecha(
+            obtener_requerido(datos, "fecha_importacion"),
+            "fecha_importacion",
+        )
+        tasa_cny = self._repositorio_tasas.obtener_vigente(
+            "CNY",
+            fecha_importacion,
+        )
+        if tasa_cny is None:
+            raise ValueError("No existe una tasa activa para CNY/EUR.")
+        producto = ProductoImportado.crear_con_conversion(
+            codigo=str(obtener_requerido(datos, "codigo")),
+            nombre=str(obtener_requerido(datos, "nombre")),
+            descripcion_tecnica=str(
+                obtener_requerido(datos, "descripcion_tecnica")
+            ),
+            categoria=str(obtener_requerido(datos, "categoria")),
+            costo_unitario_cny=obtener_requerido(datos, "costo_unitario_cny"),
+            tasa_cny_eur=tasa_cny.tasa,
+            proveedor=str(obtener_requerido(datos, "proveedor")),
+            fecha_importacion=fecha_importacion,
+        )
+        producto.id_producto = id_producto
+        producto.activo = actual.activo
+        self._repositorio_productos.actualizar(producto)
+        return producto
+
+    def desactivar(self, id_producto: int) -> ProductoImportado:
+        """Desactiva un producto sin borrar inventarios ni ventas."""
+
+        producto = self._repositorio_productos.obtener_por_id(id_producto)
+        if producto is None or not producto.activo:
+            raise ValueError("El producto indicado no existe o ya esta inactivo.")
+        self._repositorio_productos.desactivar(id_producto)
+        producto.activo = False
+        return producto
 

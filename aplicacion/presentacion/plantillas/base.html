@@ -7,11 +7,10 @@
     <title>{% block titulo %}SERF{% endblock %}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/estilos.css') }}">
 </head>
-<body>
+<body data-es-administrador="{{ 'true' if session.get('usuario_admin') else 'false' }}">
     <div class="aplicacion">
         <aside class="barra-lateral" id="barra-lateral">
             <div class="identidad">
-                <span class="logotipo" aria-hidden="true">FC</span>
                 <div>
                     <strong>FinanCorp</strong>
                     <span>Sistema SERF</span>
@@ -19,18 +18,14 @@
             </div>
 
             <nav class="navegacion" aria-label="Navegación principal">
-                <button class="enlace-navegacion activo" data-seccion="resumen" type="button"><span class="icono-navegacion" aria-hidden="true">01</span>Resumen</button>
-                <button class="enlace-navegacion" data-seccion="configuracion" type="button"><span class="icono-navegacion" aria-hidden="true">02</span>Configuración</button>
-                <button class="enlace-navegacion" data-seccion="productos" type="button"><span class="icono-navegacion" aria-hidden="true">03</span>Productos</button>
-                <button class="enlace-navegacion" data-seccion="inventario" type="button"><span class="icono-navegacion" aria-hidden="true">04</span>Inventario</button>
-                <button class="enlace-navegacion" data-seccion="ventas" type="button"><span class="icono-navegacion" aria-hidden="true">05</span>Ventas</button>
-                <button class="enlace-navegacion" data-seccion="reportes" type="button"><span class="icono-navegacion" aria-hidden="true">06</span>Reportes</button>
+                <button class="enlace-navegacion activo" data-seccion="resumen" type="button">Resumen</button>
+                <button class="enlace-navegacion" data-seccion="configuracion" type="button">Configuración</button>
+                <button class="enlace-navegacion" data-seccion="productos" type="button">Productos</button>
+                <button class="enlace-navegacion" data-seccion="inventario" type="button">Inventario</button>
+                <button class="enlace-navegacion" data-seccion="ventas" type="button">Ventas</button>
+                <button class="enlace-navegacion" data-seccion="reportes" type="button">Reportes</button>
             </nav>
 
-            <div class="estado-sistema">
-                <span class="punto-estado" aria-hidden="true"></span>
-                <div><strong>SERF operativo</strong><span>Moneda base: EUR</span></div>
-            </div>
         </aside>
 
         <div class="area-principal">
@@ -41,7 +36,6 @@
                     <h1 id="titulo-seccion">Resumen general</h1>
                 </div>
                 <div class="usuario-actual">
-                    <span class="avatar" aria-hidden="true">A</span>
                     <div><strong>{{ session.get('usuario_admin', 'admin') }}</strong><span>Administrador</span></div>
                     <form method="post" action="{{ url_for('autenticacion.logout') }}">
                         <button class="boton-salir" type="submit">Salir</button>

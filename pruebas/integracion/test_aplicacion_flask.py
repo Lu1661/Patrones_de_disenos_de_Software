@@ -29,6 +29,7 @@ def test_login_protege_el_sistema_y_permite_cerrar_sesion(monkeypatch):
     respuesta_sin_sesion = cliente.get("/api/productos")
     assert respuesta_sin_sesion.status_code == 401
     assert respuesta_sin_sesion.get_json()["exito"] is False
+    assert cliente.delete("/api/productos/1").status_code == 401
     assert respuesta_sin_sesion.headers["X-Content-Type-Options"] == "nosniff"
     assert respuesta_sin_sesion.headers["X-Frame-Options"] == "DENY"
     assert respuesta_sin_sesion.headers["Cache-Control"] == "no-store"
@@ -68,3 +69,4 @@ def test_login_protege_el_sistema_y_permite_cerrar_sesion(monkeypatch):
 
     assert cliente.post("/logout").status_code == 302
     assert cliente.get("/").status_code == 302
+    assert cliente.put("/api/configuracion/filiales/1", json={}).status_code == 401

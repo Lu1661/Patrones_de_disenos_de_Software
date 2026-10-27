@@ -18,7 +18,7 @@ from aplicacion.dominio.entidades.transaccion_venta import TransaccionVenta
 # ============================================================
 def test_producto_convierte_costo_cny_a_eur():
     producto = ProductoImportado.crear_con_conversion(
-        sku="LAP-001",
+        codigo="LAP-001",
         nombre="Laptop de prueba",
         descripcion_tecnica="Equipo para prueba unitaria",
         categoria="Laptop",
@@ -28,6 +28,7 @@ def test_producto_convierte_costo_cny_a_eur():
         fecha_importacion=date.today(),
     )
 
+    assert producto.codigo == "LAP-001"
     assert producto.costo_unitario_cny == Decimal("100.00")
     assert producto.costo_unitario_eur == Decimal("13.00")
 
@@ -75,7 +76,7 @@ def test_venta_calcula_ingresos_gastos_y_resultado_en_eur():
 
 def test_producto_rechaza_fecha_futura_y_categoria_desconocida():
     datos = {
-        "sku": "LAP-002",
+        "codigo": "LAP-002",
         "nombre": "Laptop futura",
         "descripcion_tecnica": "Equipo para validar errores",
         "categoria": "Laptop",

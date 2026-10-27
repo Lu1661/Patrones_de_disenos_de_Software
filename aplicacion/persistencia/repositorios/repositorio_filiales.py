@@ -95,3 +95,43 @@ class RepositorioFiliales(RepositorioBase, IRepositorioConsulta[Filial]):
             finally:
                 cursor.close()
 
+    def actualizar(self, filial: Filial) -> None:
+        """Actualiza los datos administrativos de una filial existente."""
+
+        consulta = """
+            UPDATE filiales
+            SET codigo = %s, nombre = %s, pais = %s, ciudad = %s,
+                codigo_divisa = %s
+            WHERE id_filial = %s
+        """
+        parametros = (
+            filial.codigo,
+            filial.nombre,
+            filial.pais,
+            filial.ciudad,
+            filial.codigo_divisa,
+            filial.id_filial,
+        )
+        with self._usar_conexion(escritura=True) as conexion:
+            cursor = conexion.cursor()
+            try:
+                cursor.execute(consulta, parametros)
+            finally:
+                cursor.close()
+
+    def desactivar(self, id_filial: int) -> None:
+        """Marca una filial como inactiva sin borrar su historial."""
+
+        with self._usar_conexion(escritura=True) as conexion:
+            cursor = conexion.cursor()
+            try:
+                cursor.execute(
+                    "UPDATE filiales SET activa = FALSE "
+                    "WHERE id_filial = %s AND activa = TRUE",
+                    (id_filial,),
+                )
+                if cursor.rowcount == 0:
+                    raise ValueError("La filial indicada no existe o ya esta inactiva.")
+            finally:
+                cursor.close()
+
