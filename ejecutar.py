@@ -1,4 +1,4 @@
-"""Punto de entrada local de la aplicacion SERF."""
+# PUNTO DE ENTRADA LOCAL DE LA APLICACION SERF.
 
 import os
 

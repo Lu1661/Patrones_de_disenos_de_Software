@@ -1,4 +1,4 @@
-"""Prueba integral y reversible de la API conectada a MySQL."""
+# PRUEBA INTEGRAL Y REVERSIBLE DE LA API CONECTADA A MYSQL.
 
 import os
 import secrets
@@ -22,7 +22,7 @@ VARIABLES_MYSQL = (
 
 
 def mysql_configurado() -> bool:
-    """Indica si el entorno permite ejecutar la prueba de integracion."""
+    # INDICA SI EL ENTORNO PERMITE EJECUTAR LA PRUEBA DE INTEGRACION.
 
     return all(os.getenv(nombre) for nombre in VARIABLES_MYSQL)
 

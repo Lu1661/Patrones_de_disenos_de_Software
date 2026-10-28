@@ -1,4 +1,4 @@
-"""Pruebas unitarias de las reglas principales del dominio."""
+# PRUEBAS UNITARIAS DE LAS REGLAS PRINCIPALES DEL DOMINIO.
 
 from datetime import date, timedelta
 from decimal import Decimal

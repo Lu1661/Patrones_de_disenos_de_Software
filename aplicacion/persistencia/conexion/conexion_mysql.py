@@ -1,4 +1,4 @@
-"""Creacion, confirmacion y cierre de conexiones MySQL."""
+# CREACION, CONFIRMACION Y CIERRE DE CONEXIONES MYSQL.
 
 import os
 from contextlib import contextmanager
@@ -10,7 +10,7 @@ from mysql.connector.abstracts import MySQLConnectionAbstract
 
 
 class ConexionMySQL:
-    """Centraliza los datos tecnicos necesarios para conectarse a MySQL."""
+    # CENTRALIZA LOS DATOS TECNICOS NECESARIOS PARA CONECTARSE A MYSQL.
 
     def __init__(
         self,
@@ -29,7 +29,7 @@ class ConexionMySQL:
 
     @classmethod
     def desde_entorno(cls) -> "ConexionMySQL":
-        """Construye la conexion sin incluir credenciales dentro del codigo."""
+        # CONSTRUYE LA CONEXION SIN INCLUIR CREDENCIALES DENTRO DEL CODIGO.
 
         load_dotenv()
         return cls(
@@ -41,7 +41,7 @@ class ConexionMySQL:
         )
 
     def _validar_configuracion(self) -> None:
-        """Informa claramente cuando falta un dato local de conexion."""
+        # INFORMA CLARAMENTE CUANDO FALTA UN DATO LOCAL DE CONEXION.
 
         if not self._host.strip():
             raise ValueError("Falta MYSQL_HOST en la configuracion.")
@@ -55,7 +55,7 @@ class ConexionMySQL:
             raise ValueError("Falta MYSQL_PASSWORD en la configuracion.")
 
     def abrir(self) -> MySQLConnectionAbstract:
-        """Abre una conexion nueva que el proceso llamador debe cerrar."""
+        # ABRE UNA CONEXION NUEVA QUE EL PROCESO LLAMADOR DEBE CERRAR.
 
         # ============================================================
         # BLOQUE: APERTURA SEGURA DE LA CONEXION MYSQL
@@ -75,7 +75,7 @@ class ConexionMySQL:
 
     @contextmanager
     def transaccion(self) -> Iterator[MySQLConnectionAbstract]:
-        """Confirma el conjunto completo o revierte todo ante un error."""
+        # CONFIRMA EL CONJUNTO COMPLETO O REVIERTE TODO ANTE UN ERROR.
 
         conexion = self.abrir()
         try:
@@ -89,7 +89,7 @@ class ConexionMySQL:
             conexion.close()
 
     def probar_conexion(self) -> bool:
-        """Ejecuta una consulta minima sin modificar informacion."""
+        # EJECUTA UNA CONSULTA MINIMA SIN MODIFICAR INFORMACION.
 
         conexion = self.abrir()
         cursor = conexion.cursor()

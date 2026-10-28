@@ -1,4 +1,4 @@
-"""Entidad que representa un producto incluido en una venta."""
+# ENTIDAD QUE REPRESENTA UN PRODUCTO INCLUIDO EN UNA VENTA.
 
 from dataclasses import dataclass
 from decimal import Decimal
@@ -13,7 +13,7 @@ from aplicacion.dominio.validaciones import (
 
 @dataclass
 class DetalleVenta:
-    """Producto, cantidad, precio y costo historico de una venta."""
+    # PRODUCTO, CANTIDAD, PRECIO Y COSTO HISTORICO DE UNA VENTA.
 
     id_producto: int
     cantidad: int
@@ -49,13 +49,13 @@ class DetalleVenta:
 
     @property
     def subtotal_local(self) -> Decimal:
-        """Calcula el importe local correspondiente al detalle."""
+        # CALCULA EL IMPORTE LOCAL CORRESPONDIENTE AL DETALLE.
 
         return redondear_moneda(self.precio_unitario_local * self.cantidad)
 
     @property
     def subtotal_costo_eur(self) -> Decimal:
-        """Calcula el gasto de importacion correspondiente al detalle."""
+        # CALCULA EL GASTO DE IMPORTACION CORRESPONDIENTE AL DETALLE.
 
         return redondear_moneda(self.costo_unitario_eur * self.cantidad)
 

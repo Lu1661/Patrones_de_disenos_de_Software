@@ -1,4 +1,4 @@
-"""Creacion de los objetos que necesita la aplicacion."""
+# CREACION DE LOS OBJETOS QUE NECESITA LA APLICACION.
 
 from flask import Flask, current_app
 from mysql.connector import Error as ErrorMySQL
@@ -32,7 +32,7 @@ from aplicacion.servicios import (
 
 
 def configurar_dependencias(aplicacion: Flask) -> None:
-    """Construye una sola vez los repositorios y servicios del sistema."""
+    # CONSTRUYE UNA SOLA VEZ LOS REPOSITORIOS Y SERVICIOS DEL SISTEMA.
 
     # ============================================================
     # BLOQUE: UNION DE LAS CAPAS DEL SISTEMA
@@ -99,7 +99,7 @@ def configurar_dependencias(aplicacion: Flask) -> None:
 
 
 def obtener_servicio(nombre: str):
-    """Recupera un servicio configurado para la solicitud actual."""
+    # BUSCA UN SERVICIO CONFIGURADO PARA LA SOLICITUD ACTUAL.
 
     servicios = current_app.extensions.get("servicios_serf", {})
     if nombre not in servicios:

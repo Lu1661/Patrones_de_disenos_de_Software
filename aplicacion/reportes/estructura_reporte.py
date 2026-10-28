@@ -1,4 +1,4 @@
-"""Estructura jerarquica de secciones y registros del reporte."""
+# ESTRUCTURA JERARQUICA DE SECCIONES Y REGISTROS DEL REPORTE.
 
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
@@ -14,23 +14,25 @@ from aplicacion.dominio.validaciones import (
 
 
 class ComponenteReporte(ABC):
-    """Contrato comun para secciones y registros individuales."""
+    # CONTRATO COMUN PARA SECCIONES Y REGISTROS INDIVIDUALES.
 
     def __init__(self, nombre: str) -> None:
         self.nombre = limpiar_texto(nombre, "nombre del componente")
 
     @abstractmethod
     def calcular_total_eur(self) -> Decimal:
-        """Retorna el valor del componente expresado en EUR."""
+        # DEVUELVE EL VALOR DEL COMPONENTE EXPRESADO EN EUR.
+        pass
 
     @abstractmethod
     def renderizar(self, nivel: int = 0) -> str:
-        """Retorna una representacion textual respetando la jerarquia."""
+        # DEVUELVE UNA REPRESENTACION TEXTUAL RESPETANDO LA JERARQUIA.
+        pass
 
 
 @dataclass
 class RegistroVentaHoja(ComponenteReporte):
-    """Elemento final del arbol que representa un importe de venta."""
+    # ELEMENTO FINAL DEL ARBOL QUE REPRESENTA UN IMPORTE DE VENTA.
 
     nombre: str
     subtotal_local: Decimal
@@ -47,12 +49,12 @@ class RegistroVentaHoja(ComponenteReporte):
         self.codigo_divisa = normalizar_codigo_iso(self.codigo_divisa)
 
     def calcular_total_eur(self) -> Decimal:
-        """Convierte directamente el valor de la hoja a EUR."""
+        # CONVIERTE DIRECTAMENTE EL VALOR DE LA HOJA A EUR.
 
         return redondear_moneda(self.subtotal_local * self.tasa_eur)
 
     def renderizar(self, nivel: int = 0) -> str:
-        """Muestra la venta con su monto local y total en EUR."""
+        # MUESTRA LA VENTA CON SU MONTO LOCAL Y TOTAL EN EUR.
 
         sangria = "  " * nivel
         return (
@@ -64,7 +66,7 @@ class RegistroVentaHoja(ComponenteReporte):
 
 @dataclass
 class SeccionCompuesta(ComponenteReporte):
-    """Agrupacion que puede contener otras secciones o registros."""
+    # AGRUPACION QUE PUEDE CONTENER OTRAS SECCIONES O REGISTROS.
 
     nombre: str
     _hijos: list[ComponenteReporte] = field(default_factory=list, repr=False)
@@ -84,24 +86,24 @@ class SeccionCompuesta(ComponenteReporte):
 
     @property
     def hijos(self) -> tuple[ComponenteReporte, ...]:
-        """Expone una vista que no permite modificar la lista interna."""
+        # EXPONE UNA VISTA QUE NO PERMITE MODIFICAR LA LISTA INTERNA.
 
         return tuple(self._hijos)
 
     def agregar(self, hijo: ComponenteReporte) -> None:
-        """Agrega una seccion o una hoja valida al arbol."""
+        # AGREGA UNA SECCION O UNA HOJA VALIDA AL ARBOL.
 
         if not isinstance(hijo, ComponenteReporte):
             raise ValueError("Solo se pueden agregar componentes de reporte.")
         self._hijos.append(hijo)
 
     def remover(self, hijo: ComponenteReporte) -> None:
-        """Retira un componente previamente agregado."""
+        # RETIRA UN COMPONENTE PREVIAMENTE AGREGADO.
 
         self._hijos.remove(hijo)
 
     def calcular_total_eur(self) -> Decimal:
-        """Suma recursivamente todos los elementos contenidos."""
+        # SUMA RECURSIVAMENTE TODOS LOS ELEMENTOS CONTENIDOS.
 
         total = sum(
             (hijo.calcular_total_eur() for hijo in self._hijos),
@@ -110,7 +112,7 @@ class SeccionCompuesta(ComponenteReporte):
         return redondear_moneda(total)
 
     def renderizar(self, nivel: int = 0) -> str:
-        """Representa la seccion y sus descendientes con sangria."""
+        # REPRESENTA LA SECCION Y SUS DESCENDIENTES CON SANGRIA.
 
         sangria = "  " * nivel
         lineas = [f"{sangria}{self.nombre} - Total: {self.calcular_total_eur()} EUR"]

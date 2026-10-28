@@ -1,53 +1,62 @@
-"""Contratos estrictamente necesarios para generar reportes."""
+# CONTRATOS ESTRICTAMENTE NECESARIOS PARA GENERAR REPORTES.
 
 from abc import ABC, abstractmethod
 from typing import Any
 
 
 class IReportePrototype(ABC):
-    """Contrato minimo para clonar una plantilla de reporte."""
+    # CONTRATO MINIMO PARA CLONAR UNA PLANTILLA DE REPORTE.
 
     @abstractmethod
     def clonar(self) -> "IReportePrototype":
-        """Retorna una copia profunda independiente de la plantilla."""
+        # DEVUELVE UNA COPIA PROFUNDA INDEPENDIENTE DE LA PLANTILLA.
+        pass
 
 
 class IReporteFinanciero(ABC):
-    """Contrato comun del reporte base y sus personalizaciones."""
+    # CONTRATO COMUN DEL REPORTE BASE Y SUS PERSONALIZACIONES.
 
     @abstractmethod
     def emitir(self) -> str:
-        """Retorna el contenido final listo para visualizar o exportar."""
+        # DEVUELVE EL CONTENIDO FINAL LISTO PARA VISUALIZAR O EXPORTAR.
+        pass
 
 
 class IReporteBuilder(ABC):
-    """Pasos indispensables para ensamblar un reporte financiero."""
+    # PASOS INDISPENSABLES PARA ARMAR UN REPORTE FINANCIERO.
 
     @abstractmethod
     def reset(self, reporte_inicial: Any | None = None) -> None:
-        """Reinicia la construccion desde una plantilla."""
+        # REINICIA LA CONSTRUCCION DESDE UNA PLANTILLA.
+        pass
 
     @abstractmethod
     def definir_encabezado(self, titulo: str, periodo: str) -> None:
-        """Establece el titulo y el periodo del reporte."""
+        # COLOCA EL TITULO Y EL PERIODO DEL REPORTE.
+        pass
 
     @abstractmethod
     def construir_cuerpo_consolidado(self, secciones: Any) -> None:
-        """Asigna la estructura jerarquica del reporte."""
+        # ASIGNA LA ESTRUCTURA JERARQUICA DEL REPORTE.
+        pass
 
     @abstractmethod
     def agregar_graficos(self, graficos: list[str]) -> None:
-        """Agrega las descripciones de los graficos requeridos."""
+        # AGREGA LAS DESCRIPCIONES DE LOS GRAFICOS REQUERIDOS.
+        pass
 
     @abstractmethod
     def agregar_conclusiones(self, conclusiones: list[str]) -> None:
-        """Agrega las conclusiones financieras del periodo."""
+        # AGREGA LAS CONCLUSIONES FINANCIERAS DEL PERIODO.
+        pass
 
     @abstractmethod
     def agregar_totales(self) -> None:
-        """Calcula y conserva el total en EUR."""
+        # CALCULA Y GUARDA EL TOTAL EN EUR.
+        pass
 
     @abstractmethod
     def obtener_resultado(self) -> IReporteFinanciero:
-        """Entrega el reporte terminado."""
+        # ENTREGA EL REPORTE TERMINADO.
+        pass
 

@@ -1,4 +1,4 @@
-"""Coordinacion funcional de la generacion de reportes."""
+# COORDINACION FUNCIONAL DE LA GENERACION DE REPORTES.
 
 from calendar import monthrange
 from datetime import date, datetime
@@ -39,7 +39,7 @@ MESES = (
 
 
 class ServicioReportes:
-    """Obtiene los datos y delega a la fachada la creacion del reporte."""
+    # BUSCA LOS DATOS Y DELEGA A LA FACHADA LA CREACION DEL REPORTE.
 
     def __init__(
         self,
@@ -54,7 +54,7 @@ class ServicioReportes:
         self._fachada = fachada
 
     def generar(self, datos: dict) -> dict:
-        """Genera un reporte financiero listo para mostrar e imprimir."""
+        # GENERA UN REPORTE FINANCIERO LISTO PARA MOSTRAR E IMPRIMIR.
 
         # ============================================================
         # BLOQUE: PREPARACION DEL REPORTE FINANCIERO
@@ -139,7 +139,7 @@ class ServicioReportes:
         anio: int,
         datos: dict,
     ) -> tuple[date, date, str]:
-        """Convierte el tipo seleccionado en fechas de consulta."""
+        # CONVIERTE EL TIPO SELECCIONADO EN FECHAS DE CONSULTA.
 
         hoy = date.today()
         if anio < 2000 or anio > hoy.year:
@@ -208,7 +208,7 @@ class ServicioReportes:
         mapa_productos: dict,
         filial_seleccionada,
     ) -> SeccionCompuesta:
-        """Forma el arbol pais, filial, categoria y venta del Composite."""
+        # FORMA EL ARBOL PAIS, FILIAL, CATEGORIA Y VENTA DEL COMPOSITE.
 
         nombre_raiz = (
             filial_seleccionada.nombre
@@ -338,7 +338,7 @@ class ServicioReportes:
 
     @staticmethod
     def _extraer_firma(contenido: str) -> dict | None:
-        """Recupera los datos visibles agregados por el Decorator de firma."""
+        # BUSCA LOS DATOS VISIBLES AGREGADOS POR EL DECORATOR DE FIRMA.
 
         campos = {}
         nombres = {

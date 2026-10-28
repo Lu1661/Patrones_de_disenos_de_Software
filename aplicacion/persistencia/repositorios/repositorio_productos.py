@@ -1,4 +1,4 @@
-"""Persistencia de productos importados."""
+# PERSISTENCIA DE PRODUCTOS IMPORTADOS.
 
 from mysql.connector.abstracts import MySQLConnectionAbstract
 
@@ -12,7 +12,7 @@ class RepositorioProductos(
     RepositorioBase,
     IRepositorioConsulta[ProductoImportado],
 ):
-    """Guarda y consulta el catalogo corporativo de productos."""
+    # GUARDA Y CONSULTA EL CATALOGO CORPORATIVO DE PRODUCTOS.
 
     def __init__(self, administrador_conexion: ConexionMySQL) -> None:
         super().__init__(administrador_conexion)
@@ -33,7 +33,7 @@ class RepositorioProductos(
         )
 
     def listar(self) -> list[ProductoImportado]:
-        """Lista el catalogo ordenado por nombre."""
+        # LISTA EL CATALOGO ORDENADO POR NOMBRE.
 
         consulta = """
             SELECT id_producto, codigo, nombre, descripcion_tecnica,
@@ -51,17 +51,17 @@ class RepositorioProductos(
                 cursor.close()
 
     def obtener_por_id(self, identificador: int) -> ProductoImportado | None:
-        """Busca un producto por su clave primaria."""
+        # BUSCA UN PRODUCTO POR SU CLAVE PRIMARIA.
 
         return self._obtener_por("id_producto", identificador)
 
     def obtener_por_codigo(self, codigo: str) -> ProductoImportado | None:
-        """Busca un producto por su codigo corporativo."""
+        # BUSCA UN PRODUCTO POR SU CODIGO CORPORATIVO.
 
         return self._obtener_por("codigo", codigo.strip().upper())
 
     def _obtener_por(self, columna: str, valor: object) -> ProductoImportado | None:
-        """Ejecuta las dos busquedas permitidas sin aceptar columnas externas."""
+        # EJECUTA LAS DOS BUSQUEDAS PERMITIDAS SIN ACEPTAR COLUMNAS EXTERNAS.
 
         if columna not in {"id_producto", "codigo"}:
             raise ValueError("La columna de busqueda no es valida.")
@@ -86,7 +86,7 @@ class RepositorioProductos(
         producto: ProductoImportado,
         conexion: MySQLConnectionAbstract | None = None,
     ) -> int:
-        """Inserta un producto y retorna su identificador."""
+        # INSERTA UN PRODUCTO Y DEVUELVE SU IDENTIFICADOR.
 
         consulta = """
             INSERT INTO productos_importados
@@ -116,7 +116,7 @@ class RepositorioProductos(
                 cursor.close()
 
     def actualizar(self, producto: ProductoImportado) -> None:
-        """Actualiza los datos tecnicos y costos de un producto."""
+        # ACTUALIZA LOS DATOS TECNICOS Y COSTOS DE UN PRODUCTO.
 
         consulta = """
             UPDATE productos_importados
@@ -145,7 +145,7 @@ class RepositorioProductos(
                 cursor.close()
 
     def desactivar(self, id_producto: int) -> None:
-        """Marca un producto como inactivo y conserva sus movimientos."""
+        # MARCA UN PRODUCTO COMO INACTIVO Y GUARDA SUS MOVIMIENTOS.
 
         with self._usar_conexion(escritura=True) as conexion:
             cursor = conexion.cursor()

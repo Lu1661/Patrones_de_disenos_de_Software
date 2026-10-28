@@ -1,2 +1,2 @@
-"""Pruebas automatizadas del proyecto SERF."""
+# PRUEBAS AUTOMATIZADAS DEL PROYECTO SERF.
 

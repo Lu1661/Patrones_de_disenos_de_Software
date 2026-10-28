@@ -1,4 +1,4 @@
-"""Entidad que representa una filial comercial."""
+# ENTIDAD QUE REPRESENTA UNA FILIAL COMERCIAL.
 
 from dataclasses import dataclass
 
@@ -11,7 +11,7 @@ from aplicacion.dominio.validaciones import (
 
 @dataclass
 class Filial:
-    """Sede comercial que vende utilizando una divisa local."""
+    # SEDE COMERCIAL QUE VENDE UTILIZANDO UNA DIVISA LOCAL.
 
     codigo: str
     nombre: str

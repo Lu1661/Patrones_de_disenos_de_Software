@@ -1,2 +1,2 @@
-"""Pruebas unitarias de reglas y patrones."""
+# PRUEBAS UNITARIAS DE REGLAS Y PATRONES.
 

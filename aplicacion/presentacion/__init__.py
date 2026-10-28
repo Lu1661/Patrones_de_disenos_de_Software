@@ -1,2 +1,2 @@
-"""Capa de presentacion web de SERF."""
+# CAPA DE PRESENTACION WEB DE SERF.
 

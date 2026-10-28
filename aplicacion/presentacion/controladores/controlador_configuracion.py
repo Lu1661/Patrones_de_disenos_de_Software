@@ -1,4 +1,4 @@
-"""Controlador de filiales y tipos de cambio."""
+# CONTROLADOR DE FILIALES Y TIPOS DE CAMBIO.
 
 from flask import Blueprint
 
@@ -21,7 +21,7 @@ configuracion_bp = Blueprint(
 
 @configuracion_bp.get("/filiales")
 def listar_filiales():
-    """Retorna las filiales disponibles para los formularios."""
+    # DEVUELVE LAS FILIALES DISPONIBLES PARA LOS FORMULARIOS.
 
     servicio = obtener_servicio("filiales")
     return respuesta_exitosa(servicio.listar(), "Filiales consultadas.")
@@ -29,7 +29,7 @@ def listar_filiales():
 
 @configuracion_bp.post("/filiales")
 def registrar_filial():
-    """Registra una sede comercial con su moneda local."""
+    # REGISTRA UNA SEDE COMERCIAL CON SU MONEDA LOCAL.
 
     servicio = obtener_servicio("filiales")
     filial = servicio.registrar(obtener_datos_solicitud())
@@ -39,7 +39,7 @@ def registrar_filial():
 @configuracion_bp.put("/filiales/<int:id_filial>")
 @requiere_administrador
 def actualizar_filial(id_filial: int):
-    """Actualiza una sede mediante una operacion administrativa."""
+    # ACTUALIZA UNA SEDE MEDIANTE UNA OPERACION ADMINISTRATIVA.
 
     servicio = obtener_servicio("filiales")
     filial = servicio.actualizar(id_filial, obtener_datos_solicitud())
@@ -49,7 +49,7 @@ def actualizar_filial(id_filial: int):
 @configuracion_bp.delete("/filiales/<int:id_filial>")
 @requiere_administrador
 def eliminar_filial(id_filial: int):
-    """Desactiva una sede y conserva su historial."""
+    # DESACTIVA UNA SEDE Y GUARDA SU HISTORIAL.
 
     servicio = obtener_servicio("filiales")
     filial = servicio.desactivar(id_filial)
@@ -58,7 +58,7 @@ def eliminar_filial(id_filial: int):
 
 @configuracion_bp.get("/tipos-cambio")
 def listar_tipos_cambio():
-    """Retorna el historial de tasas hacia EUR."""
+    # DEVUELVE EL HISTORIAL DE TASAS HACIA EUR.
 
     servicio = obtener_servicio("tipos_cambio")
     return respuesta_exitosa(servicio.listar(), "Tipos de cambio consultados.")
@@ -66,7 +66,7 @@ def listar_tipos_cambio():
 
 @configuracion_bp.post("/tipos-cambio")
 def registrar_tipo_cambio():
-    """Registra una nueva tasa vigente hacia EUR."""
+    # REGISTRA UNA NUEVA TASA VIGENTE HACIA EUR.
 
     servicio = obtener_servicio("tipos_cambio")
     tasa = servicio.registrar(obtener_datos_solicitud())
@@ -76,7 +76,7 @@ def registrar_tipo_cambio():
 @configuracion_bp.put("/tipos-cambio/<int:id_tipo_cambio>")
 @requiere_administrador
 def actualizar_tipo_cambio(id_tipo_cambio: int):
-    """Actualiza una tasa existente mediante una operacion administrativa."""
+    # ACTUALIZA UNA TASA EXISTENTE MEDIANTE UNA OPERACION ADMINISTRATIVA.
 
     servicio = obtener_servicio("tipos_cambio")
     tasa = servicio.actualizar(id_tipo_cambio, obtener_datos_solicitud())
@@ -86,7 +86,7 @@ def actualizar_tipo_cambio(id_tipo_cambio: int):
 @configuracion_bp.delete("/tipos-cambio/<int:id_tipo_cambio>")
 @requiere_administrador
 def eliminar_tipo_cambio(id_tipo_cambio: int):
-    """Desactiva una tasa y conserva su registro historico."""
+    # DESACTIVA UNA TASA Y GUARDA SU REGISTRO HISTORICO.
 
     servicio = obtener_servicio("tipos_cambio")
     tasa = servicio.desactivar(id_tipo_cambio)

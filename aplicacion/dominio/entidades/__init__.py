@@ -1,4 +1,4 @@
-"""Entidades principales del dominio financiero."""
+# ENTIDADES PRINCIPALES DEL DOMINIO FINANCIERO.
 
 from aplicacion.dominio.entidades.detalle_venta import DetalleVenta
 from aplicacion.dominio.entidades.divisa import Divisa

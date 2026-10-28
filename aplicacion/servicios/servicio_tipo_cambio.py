@@ -1,4 +1,4 @@
-"""Proceso de mantenimiento y consulta de tipos de cambio."""
+# PROCESO DE MANTENIMIENTO Y CONSULTA DE TIPOS DE CAMBIO.
 
 from datetime import date
 
@@ -11,7 +11,7 @@ from aplicacion.servicios.utilidades import convertir_fecha, obtener_requerido
 
 
 class ServicioTiposCambio:
-    """Mantiene MySQL y ConfiguracionGlobal con las mismas tasas activas."""
+    # MANTIENE MYSQL Y CONFIGURACIONGLOBAL CON LAS MISMAS TASAS ACTIVAS.
 
     def __init__(
         self,
@@ -22,12 +22,12 @@ class ServicioTiposCambio:
         self._configuracion = configuracion
 
     def listar(self) -> list[TipoCambio]:
-        """Retorna el historial de tasas registradas."""
+        # DEVUELVE EL HISTORIAL DE TASAS REGISTRADAS.
 
         return self._repositorio.listar()
 
     def cargar_tasas_activas(self) -> None:
-        """Carga una sola vez las tasas vigentes desde MySQL al Singleton."""
+        # CARGA UNA SOLA VEZ LAS TASAS VIGENTES DESDE MYSQL AL SINGLETON.
 
         codigos_cargados: set[str] = set()
         for tipo_cambio in self._repositorio.listar():
@@ -41,7 +41,7 @@ class ServicioTiposCambio:
         codigo_divisa: str,
         fecha_referencia: date | None = None,
     ) -> TipoCambio:
-        """Obtiene la tasa aplicable o informa que falta configurarla."""
+        # BUSCA LA TASA APLICABLE O INFORMA QUE FALTA CONFIGURARLA.
 
         tipo_cambio = self._repositorio.obtener_vigente(
             codigo_divisa,
@@ -52,7 +52,7 @@ class ServicioTiposCambio:
         return tipo_cambio
 
     def registrar(self, datos: dict) -> TipoCambio:
-        """Registra una tasa nueva y actualiza la configuracion en memoria."""
+        # REGISTRA UNA TASA NUEVA Y ACTUALIZA LA CONFIGURACION EN MEMORIA.
 
         tipo_cambio = TipoCambio(
             codigo_divisa_origen=str(
@@ -72,7 +72,7 @@ class ServicioTiposCambio:
         return tipo_cambio
 
     def actualizar(self, id_tipo_cambio: int, datos: dict) -> TipoCambio:
-        """Actualiza una tasa conservando su identificador e historial."""
+        # ACTUALIZA UNA TASA GUARDANDO SU IDENTIFICADOR E HISTORIAL.
 
         actual = self._repositorio.obtener_por_id(id_tipo_cambio)
         if actual is None:
@@ -100,7 +100,7 @@ class ServicioTiposCambio:
         return tipo_cambio
 
     def desactivar(self, id_tipo_cambio: int) -> TipoCambio:
-        """Desactiva una tasa no corporativa y conserva el historial."""
+        # DESACTIVA UNA TASA NO CORPORATIVA Y GUARDA EL HISTORIAL.
 
         tipo_cambio = self._repositorio.obtener_por_id(id_tipo_cambio)
         if tipo_cambio is None or not tipo_cambio.activa:

@@ -1,4 +1,4 @@
-"""Validaciones sencillas compartidas por las entidades del dominio."""
+# VALIDACIONES SENCILLAS COMPARTIDAS POR LAS ENTIDADES DEL DOMINIO.
 
 import re
 from datetime import date, datetime
@@ -10,7 +10,7 @@ OCHO_DECIMALES = Decimal("0.00000001")
 
 
 def limpiar_texto(valor: str, campo: str) -> str:
-    """Retorna un texto sin espacios sobrantes o informa el campo invalido."""
+    # DEVUELVE UN TEXTO SIN ESPACIOS SOBRANTES O INFORMA EL CAMPO INVALIDO.
 
     if not isinstance(valor, str) or not valor.strip():
         raise ValueError(f"El campo {campo} es obligatorio.")
@@ -18,7 +18,7 @@ def limpiar_texto(valor: str, campo: str) -> str:
 
 
 def normalizar_codigo_iso(valor: str) -> str:
-    """Valida y normaliza un codigo ISO de moneda de tres letras."""
+    # VALIDA Y NORMALIZA UN CODIGO ISO DE MONEDA DE TRES LETRAS.
 
     codigo = limpiar_texto(valor, "codigo de divisa").upper()
     if not re.fullmatch(r"[A-Z]{3}", codigo):
@@ -27,7 +27,7 @@ def normalizar_codigo_iso(valor: str) -> str:
 
 
 def convertir_decimal(valor: Decimal | str | int, campo: str) -> Decimal:
-    """Convierte un valor numerico a Decimal sin utilizar calculos con float."""
+    # CONVIERTE UN VALOR NUMERICO A DECIMAL SIN UTILIZAR CALCULOS CON FLOAT.
 
     if isinstance(valor, (bool, float)):
         raise ValueError(
@@ -45,7 +45,7 @@ def convertir_decimal(valor: Decimal | str | int, campo: str) -> Decimal:
 
 
 def validar_decimal_positivo(valor: Decimal | str | int, campo: str) -> Decimal:
-    """Valida un importe estrictamente mayor que cero."""
+    # VALIDA UN IMPORTE ESTRICTAMENTE MAYOR QUE CERO.
 
     numero = convertir_decimal(valor, campo)
     if numero <= 0:
@@ -57,7 +57,7 @@ def validar_decimal_no_negativo(
     valor: Decimal | str | int,
     campo: str,
 ) -> Decimal:
-    """Valida un importe que puede ser cero, pero nunca negativo."""
+    # VALIDA UN IMPORTE QUE PUEDE SER CERO, PERO NUNCA NEGATIVO.
 
     numero = convertir_decimal(valor, campo)
     if numero < 0:
@@ -66,7 +66,7 @@ def validar_decimal_no_negativo(
 
 
 def redondear_moneda(valor: Decimal | str | int) -> Decimal:
-    """Aplica el redondeo monetario definido para importes visibles."""
+    # APLICA EL REDONDEO MONETARIO DEFINIDO PARA IMPORTES VISIBLES.
 
     return convertir_decimal(valor, "importe").quantize(
         DOS_DECIMALES,
@@ -75,7 +75,7 @@ def redondear_moneda(valor: Decimal | str | int) -> Decimal:
 
 
 def redondear_tasa(valor: Decimal | str | int) -> Decimal:
-    """Conserva la precision de ocho decimales de una tasa de cambio."""
+    # GUARDA LA PRECISION DE OCHO DECIMALES DE UNA TASA DE CAMBIO.
 
     return validar_decimal_positivo(valor, "tasa").quantize(
         OCHO_DECIMALES,
@@ -84,7 +84,7 @@ def redondear_tasa(valor: Decimal | str | int) -> Decimal:
 
 
 def validar_entero_positivo(valor: int, campo: str) -> int:
-    """Valida identificadores y cantidades mayores que cero."""
+    # VALIDA IDENTIFICADORES Y CANTIDADES MAYORES QUE CERO.
 
     if isinstance(valor, bool) or not isinstance(valor, int) or valor <= 0:
         raise ValueError(f"El campo {campo} debe ser un entero mayor que cero.")
@@ -92,7 +92,7 @@ def validar_entero_positivo(valor: int, campo: str) -> int:
 
 
 def validar_entero_no_negativo(valor: int, campo: str) -> int:
-    """Valida existencias que pueden ser cero, pero nunca negativas."""
+    # VALIDA EXISTENCIAS QUE PUEDEN SER CERO, PERO NUNCA NEGATIVAS.
 
     if isinstance(valor, bool) or not isinstance(valor, int) or valor < 0:
         raise ValueError(f"El campo {campo} debe ser un entero no negativo.")
@@ -100,7 +100,7 @@ def validar_entero_no_negativo(valor: int, campo: str) -> int:
 
 
 def validar_id_opcional(valor: int | None, campo: str) -> int | None:
-    """Permite una entidad nueva sin id y valida un id ya asignado."""
+    # PERMITE UNA ENTIDAD NUEVA SIN ID Y VALIDA UN ID YA ASIGNADO.
 
     if valor is None:
         return None
@@ -108,7 +108,7 @@ def validar_id_opcional(valor: int | None, campo: str) -> int | None:
 
 
 def validar_fecha_no_futura(valor: date | datetime, campo: str) -> date | datetime:
-    """Impide registrar importaciones o ventas con una fecha futura."""
+    # IMPIDE REGISTRAR IMPORTACIONES O VENTAS CON UNA FECHA FUTURA.
 
     if not isinstance(valor, (date, datetime)):
         raise ValueError(f"El campo {campo} debe ser una fecha valida.")

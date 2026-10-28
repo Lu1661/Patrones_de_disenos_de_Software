@@ -1,4 +1,4 @@
-"""Entidad que representa un producto tecnologico importado."""
+# ENTIDAD QUE REPRESENTA UN PRODUCTO TECNOLOGICO IMPORTADO.
 
 from dataclasses import dataclass
 from datetime import date
@@ -19,7 +19,7 @@ CATEGORIAS_PERMITIDAS = ("Laptop", "Smartphone", "Accesorio", "Redes")
 
 @dataclass
 class ProductoImportado:
-    """Producto tecnologico comprado en CNY y valorizado en EUR."""
+    # PRODUCTO TECNOLOGICO COMPRADO EN CNY Y VALORIZADO EN EUR.
 
     codigo: str
     nombre: str
@@ -64,7 +64,7 @@ class ProductoImportado:
 
     @staticmethod
     def _normalizar_categoria(categoria: str) -> str:
-        """Retorna la escritura oficial de una categoria permitida."""
+        # DEVUELVE LA ESCRITURA OFICIAL DE UNA CATEGORIA PERMITIDA.
 
         valor = limpiar_texto(categoria, "categoria")
         for categoria_permitida in CATEGORIAS_PERMITIDAS:
@@ -86,7 +86,7 @@ class ProductoImportado:
         proveedor: str,
         fecha_importacion: date,
     ) -> "ProductoImportado":
-        """Crea un producto calculando su costo corporativo en EUR."""
+        # CREA UN PRODUCTO CALCULANDO SU COSTO CORPORATIVO EN EUR.
 
         costo_cny = validar_decimal_positivo(costo_unitario_cny, "costo en CNY")
         tasa = redondear_tasa(tasa_cny_eur)

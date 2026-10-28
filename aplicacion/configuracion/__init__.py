@@ -1,2 +1,2 @@
-"""Configuracion tecnica y corporativa de SERF."""
+# CONFIGURACION TECNICA Y CORPORATIVA DE SERF.
 

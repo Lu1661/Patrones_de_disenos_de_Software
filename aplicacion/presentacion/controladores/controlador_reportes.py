@@ -1,4 +1,4 @@
-"""Controlador de generacion de reportes financieros."""
+# CONTROLADOR DE GENERACION DE REPORTES FINANCIEROS.
 
 from flask import Blueprint
 
@@ -14,7 +14,7 @@ reportes_bp = Blueprint("reportes", __name__, url_prefix="/api/reportes")
 
 @reportes_bp.post("/generar")
 def generar_reporte():
-    """Genera un reporte por periodo y filial para la vista imprimible."""
+    # GENERA UN REPORTE POR PERIODO Y FILIAL PARA LA VISTA IMPRIMIBLE.
 
     servicio = obtener_servicio("reportes")
     reporte = servicio.generar(obtener_datos_solicitud())

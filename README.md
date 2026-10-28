@@ -1,6 +1,34 @@
 # SERF - Sistema Empresarial de Reportes Financieros
 
-Proyecto académico del curso Patrones de Diseño de Software.
+SERF es un proyecto académico desarrollado para el curso de Patrones de Diseño de Software. El sistema permite registrar productos importados, controlar el inventario de varias filiales, guardar ventas y generar reportes financieros en euros.
+
+## Objetivo del proyecto
+
+El objetivo es reunir la información comercial de FinanCorp en una aplicación sencilla. Cada filial trabaja con su moneda local y el sistema utiliza los tipos de cambio registrados para mostrar resultados consolidados en EUR.
+
+## Funciones principales
+
+- Registrar tipos de cambio y filiales.
+- Registrar productos importados y su stock inicial.
+- Consultar y reponer el inventario de cada filial.
+- Registrar ventas y descontar el stock utilizado.
+- Consultar ventas por fechas y por filial.
+- Generar reportes mensuales, trimestrales y anuales.
+- Agregar una marca de agua o una firma digital al reporte.
+- Editar o desactivar registros desde la cuenta administrativa.
+
+## Patrones utilizados
+
+El proyecto utiliza los seis patrones solicitados en el caso práctico:
+
+- **Singleton:** mantiene una sola configuración de tipos de cambio durante la ejecución.
+- **Prototype:** crea una copia de la plantilla del reporte elegido.
+- **Builder:** arma el reporte paso a paso.
+- **Composite:** organiza el contenido del reporte por grupos y elementos.
+- **Decorator:** agrega la marca de agua y la firma digital de manera opcional.
+- **Facade:** ofrece un punto sencillo para coordinar la generación del reporte.
+
+Los patrones están dentro de los módulos donde cumplen una función real. No se crearon carpetas separadas para cada patrón.
 
 ## Tecnologías
 
@@ -10,11 +38,20 @@ Proyecto académico del curso Patrones de Diseño de Software.
 - HTML, CSS y JavaScript
 - pytest
 
-## Estado actual
+## Organización del proyecto
 
-Las fases 1 a 14 y el paso adicional 13.5 están terminados. El proyecto cuenta con estructura modular, base de datos MySQL, entidades del dominio, los seis patrones solicitados, repositorios, backend Flask, una interfaz web responsive, reportes financieros integrados, acceso administrativo y una suite automatizada de pruebas.
+- `aplicacion/configuracion`: configuración de Flask y del sistema.
+- `aplicacion/dominio`: entidades, validaciones y contratos principales.
+- `aplicacion/servicios`: procesos de filiales, productos, inventario y ventas.
+- `aplicacion/reportes`: clases utilizadas para generar los reportes.
+- `aplicacion/persistencia`: conexión y consultas a MySQL.
+- `aplicacion/presentacion`: rutas, pantallas y recursos de la interfaz.
+- `base_datos`: scripts para crear y preparar la base de datos.
+- `pruebas`: pruebas unitarias y de integración.
 
 ## Preparación local
+
+Desde la carpeta principal del proyecto se ejecutan los siguientes comandos:
 
 ```powershell
 python -m venv .venv
@@ -23,70 +60,35 @@ python -m pip install -r requirements.txt
 Copy-Item .env.example .env
 ```
 
-El archivo `.env` debe completarse localmente y nunca debe enviarse al repositorio.
+Luego se completan en `.env` los datos de conexión a MySQL. Este archivo es local y no debe enviarse al repositorio.
 
 ## Ejecución
+
+Con el entorno virtual activo se inicia el sistema con:
 
 ```powershell
 python ejecutar.py
 ```
 
-La aplicación quedará disponible en `http://127.0.0.1:5000`.
+La aplicación estará disponible en `http://127.0.0.1:5000`.
 
-El sistema solicita el acceso administrativo antes de mostrar la interfaz. Las credenciales académicas iniciales se encuentran en `ARRANQUE.txt` y se pueden cambiar mediante `ADMIN_USUARIO` y `ADMIN_PASSWORD` en el archivo `.env`.
+El usuario y la contraseña local se encuentran en `ARRANQUE.txt`. También pueden cambiarse con las variables `ADMIN_USUARIO` y `ADMIN_PASSWORD` del archivo `.env`.
 
-## Seguridad del entorno académico
+## Orden básico de uso
 
-La aplicación escucha únicamente en `127.0.0.1`, protege la interfaz y la API mediante sesión, utiliza una cookie `HttpOnly` con `SameSite=Lax` y agrega encabezados básicos de seguridad. Si `CLAVE_SECRETA` no está definida o conserva el texto de ejemplo, SERF genera una clave temporal diferente al iniciar. Para conservar sesiones entre reinicios se debe establecer una clave privada en `.env`.
+1. Registrar los tipos de cambio.
+2. Crear una filial y seleccionar su moneda local.
+3. Registrar un producto con su stock y precio de venta.
+4. Revisar el inventario disponible.
+5. Registrar una venta.
+6. Generar el reporte del periodo elegido.
 
-`COOKIE_SEGURA` debe permanecer en `false` durante las pruebas locales con HTTP. Solo debe cambiarse a `true` cuando la aplicación se ejecute mediante HTTPS. La cuenta `admin / admin` es exclusivamente académica y puede reemplazarse desde `.env` sin modificar el código.
+## Pruebas
 
-## Pruebas automatizadas
+Las pruebas se ejecutan desde la carpeta principal:
 
 ```powershell
 python -m pytest -q
 ```
 
-La suite contiene pruebas unitarias para las entidades, cálculos y seis patrones, además de pruebas de integración para Flask y MySQL. La prueba MySQL utiliza las variables del archivo `.env`, crea datos temporales y los elimina al finalizar. Si MySQL no está configurado, esa prueba se omite sin impedir la ejecución de las pruebas unitarias.
-
-## API disponible
-
-- `GET` y `POST` `/api/configuracion/filiales`
-- `GET` y `POST` `/api/configuracion/tipos-cambio`
-- `GET` y `POST` `/api/productos`
-- `GET` `/api/inventario?id_filial=1`
-- `POST` `/api/inventario/reponer`
-- `GET` y `POST` `/api/ventas`
-- `POST` `/api/reportes/generar`
-
-Las respuestas utilizan JSON y mantienen la estructura `exito`, `mensaje` y `datos`. Todas las rutas de la API requieren una sesión administrativa activa. Los registros de producto y venta se ejecutan dentro de transacciones para evitar productos incompletos, ventas sin detalle o descuentos parciales de stock.
-
-## Módulos de la interfaz
-
-- Resumen general con indicadores operativos.
-- Configuración de filiales y tipos de cambio.
-- Registro y consulta de productos importados.
-- Consulta y reposición de inventario por filial.
-- Registro y consulta de ventas con conversión a EUR.
-- Reportes mensuales, trimestrales y anuales por filial o consolidados.
-
-La interfaz utiliza las rutas del backend mediante JavaScript y adapta formularios, navegación y tablas para equipos de escritorio y dispositivos móviles.
-
-## Flujo integrado
-
-El uso normal del sistema sigue este orden: registrar los tipos de cambio, crear una filial, registrar un producto con su stock inicial y finalmente realizar ventas. Cada venta consulta la tasa correspondiente, calcula los importes y descuenta el inventario dentro de una misma transacción. Si alguna operación falla, MySQL revierte el proceso para conservar datos consistentes.
-
-Los reportes consultan las ventas históricas sin modificar datos. Presentan ingresos, gastos de importación y resultado financiero en EUR, una comparación sencilla entre filiales y una vista preparada para impresión. La marca de agua y la firma con SHA-256 son opciones académicas del reporte.
-
-## Organización
-
-- `aplicacion/dominio`: entidades y contratos del negocio.
-- `aplicacion/servicios`: procesos principales del sistema.
-- `aplicacion/reportes`: construcción y presentación de reportes.
-- `aplicacion/persistencia`: conexión y repositorios MySQL.
-- `aplicacion/presentacion`: controladores, plantillas y recursos visuales.
-- `base_datos`: scripts SQL ordenados.
-- `pruebas`: pruebas unitarias y de integración.
-
-Los patrones solicitados se ubicarán dentro de los módulos donde cumplen una responsabilidad real. No se crearán carpetas separadas por patrón.
-
+Las pruebas unitarias revisan las reglas principales y los patrones de diseño. La prueba de integración con MySQL se ejecuta cuando la conexión está configurada en el entorno local.

@@ -1,4 +1,4 @@
-"""Entidad que representa una moneda utilizada por SERF."""
+# ENTIDAD QUE REPRESENTA UNA MONEDA UTILIZADA POR SERF.
 
 from dataclasses import dataclass
 
@@ -7,7 +7,7 @@ from aplicacion.dominio.validaciones import limpiar_texto, normalizar_codigo_iso
 
 @dataclass
 class Divisa:
-    """Moneda disponible para importaciones, ventas y reportes."""
+    # MONEDA DISPONIBLE PARA IMPORTACIONES, VENTAS Y REPORTES.
 
     codigo_iso: str
     nombre: str

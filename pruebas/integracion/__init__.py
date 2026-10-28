@@ -1,2 +1,2 @@
-"""Pruebas de integracion con Flask y MySQL."""
+# PRUEBAS DE INTEGRACION CON FLASK Y MYSQL.
 

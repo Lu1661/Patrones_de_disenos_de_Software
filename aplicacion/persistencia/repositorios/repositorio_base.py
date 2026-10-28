@@ -1,4 +1,4 @@
-"""Apoyo comun para abrir conexiones dentro de los repositorios."""
+# APOYO COMUN PARA ABRIR CONEXIONES DENTRO DE LOS REPOSITORIOS.
 
 from contextlib import contextmanager
 from typing import Iterator
@@ -9,7 +9,7 @@ from aplicacion.persistencia.conexion.conexion_mysql import ConexionMySQL
 
 
 class RepositorioBase:
-    """Evita repetir la apertura, confirmacion y cierre de conexiones."""
+    # EVITA REPETIR LA APERTURA, CONFIRMACION Y CIERRE DE CONEXIONES.
 
     def __init__(self, administrador_conexion: ConexionMySQL) -> None:
         self._administrador_conexion = administrador_conexion
@@ -21,7 +21,7 @@ class RepositorioBase:
         *,
         escritura: bool = False,
     ) -> Iterator[MySQLConnectionAbstract]:
-        """Usa una conexion compartida o administra una conexion propia."""
+        # USA UNA CONEXION COMPARTIDA O ADMINISTRA UNA CONEXION PROPIA.
 
         conexion_propia = conexion_externa is None
         conexion = conexion_externa or self._administrador_conexion.abrir()

@@ -1,4 +1,4 @@
-"""Proceso de registro atomico de ventas."""
+# PROCESO DE REGISTRO ATOMICO DE VENTAS.
 
 from datetime import date
 
@@ -28,7 +28,7 @@ from aplicacion.servicios.utilidades import (
 
 
 class ServicioVentas:
-    """Coordina stock, conversion y comprobante dentro de una transaccion."""
+    # COORDINA STOCK, CONVERSION Y COMPROBANTE DENTRO DE UNA TRANSACCION.
 
     def __init__(
         self,
@@ -47,7 +47,7 @@ class ServicioVentas:
         self._repositorio_tasas = repositorio_tasas
 
     def registrar(self, datos: dict) -> TransaccionVenta:
-        """Registra una venta o revierte todo si falla una parte."""
+        # REGISTRA UNA VENTA O REVIERTE TODO SI FALLA UNA PARTE.
 
         # ============================================================
         # BLOQUE: REGISTRO ATOMICO DE UNA VENTA
@@ -154,7 +154,7 @@ class ServicioVentas:
         fecha_fin: date,
         id_filial: int | None = None,
     ) -> list[TransaccionVenta]:
-        """Retorna las ventas que utilizaran las consultas y reportes."""
+        # DEVUELVE LAS VENTAS QUE UTILIZARAN LAS CONSULTAS Y REPORTES.
 
         if fecha_inicio > fecha_fin:
             raise ValueError("La fecha inicial no puede superar la fecha final.")

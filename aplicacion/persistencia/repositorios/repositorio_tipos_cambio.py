@@ -1,4 +1,4 @@
-"""Persistencia de tipos de cambio."""
+# PERSISTENCIA DE TIPOS DE CAMBIO.
 
 from datetime import date
 
@@ -11,7 +11,7 @@ from aplicacion.persistencia.repositorios.repositorio_base import RepositorioBas
 
 
 class RepositorioTiposCambio(RepositorioBase):
-    """Mantiene el historial de tasas utilizadas para convertir a EUR."""
+    # MANTIENE EL HISTORIAL DE TASAS UTILIZADAS PARA CONVERTIR A EUR.
 
     def __init__(self, administrador_conexion: ConexionMySQL) -> None:
         super().__init__(administrador_conexion)
@@ -28,7 +28,7 @@ class RepositorioTiposCambio(RepositorioBase):
         )
 
     def listar(self) -> list[TipoCambio]:
-        """Lista las tasas desde la vigencia mas reciente."""
+        # LISTA LAS TASAS DESDE LA VIGENCIA MAS RECIENTE.
 
         consulta = """
             SELECT id_tipo_cambio, codigo_divisa_origen,
@@ -49,7 +49,7 @@ class RepositorioTiposCambio(RepositorioBase):
         codigo_divisa_origen: str,
         fecha_referencia: date | None = None,
     ) -> TipoCambio | None:
-        """Obtiene la ultima tasa activa aplicable a una fecha."""
+        # BUSCA LA ULTIMA TASA ACTIVA APLICABLE A UNA FECHA.
 
         codigo = normalizar_codigo_iso(codigo_divisa_origen)
         fecha_busqueda = fecha_referencia or date.today()
@@ -74,7 +74,7 @@ class RepositorioTiposCambio(RepositorioBase):
                 cursor.close()
 
     def obtener_por_id(self, id_tipo_cambio: int) -> TipoCambio | None:
-        """Busca una tasa por su identificador administrativo."""
+        # BUSCA UNA TASA POR SU IDENTIFICADOR ADMINISTRATIVO.
 
         consulta = """
             SELECT id_tipo_cambio, codigo_divisa_origen,
@@ -96,7 +96,7 @@ class RepositorioTiposCambio(RepositorioBase):
         tipo_cambio: TipoCambio,
         conexion: MySQLConnectionAbstract | None = None,
     ) -> int:
-        """Desactiva la tasa anterior y registra la nueva en una operacion."""
+        # DESACTIVA LA TASA ANTERIOR Y REGISTRA LA NUEVA EN UNA OPERACION.
 
         with self._usar_conexion(conexion, escritura=True) as conexion_actual:
             cursor = conexion_actual.cursor()
@@ -134,7 +134,7 @@ class RepositorioTiposCambio(RepositorioBase):
                 cursor.close()
 
     def actualizar(self, tipo_cambio: TipoCambio) -> None:
-        """Actualiza una tasa y conserva una sola tasa activa por divisa."""
+        # ACTUALIZA UNA TASA Y GUARDA UNA SOLA TASA ACTIVA POR DIVISA.
 
         with self._usar_conexion(escritura=True) as conexion:
             cursor = conexion.cursor()
@@ -172,7 +172,7 @@ class RepositorioTiposCambio(RepositorioBase):
                 cursor.close()
 
     def desactivar(self, id_tipo_cambio: int) -> None:
-        """Marca una tasa como historica sin eliminarla fisicamente."""
+        # MARCA UNA TASA COMO HISTORICA SIN ELIMINARLA FISICAMENTE.
 
         with self._usar_conexion(escritura=True) as conexion:
             cursor = conexion.cursor()

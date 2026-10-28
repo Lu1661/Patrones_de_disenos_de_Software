@@ -1,4 +1,4 @@
-"""Servicios que coordinan las reglas del negocio."""
+# SERVICIOS QUE COORDINAN LAS REGLAS DEL NEGOCIO.
 
 from aplicacion.servicios.servicio_filiales import ServicioFiliales
 from aplicacion.servicios.servicio_inventario import ServicioInventario

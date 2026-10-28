@@ -1,4 +1,4 @@
-"""Conversion de entidades del dominio a valores compatibles con JSON."""
+# CONVERSION DE ENTIDADES DEL DOMINIO A VALORES COMPATIBLES CON JSON.
 
 from dataclasses import fields, is_dataclass
 from datetime import date, datetime
@@ -6,7 +6,7 @@ from decimal import Decimal
 
 
 def serializar(valor):
-    """Convierte recursivamente fechas, decimales y entidades para la API."""
+    # CONVIERTE RECURSIVAMENTE FECHAS, DECIMALES Y ENTIDADES PARA LA API.
 
     if isinstance(valor, Decimal):
         return format(valor, "f")

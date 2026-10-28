@@ -1,4 +1,4 @@
-"""Acceso simplificado a la generacion de reportes SERF."""
+# ACCESO SIMPLIFICADO A LA GENERACION DE REPORTES SERF.
 
 from aplicacion.configuracion.configuracion_global import ConfiguracionGlobal
 from aplicacion.dominio.contratos.contrato_reporte import IReporteFinanciero
@@ -19,7 +19,7 @@ from aplicacion.reportes.personalizacion_reporte import (
 
 
 class FachadaSERF:
-    """Coordina los patrones requeridos mediante una operacion sencilla."""
+    # COORDINA LOS PATRONES REQUERIDOS MEDIANTE UNA OPERACION SENCILLA.
 
     def __init__(
         self,

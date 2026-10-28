@@ -1,4 +1,4 @@
-"""Configuracion corporativa compartida por los procesos del negocio."""
+# CONFIGURACION CORPORATIVA COMPARTIDA POR LOS PROCESOS DEL NEGOCIO.
 
 from decimal import Decimal
 from threading import Lock
@@ -12,7 +12,7 @@ from aplicacion.dominio.validaciones import (
 
 
 class ConfiguracionGlobal:
-    """Mantiene una sola configuracion cambiaria durante la ejecucion."""
+    # MANTIENE UNA SOLA CONFIGURACION CAMBIARIA DURANTE LA EJECUCION.
 
     _instancia: "ConfiguracionGlobal | None" = None
     _bloqueo = Lock()
@@ -21,7 +21,7 @@ class ConfiguracionGlobal:
         # ============================================================
         # PATRON SINGLETON: INSTANCIA UNICA DE CONFIGURACION
         # Este bloque impide que distintas partes del sistema manejen
-        # tasas o reglas de redondeo contradictorias.
+        # tasas o reglas que lo contradigan.
         # Cumple: RF-04, CU-04 y CU-05.
         # ============================================================
         if cls._instancia is None:
@@ -43,7 +43,7 @@ class ConfiguracionGlobal:
 
     @classmethod
     def obtener_instancia(cls) -> "ConfiguracionGlobal":
-        """Retorna la instancia unica usando un nombre facil de exponer."""
+        # DEVUELVE LA INSTANCIA UNICA.
 
         return cls()
 
@@ -52,7 +52,7 @@ class ConfiguracionGlobal:
         codigo_divisa_origen: str,
         nueva_tasa: Decimal | str | int,
     ) -> None:
-        """Registra en memoria una tasa vigente hacia EUR."""
+        # REGISTRA EN MEMORIA UNA TASA VIGENTE HACIA EUR.
 
         codigo = normalizar_codigo_iso(codigo_divisa_origen)
         tasa = redondear_tasa(nueva_tasa)
@@ -61,14 +61,14 @@ class ConfiguracionGlobal:
         self._tasas_cambio[codigo] = tasa
 
     def eliminar_tasa(self, codigo_divisa_origen: str) -> None:
-        """Retira de memoria una tasa inactiva sin eliminar la base EUR."""
+        # RETIRA DE MEMORIA UNA TASA INACTIVA SIN ELIMINAR LA BASE EUR.
 
         codigo = normalizar_codigo_iso(codigo_divisa_origen)
         if codigo != "EUR":
             self._tasas_cambio.pop(codigo, None)
 
     def obtener_tasa(self, codigo_divisa_origen: str) -> Decimal:
-        """Obtiene una tasa registrada o informa que debe configurarse."""
+        # BUSCA UNA TASA REGISTRADA O INFORMA QUE DEBE CONFIGURARSE.
 
         codigo = normalizar_codigo_iso(codigo_divisa_origen)
         if codigo not in self._tasas_cambio:
@@ -80,14 +80,14 @@ class ConfiguracionGlobal:
         monto: Decimal | str | int,
         codigo_divisa_origen: str,
     ) -> Decimal:
-        """Convierte un importe con la tasa centralizada vigente."""
+        # CONVIERTE UN IMPORTE CON LA TASA CENTRALIZADA VIGENTE.
 
         importe = validar_decimal_no_negativo(monto, "monto a convertir")
         tasa = self.obtener_tasa(codigo_divisa_origen)
         return redondear_moneda(importe * tasa)
 
     def listar_tasas(self) -> dict[str, Decimal]:
-        """Entrega una copia para impedir modificaciones externas directas."""
+        # ENTREGA UNA COPIA PARA IMPEDIR MODIFICACIONES EXTERNAS DIRECTAS.
 
         return self._tasas_cambio.copy()
 

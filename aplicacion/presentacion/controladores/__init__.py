@@ -1,2 +1,2 @@
-"""Controladores de las pantallas Flask."""
+# CONTROLADORES DE LAS PANTALLAS FLASK.
 

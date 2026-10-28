@@ -1,4 +1,4 @@
-"""Controlador de la pantalla inicial."""
+# CONTROLADOR DE LA PANTALLA INICIAL.
 
 from flask import Blueprint, render_template
 
@@ -8,7 +8,7 @@ inicio_bp = Blueprint("inicio", __name__)
 
 @inicio_bp.get("/")
 def mostrar_inicio() -> str:
-    """Muestra el estado inicial del proyecto SERF."""
+    # MUESTRA EL ESTADO INICIAL DEL PROYECTO SERF.
 
     # ============================================================
     # BLOQUE: PANTALLA INICIAL

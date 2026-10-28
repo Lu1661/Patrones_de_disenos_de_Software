@@ -1,2 +1,2 @@
-"""Paquete principal de la aplicacion SERF."""
+# PAQUETE PRINCIPAL DE LA APLICACION SERF.
 

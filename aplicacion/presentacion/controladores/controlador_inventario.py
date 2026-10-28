@@ -1,4 +1,4 @@
-"""Controlador de existencias por filial."""
+# CONTROLADOR DE EXISTENCIAS POR FILIAL.
 
 from flask import Blueprint, request
 
@@ -15,7 +15,7 @@ inventario_bp = Blueprint("inventario", __name__, url_prefix="/api/inventario")
 
 @inventario_bp.get("/catalogo")
 def listar_inventario_catalogo():
-    """Retorna los precios locales que complementan el catalogo."""
+    # DEVUELVE LOS PRECIOS LOCALES QUE COMPLEMENTAN EL CATALOGO.
 
     servicio = obtener_servicio("inventario")
     inventario = servicio.listar_todos()
@@ -24,7 +24,7 @@ def listar_inventario_catalogo():
 
 @inventario_bp.get("")
 def listar_inventario():
-    """Retorna las existencias de la filial indicada."""
+    # DEVUELVE LAS EXISTENCIAS DE LA FILIAL INDICADA.
 
     id_filial = convertir_entero(request.args.get("id_filial"), "id_filial")
     servicio = obtener_servicio("inventario")
@@ -34,7 +34,7 @@ def listar_inventario():
 
 @inventario_bp.post("/reponer")
 def reponer_inventario():
-    """Incrementa el stock de un producto ya asignado a una filial."""
+    # INCREMENTA EL STOCK DE UN PRODUCTO YA ASIGNADO A UNA FILIAL.
 
     servicio = obtener_servicio("inventario")
     inventario = servicio.reponer(obtener_datos_solicitud())

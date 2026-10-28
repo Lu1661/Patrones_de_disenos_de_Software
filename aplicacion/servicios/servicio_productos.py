@@ -1,4 +1,4 @@
-"""Proceso de registro y consulta de productos importados."""
+# PROCESO DE REGISTRO Y CONSULTA DE PRODUCTOS IMPORTADOS.
 
 from aplicacion.dominio.entidades.inventario_filial import InventarioFilial
 from aplicacion.dominio.entidades.producto_importado import ProductoImportado
@@ -23,7 +23,7 @@ from aplicacion.servicios.utilidades import (
 
 
 class ServicioProductos:
-    """Registra el producto y su stock inicial como una sola operacion."""
+    # REGISTRA EL PRODUCTO Y SU STOCK INICIAL COMO UNA SOLA OPERACION.
 
     def __init__(
         self,
@@ -40,12 +40,12 @@ class ServicioProductos:
         self._repositorio_tasas = repositorio_tasas
 
     def listar(self) -> list[ProductoImportado]:
-        """Retorna todos los productos registrados."""
+        # DEVUELVE TODOS LOS PRODUCTOS REGISTRADOS.
 
         return self._repositorio_productos.listar()
 
     def registrar_con_stock(self, datos: dict) -> tuple[ProductoImportado, InventarioFilial]:
-        """Registra producto e inventario sin dejar datos parciales."""
+        # REGISTRA PRODUCTO E INVENTARIO SIN DEJAR DATOS PARCIALES.
 
         # ============================================================
         # BLOQUE: REGISTRO ATOMICO DEL PRODUCTO IMPORTADO
@@ -106,7 +106,7 @@ class ServicioProductos:
         return producto, inventario
 
     def actualizar(self, id_producto: int, datos: dict) -> ProductoImportado:
-        """Actualiza el catalogo sin modificar stock ni precios locales."""
+        # ACTUALIZA EL CATALOGO SIN MODIFICAR STOCK NI PRECIOS LOCALES.
 
         actual = self._repositorio_productos.obtener_por_id(id_producto)
         if actual is None:
@@ -139,7 +139,7 @@ class ServicioProductos:
         return producto
 
     def desactivar(self, id_producto: int) -> ProductoImportado:
-        """Desactiva un producto sin borrar inventarios ni ventas."""
+        # DESACTIVA UN PRODUCTO SIN BORRAR INVENTARIOS NI VENTAS.
 
         producto = self._repositorio_productos.obtener_por_id(id_producto)
         if producto is None or not producto.activo:

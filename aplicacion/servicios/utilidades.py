@@ -1,10 +1,10 @@
-"""Conversiones sencillas para los datos recibidos por el backend."""
+# CONVERSIONES SENCILLAS PARA LOS DATOS RECIBIDOS POR EL BACKEND.
 
 from datetime import date, datetime
 
 
 def obtener_requerido(datos: dict, campo: str) -> object:
-    """Obtiene un campo obligatorio sin aceptar textos vacios."""
+    # BUSCA UN CAMPO OBLIGATORIO SIN ACEPTAR TEXTOS VACIOS.
 
     valor = datos.get(campo)
     if valor is None or (isinstance(valor, str) and not valor.strip()):
@@ -13,7 +13,7 @@ def obtener_requerido(datos: dict, campo: str) -> object:
 
 
 def convertir_entero(valor: object, campo: str) -> int:
-    """Convierte un dato de formulario en un entero valido."""
+    # CONVIERTE UN DATO DE FORMULARIO EN UN ENTERO VALIDO.
 
     if isinstance(valor, bool):
         raise ValueError(f"El campo {campo} debe ser un numero entero.")
@@ -24,7 +24,7 @@ def convertir_entero(valor: object, campo: str) -> int:
 
 
 def convertir_fecha(valor: object, campo: str) -> date:
-    """Convierte una fecha ISO con formato AAAA-MM-DD."""
+    # CONVIERTE UNA FECHA ISO CON FORMATO AAAA-MM-DD.
 
     if isinstance(valor, datetime):
         return valor.date()
@@ -37,7 +37,7 @@ def convertir_fecha(valor: object, campo: str) -> date:
 
 
 def convertir_fecha_hora(valor: object, campo: str) -> datetime:
-    """Convierte una fecha o fecha-hora ISO para registrar una venta."""
+    # CONVIERTE UNA FECHA O FECHA-HORA ISO PARA REGISTRAR UNA VENTA.
 
     if isinstance(valor, datetime):
         return valor

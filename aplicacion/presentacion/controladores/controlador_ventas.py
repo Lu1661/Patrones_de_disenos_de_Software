@@ -1,4 +1,4 @@
-"""Controlador de registro y consulta de ventas."""
+# CONTROLADOR DE REGISTRO Y CONSULTA DE VENTAS.
 
 from datetime import date
 
@@ -17,7 +17,7 @@ ventas_bp = Blueprint("ventas", __name__, url_prefix="/api/ventas")
 
 @ventas_bp.get("")
 def listar_ventas():
-    """Consulta ventas por periodo y, opcionalmente, por filial."""
+    # CONSULTA VENTAS POR PERIODO Y, OPCIONALMENTE, POR FILIAL.
 
     hoy = date.today()
     fecha_inicio = convertir_fecha(
@@ -42,7 +42,7 @@ def listar_ventas():
 
 @ventas_bp.post("")
 def registrar_venta():
-    """Registra el comprobante y descuenta el stock en una sola operacion."""
+    # REGISTRA EL COMPROBANTE Y DESCUENTA EL STOCK EN UNA SOLA OPERACION.
 
     servicio = obtener_servicio("ventas")
     venta = servicio.registrar(obtener_datos_solicitud())

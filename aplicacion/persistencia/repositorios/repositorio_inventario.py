@@ -1,4 +1,4 @@
-"""Persistencia del inventario por filial."""
+# PERSISTENCIA DEL INVENTARIO POR FILIAL.
 
 from decimal import Decimal
 
@@ -15,7 +15,7 @@ from aplicacion.persistencia.repositorios.repositorio_base import RepositorioBas
 
 
 class RepositorioInventario(RepositorioBase):
-    """Consulta y modifica las existencias locales de las filiales."""
+    # CONSULTA Y MODIFICA LAS EXISTENCIAS LOCALES DE LAS FILIALES.
 
     def __init__(self, administrador_conexion: ConexionMySQL) -> None:
         super().__init__(administrador_conexion)
@@ -31,7 +31,7 @@ class RepositorioInventario(RepositorioBase):
         )
 
     def listar_por_filial(self, id_filial: int) -> list[InventarioFilial]:
-        """Lista las existencias de una filial."""
+        # LISTA LAS EXISTENCIAS DE UNA FILIAL.
 
         consulta = """
             SELECT id_inventario, id_filial, id_producto,
@@ -49,7 +49,7 @@ class RepositorioInventario(RepositorioBase):
                 cursor.close()
 
     def listar_todos(self) -> list[InventarioFilial]:
-        """Lista los precios y existencias asociados a todos los productos."""
+        # LISTA LOS PRECIOS Y EXISTENCIAS ASOCIADOS A TODOS LOS PRODUCTOS.
 
         consulta = """
             SELECT id_inventario, id_filial, id_producto,
@@ -73,7 +73,7 @@ class RepositorioInventario(RepositorioBase):
         bloquear: bool = False,
         conexion: MySQLConnectionAbstract | None = None,
     ) -> InventarioFilial | None:
-        """Obtiene un inventario y permite bloquearlo durante una venta."""
+        # BUSCA UN INVENTARIO Y PERMITE BLOQUEARLO DURANTE UNA VENTA.
 
         consulta = """
             SELECT id_inventario, id_filial, id_producto,
@@ -100,7 +100,7 @@ class RepositorioInventario(RepositorioBase):
         inventario: InventarioFilial,
         conexion: MySQLConnectionAbstract | None = None,
     ) -> int:
-        """Crea el stock y precio inicial de un producto en una filial."""
+        # CREA EL STOCK Y PRECIO INICIAL DE UN PRODUCTO EN UNA FILIAL.
 
         consulta = """
             INSERT INTO inventarios_filial
@@ -129,7 +129,7 @@ class RepositorioInventario(RepositorioBase):
         cantidad: int,
         conexion: MySQLConnectionAbstract | None = None,
     ) -> None:
-        """Descuenta unidades solamente cuando existe saldo suficiente."""
+        # DESCUENTA UNIDADES SOLAMENTE CUANDO EXISTE SALDO SUFICIENTE.
 
         # ============================================================
         # BLOQUE: DESCUENTO ATOMICO DE STOCK EN MYSQL
@@ -162,7 +162,7 @@ class RepositorioInventario(RepositorioBase):
         cantidad: int,
         conexion: MySQLConnectionAbstract | None = None,
     ) -> None:
-        """Incrementa el stock durante una recepcion o reversion."""
+        # INCREMENTA EL STOCK DURANTE UNA RECEPCION O REVERSION.
 
         unidades = validar_entero_positivo(cantidad, "cantidad a reponer")
         consulta = """
@@ -185,7 +185,7 @@ class RepositorioInventario(RepositorioBase):
         id_producto: int,
         nuevo_precio: Decimal | str | int,
     ) -> None:
-        """Actualiza el precio local sin modificar el producto corporativo."""
+        # ACTUALIZA EL PRECIO LOCAL SIN MODIFICAR EL PRODUCTO CORPORATIVO.
 
         precio = redondear_moneda(
             validar_decimal_positivo(nuevo_precio, "precio de venta local")

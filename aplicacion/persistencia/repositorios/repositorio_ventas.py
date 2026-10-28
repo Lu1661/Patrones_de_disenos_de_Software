@@ -1,4 +1,4 @@
-"""Persistencia de ventas y sus detalles."""
+# PERSISTENCIA DE VENTAS Y SUS DETALLES.
 
 from datetime import date, datetime, time
 
@@ -11,7 +11,7 @@ from aplicacion.persistencia.repositorios.repositorio_base import RepositorioBas
 
 
 class RepositorioVentas(RepositorioBase):
-    """Guarda comprobantes completos y recupera sus detalles."""
+    # GUARDA COMPROBANTES COMPLETOS Y BUSCA SUS DETALLES.
 
     def __init__(self, administrador_conexion: ConexionMySQL) -> None:
         super().__init__(administrador_conexion)
@@ -21,7 +21,7 @@ class RepositorioVentas(RepositorioBase):
         venta: TransaccionVenta,
         conexion: MySQLConnectionAbstract | None = None,
     ) -> int:
-        """Guarda la cabecera y sus detalles dentro de la misma conexion."""
+        # GUARDA LA CABECERA Y SUS DETALLES DENTRO DE LA MISMA CONEXION.
 
         venta.validar_para_registro()
         consulta_venta = """
@@ -78,7 +78,7 @@ class RepositorioVentas(RepositorioBase):
                 cursor.close()
 
     def obtener_por_id(self, id_venta: int) -> TransaccionVenta | None:
-        """Recupera una venta junto con todos sus productos."""
+        # BUSCA UNA VENTA JUNTO CON TODOS SUS PRODUCTOS.
 
         with self._usar_conexion() as conexion:
             ventas = self._consultar_ventas(
@@ -94,7 +94,7 @@ class RepositorioVentas(RepositorioBase):
         fecha_fin: date,
         id_filial: int | None = None,
     ) -> list[TransaccionVenta]:
-        """Lista ventas para construir reportes por periodo y filial."""
+        # LISTA VENTAS PARA CONSTRUIR REPORTES POR PERIODO Y FILIAL.
 
         inicio = datetime.combine(fecha_inicio, time.min)
         fin = datetime.combine(fecha_fin, time.max)
@@ -113,7 +113,7 @@ class RepositorioVentas(RepositorioBase):
         condicion: str,
         parametros: tuple,
     ) -> list[TransaccionVenta]:
-        """Convierte cabeceras y detalles MySQL en entidades del dominio."""
+        # CONVIERTE CABECERAS Y DETALLES MYSQL EN ENTIDADES DEL DOMINIO.
 
         consulta = f"""
             SELECT id_venta, numero_factura, id_filial, fecha_venta,
@@ -154,7 +154,7 @@ class RepositorioVentas(RepositorioBase):
         conexion: MySQLConnectionAbstract,
         id_venta: int,
     ) -> list[DetalleVenta]:
-        """Recupera los productos asociados a una venta."""
+        # BUSCA LOS PRODUCTOS ASOCIADOS A UNA VENTA.
 
         consulta = """
             SELECT id_detalle, id_producto, cantidad,

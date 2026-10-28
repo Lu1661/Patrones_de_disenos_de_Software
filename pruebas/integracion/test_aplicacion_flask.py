@@ -1,4 +1,4 @@
-"""Pruebas de integracion de Flask que no necesitan MySQL."""
+# PRUEBAS DE INTEGRACION DE FLASK QUE NO NECESITAN MYSQL.
 
 from aplicacion.crear_aplicacion import crear_aplicacion
 

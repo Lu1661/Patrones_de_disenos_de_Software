@@ -1,4 +1,4 @@
-"""Acceso a la base de datos MySQL."""
+# ACCESO A LA BASE DE DATOS MYSQL.
 
 from aplicacion.persistencia.conexion.conexion_mysql import ConexionMySQL
 

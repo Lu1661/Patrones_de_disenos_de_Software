@@ -1,4 +1,4 @@
-"""Pruebas TC-01 a TC-06 de los patrones solicitados."""
+# PRUEBAS TC-01 A TC-06 DE LOS PATRONES SOLICITADOS.
 
 import re
 from concurrent.futures import ThreadPoolExecutor
@@ -22,7 +22,7 @@ from aplicacion.servicios.fachada_serf import FachadaSERF
 
 
 def crear_estructura_ejemplo() -> SeccionCompuesta:
-    """Crea un arbol pequeno que varias pruebas pueden reutilizar."""
+    # CREA UN ARBOL PEQUENO QUE VARIAS PRUEBAS PUEDEN REUTILIZAR.
 
     raiz = SeccionCompuesta("Consolidado corporativo")
     filial = SeccionCompuesta("Filial Lima")

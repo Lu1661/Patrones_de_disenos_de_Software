@@ -1,4 +1,4 @@
-"""Entidad que representa la cabecera de una venta."""
+# ENTIDAD QUE REPRESENTA LA CABECERA DE UNA VENTA.
 
 from dataclasses import dataclass, field
 from datetime import date, datetime, time
@@ -21,7 +21,7 @@ METODOS_PAGO_PERMITIDOS = ("Efectivo", "Tarjeta", "Transferencia")
 
 @dataclass
 class TransaccionVenta:
-    """Comprobante de venta realizado en la divisa local de una filial."""
+    # COMPROBANTE DE VENTA REALIZADO EN LA DIVISA LOCAL DE UNA FILIAL.
 
     numero_factura: str
     id_filial: int
@@ -75,7 +75,7 @@ class TransaccionVenta:
 
     @staticmethod
     def _normalizar_metodo_pago(metodo_pago: str) -> str:
-        """Retorna la escritura oficial de un metodo de pago permitido."""
+        # DEVUELVE LA ESCRITURA OFICIAL DE UN METODO DE PAGO PERMITIDO.
 
         valor = limpiar_texto(metodo_pago, "metodo de pago")
         for metodo_permitido in METODOS_PAGO_PERMITIDOS:
@@ -85,7 +85,7 @@ class TransaccionVenta:
         raise ValueError(f"El metodo de pago debe ser: {opciones}.")
 
     def agregar_detalle(self, detalle: DetalleVenta) -> None:
-        """Agrega un producto valido y evita repetirlo en el comprobante."""
+        # AGREGA UN PRODUCTO VALIDO Y EVITA REPETIRLO EN EL COMPROBANTE.
 
         if not isinstance(detalle, DetalleVenta):
             raise ValueError("La venta solo puede contener detalles validos.")
@@ -97,14 +97,14 @@ class TransaccionVenta:
         self.detalles.append(detalle)
 
     def validar_para_registro(self) -> None:
-        """Comprueba que la venta tenga al menos un producto antes de guardarla."""
+        # COMPRUEBA QUE LA VENTA TENGA AL MENOS UN PRODUCTO ANTES DE GUARDARLA.
 
         if not self.detalles:
             raise ValueError("La venta debe contener al menos un producto.")
 
     @property
     def total_local(self) -> Decimal:
-        """Suma los subtotales expresados en la moneda local."""
+        # SUMA LOS SUBTOTALES EXPRESADOS EN LA MONEDA LOCAL.
 
         return redondear_moneda(
             sum((detalle.subtotal_local for detalle in self.detalles), Decimal("0"))
@@ -112,13 +112,13 @@ class TransaccionVenta:
 
     @property
     def total_eur(self) -> Decimal:
-        """Convierte el total local a la moneda corporativa EUR."""
+        # CONVIERTE EL TOTAL LOCAL A LA MONEDA CORPORATIVA EUR.
 
         return redondear_moneda(self.total_local * self.tasa_eur_aplicada)
 
     @property
     def total_costo_eur(self) -> Decimal:
-        """Suma los costos historicos de importacion de los productos vendidos."""
+        # SUMA LOS COSTOS HISTORICOS DE IMPORTACION DE LOS PRODUCTOS VENDIDOS.
 
         return redondear_moneda(
             sum(
@@ -129,7 +129,7 @@ class TransaccionVenta:
 
     @property
     def resultado_financiero_eur(self) -> Decimal:
-        """Calcula ingresos menos gastos de importacion para la venta."""
+        # CALCULA INGRESOS MENOS GASTOS DE IMPORTACION PARA LA VENTA.
 
         return redondear_moneda(self.total_eur - self.total_costo_eur)
 

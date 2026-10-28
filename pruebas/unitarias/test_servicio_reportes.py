@@ -1,4 +1,4 @@
-"""Pruebas unitarias del servicio que prepara los reportes."""
+# PRUEBAS UNITARIAS DEL SERVICIO QUE PREPARA LOS REPORTES.
 
 from datetime import date
 from decimal import Decimal
@@ -12,7 +12,7 @@ from aplicacion.servicios.fachada_serf import FachadaSERF
 
 
 class RepositorioListaFalso:
-    """Repositorio minimo para entregar una lista controlada."""
+    # REPOSITORIO MINIMO PARA ENTREGAR UNA LISTA CONTROLADA.
 
     def __init__(self, elementos):
         self._elementos = elementos
@@ -22,7 +22,7 @@ class RepositorioListaFalso:
 
 
 class RepositorioVentasFalso:
-    """Consulta ventas en memoria respetando el filtro por filial."""
+    # CONSULTA VENTAS EN MEMORIA RESPETANDO EL FILTRO POR FILIAL.
 
     def __init__(self, ventas):
         self._ventas = ventas

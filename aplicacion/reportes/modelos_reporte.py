@@ -1,4 +1,4 @@
-"""Plantillas mensuales, trimestrales y anuales de reportes."""
+# PLANTILLAS MENSUALES, TRIMESTRALES Y ANUALES DE REPORTES.
 
 from copy import deepcopy
 from dataclasses import dataclass, field
@@ -17,7 +17,7 @@ from aplicacion.reportes.estructura_reporte import (
 
 @dataclass
 class ReporteBase(IReporteFinanciero, IReportePrototype):
-    """Documento financiero que puede clonarse, construirse y decorarse."""
+    # DOCUMENTO FINANCIERO QUE PUEDE CLONARSE, CONSTRUIRSE Y DECORARSE.
 
     tipo: str = "General"
     titulo: str = "Reporte financiero"
@@ -39,7 +39,7 @@ class ReporteBase(IReporteFinanciero, IReportePrototype):
         return deepcopy(self)
 
     def emitir(self) -> str:
-        """Genera una representacion legible del reporte construido."""
+        # GENERA UNA REPRESENTACION LEGIBLE DEL REPORTE CONSTRUIDO.
 
         lineas = [
             "FINANCORP S.A.",
@@ -63,14 +63,14 @@ class ReporteBase(IReporteFinanciero, IReportePrototype):
         return "\n".join(lineas)
 
     def definir_datos_principales(self, titulo: str, periodo: str) -> None:
-        """Actualiza los campos que cambian en cada reporte generado."""
+        # ACTUALIZA LOS CAMPOS QUE CAMBIAN EN CADA REPORTE GENERADO.
 
         self.titulo = limpiar_texto(titulo, "titulo del reporte")
         self.periodo = limpiar_texto(periodo, "periodo del reporte")
 
 
 class ReporteMensual(ReporteBase):
-    """Plantilla base para un reporte mensual de ingresos."""
+    # PLANTILLA BASE PARA UN REPORTE MENSUAL DE INGRESOS.
 
     def __init__(self) -> None:
         super().__init__(
@@ -80,7 +80,7 @@ class ReporteMensual(ReporteBase):
 
 
 class ReporteTrimestral(ReporteBase):
-    """Plantilla base para un reporte trimestral financiero."""
+    # PLANTILLA BASE PARA UN REPORTE TRIMESTRAL FINANCIERO.
 
     def __init__(self) -> None:
         super().__init__(
@@ -90,7 +90,7 @@ class ReporteTrimestral(ReporteBase):
 
 
 class ReporteAnual(ReporteBase):
-    """Plantilla base para un reporte anual consolidado."""
+    # PLANTILLA BASE PARA UN REPORTE ANUAL CONSOLIDADO.
 
     def __init__(self) -> None:
         super().__init__(
@@ -100,7 +100,7 @@ class ReporteAnual(ReporteBase):
 
 
 def crear_catalogo_plantillas() -> dict[str, ReporteBase]:
-    """Crea el catalogo pequeno requerido por el flujo de reportes."""
+    # CREA EL CATALOGO PEQUENO REQUERIDO POR EL FLUJO DE REPORTES.
 
     return {
         "mensual": ReporteMensual(),

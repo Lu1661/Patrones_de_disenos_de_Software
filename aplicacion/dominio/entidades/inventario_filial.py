@@ -1,4 +1,4 @@
-"""Entidad que relaciona un producto con el inventario de una filial."""
+# ENTIDAD QUE RELACIONA UN PRODUCTO CON EL INVENTARIO DE UNA FILIAL.
 
 from dataclasses import dataclass
 from decimal import Decimal
@@ -14,7 +14,7 @@ from aplicacion.dominio.validaciones import (
 
 @dataclass
 class InventarioFilial:
-    """Existencias y precio local de un producto en una filial."""
+    # EXISTENCIAS Y PRECIO LOCAL DE UN PRODUCTO EN UNA FILIAL.
 
     id_filial: int
     id_producto: int
@@ -50,13 +50,13 @@ class InventarioFilial:
         )
 
     def tiene_stock(self, cantidad: int) -> bool:
-        """Indica si existen unidades suficientes para una venta."""
+        # INDICA SI EXISTEN UNIDADES SUFICIENTES PARA UNA VENTA.
 
         unidades = validar_entero_positivo(cantidad, "cantidad solicitada")
         return self.stock_disponible >= unidades
 
     def descontar_stock(self, cantidad: int) -> None:
-        """Descuenta unidades sin permitir que el inventario quede negativo."""
+        # DESCUENTA UNIDADES SIN PERMITIR QUE EL INVENTARIO QUEDE NEGATIVO.
 
         # ============================================================
         # BLOQUE: DESCUENTO DE EXISTENCIAS
@@ -72,7 +72,7 @@ class InventarioFilial:
         self.stock_disponible -= unidades
 
     def reponer_stock(self, cantidad: int) -> None:
-        """Incrementa las existencias por una nueva recepcion o una reversion."""
+        # INCREMENTA LAS EXISTENCIAS POR UNA NUEVA RECEPCION O UNA REVERSION.
 
         unidades = validar_entero_positivo(cantidad, "cantidad a reponer")
         self.stock_disponible += unidades

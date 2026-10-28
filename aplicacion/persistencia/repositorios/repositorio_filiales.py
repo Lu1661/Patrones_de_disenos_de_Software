@@ -1,4 +1,4 @@
-"""Persistencia de filiales."""
+# PERSISTENCIA DE FILIALES.
 
 from mysql.connector.abstracts import MySQLConnectionAbstract
 
@@ -9,7 +9,7 @@ from aplicacion.persistencia.repositorios.repositorio_base import RepositorioBas
 
 
 class RepositorioFiliales(RepositorioBase, IRepositorioConsulta[Filial]):
-    """Guarda y consulta las sedes comerciales de FinanCorp."""
+    # GUARDA Y CONSULTA LAS SEDES COMERCIALES DE FINANCORP.
 
     def __init__(self, administrador_conexion: ConexionMySQL) -> None:
         super().__init__(administrador_conexion)
@@ -27,7 +27,7 @@ class RepositorioFiliales(RepositorioBase, IRepositorioConsulta[Filial]):
         )
 
     def listar(self) -> list[Filial]:
-        """Lista todas las filiales ordenadas por nombre."""
+        # LISTA TODAS LAS FILIALES ORDENADAS POR NOMBRE.
 
         consulta = """
             SELECT id_filial, codigo, nombre, pais, ciudad,
@@ -44,12 +44,12 @@ class RepositorioFiliales(RepositorioBase, IRepositorioConsulta[Filial]):
                 cursor.close()
 
     def listar_activas(self) -> list[Filial]:
-        """Lista las filiales habilitadas para registrar operaciones."""
+        # LISTA LAS FILIALES HABILITADAS PARA REGISTRAR OPERACIONES.
 
         return [filial for filial in self.listar() if filial.activa]
 
     def obtener_por_id(self, identificador: int) -> Filial | None:
-        """Busca una filial por su clave primaria."""
+        # BUSCA UNA FILIAL POR SU CLAVE PRIMARIA.
 
         consulta = """
             SELECT id_filial, codigo, nombre, pais, ciudad,
@@ -71,7 +71,7 @@ class RepositorioFiliales(RepositorioBase, IRepositorioConsulta[Filial]):
         filial: Filial,
         conexion: MySQLConnectionAbstract | None = None,
     ) -> int:
-        """Inserta una filial y retorna su identificador."""
+        # INSERTA UNA FILIAL Y DEVUELVE SU IDENTIFICADOR.
 
         consulta = """
             INSERT INTO filiales
@@ -96,7 +96,7 @@ class RepositorioFiliales(RepositorioBase, IRepositorioConsulta[Filial]):
                 cursor.close()
 
     def actualizar(self, filial: Filial) -> None:
-        """Actualiza los datos administrativos de una filial existente."""
+        # ACTUALIZA LOS DATOS ADMINISTRATIVOS DE UNA FILIAL EXISTENTE.
 
         consulta = """
             UPDATE filiales
@@ -120,7 +120,7 @@ class RepositorioFiliales(RepositorioBase, IRepositorioConsulta[Filial]):
                 cursor.close()
 
     def desactivar(self, id_filial: int) -> None:
-        """Marca una filial como inactiva sin borrar su historial."""
+        # MARCA UNA FILIAL COMO INACTIVA SIN BORRAR SU HISTORIAL.
 
         with self._usar_conexion(escritura=True) as conexion:
             cursor = conexion.cursor()

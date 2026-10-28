@@ -1,4 +1,4 @@
-"""Controlador del acceso administrativo al sistema."""
+# CONTROLADOR DEL ACCESO ADMINISTRATIVO AL SISTEMA.
 
 from functools import wraps
 from hmac import compare_digest
@@ -19,7 +19,7 @@ autenticacion_bp = Blueprint("autenticacion", __name__)
 
 
 def requiere_administrador(funcion):
-    """Permite ejecutar una operacion solamente a la cuenta administrativa."""
+    # PERMITE EJECUTAR UNA OPERACION SOLAMENTE A LA CUENTA ADMINISTRATIVA.
 
     @wraps(funcion)
     def funcion_protegida(*args, **kwargs):
@@ -42,7 +42,7 @@ def requiere_administrador(funcion):
 
 @autenticacion_bp.route("/login", methods=["GET", "POST"])
 def login():
-    """Valida las credenciales administrativas antes de ingresar."""
+    # VALIDA LAS CREDENCIALES ADMINISTRATIVAS ANTES DE INGRESAR.
 
     # ============================================================
     # BLOQUE: VALIDACION DEL ACCESO ADMINISTRATIVO
@@ -77,7 +77,7 @@ def login():
 
 @autenticacion_bp.post("/logout")
 def logout():
-    """Cierra la sesion administrativa y regresa al login."""
+    # CIERRA LA SESION ADMINISTRATIVA Y REGRESA AL LOGIN.
 
     # ============================================================
     # BLOQUE: CIERRE DE SESION

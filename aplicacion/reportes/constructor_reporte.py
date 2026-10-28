@@ -1,4 +1,4 @@
-"""Construccion ordenada de los reportes financieros."""
+# CONSTRUCCION ORDENADA DE LOS REPORTES FINANCIEROS.
 
 from aplicacion.dominio.contratos.contrato_reporte import IReporteBuilder
 from aplicacion.dominio.validaciones import limpiar_texto
@@ -7,7 +7,7 @@ from aplicacion.reportes.modelos_reporte import ReporteBase
 
 
 class ReporteFinancieroBuilder(IReporteBuilder):
-    """Construye un reporte por pasos sin mezclar la obtencion de datos."""
+    # CONSTRUYE UN REPORTE POR PASOS SIN MEZCLAR LA OBTENCION DE DATOS.
 
     def __init__(self) -> None:
         self._reporte_actual = ReporteBase()
@@ -22,7 +22,7 @@ class ReporteFinancieroBuilder(IReporteBuilder):
         self._reporte_actual = reporte_inicial or ReporteBase()
 
     def definir_encabezado(self, titulo: str, periodo: str) -> None:
-        """Establece los datos visibles que identifican el reporte."""
+        # COLOCA LOS DATOS VISIBLES QUE IDENTIFICAN EL REPORTE.
 
         self._reporte_actual.definir_datos_principales(titulo, periodo)
 
@@ -30,21 +30,21 @@ class ReporteFinancieroBuilder(IReporteBuilder):
         self,
         secciones: ComponenteReporte,
     ) -> None:
-        """Asigna el arbol previamente construido por el Composite."""
+        # ASIGNA EL ARBOL PREVIAMENTE CONSTRUIDO POR EL COMPOSITE.
 
         if not isinstance(secciones, ComponenteReporte):
             raise ValueError("El cuerpo debe ser un componente de reporte.")
         self._reporte_actual.cuerpo = secciones
 
     def agregar_graficos(self, graficos: list[str]) -> None:
-        """Agrega descripciones que luego representara la interfaz web."""
+        # AGREGA DESCRIPCIONES QUE LUEGO REPRESENTARA LA INTERFAZ WEB.
 
         self._reporte_actual.graficos = [
             limpiar_texto(grafico, "grafico") for grafico in graficos
         ]
 
     def agregar_conclusiones(self, conclusiones: list[str]) -> None:
-        """Agrega conclusiones sencillas calculadas para el periodo."""
+        # AGREGA CONCLUSIONES SENCILLAS CALCULADAS PARA EL PERIODO.
 
         self._reporte_actual.conclusiones = [
             limpiar_texto(conclusion, "conclusion")
@@ -52,14 +52,14 @@ class ReporteFinancieroBuilder(IReporteBuilder):
         ]
 
     def agregar_totales(self) -> None:
-        """Calcula el total utilizando el contrato comun del Composite."""
+        # CALCULA EL TOTAL UTILIZANDO EL CONTRATO COMUN DEL COMPOSITE.
 
         self._reporte_actual.total_eur = (
             self._reporte_actual.cuerpo.calcular_total_eur()
         )
 
     def obtener_resultado(self) -> ReporteBase:
-        """Entrega el reporte completo y prepara un nuevo ciclo."""
+        # ENTREGA EL REPORTE COMPLETO Y PREPARA UN NUEVO CICLO.
 
         resultado = self._reporte_actual
         self.reset()
@@ -67,13 +67,13 @@ class ReporteFinancieroBuilder(IReporteBuilder):
 
 
 class DirectorReporte:
-    """Define el orden unico de los pasos usados para crear un reporte."""
+    # DEFINE EL ORDEN UNICO DE LOS PASOS USADOS PARA CREAR UN REPORTE.
 
     def __init__(self, builder: IReporteBuilder) -> None:
         self._builder = builder
 
     def establecer_builder(self, builder: IReporteBuilder) -> None:
-        """Permite utilizar otro constructor que respete el mismo contrato."""
+        # PERMITE UTILIZAR OTRO CONSTRUCTOR QUE RESPETE EL MISMO CONTRATO.
 
         self._builder = builder
 
@@ -85,7 +85,7 @@ class DirectorReporte:
         graficos: list[str] | None = None,
         conclusiones: list[str] | None = None,
     ) -> ReporteBase:
-        """Ejecuta en orden los pasos de construccion solicitados."""
+        # EJECUTA EN ORDEN LOS PASOS DE CONSTRUCCION SOLICITADOS.
 
         self._builder.reset(plantilla_clonada)
         self._builder.definir_encabezado(

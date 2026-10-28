@@ -1,4 +1,4 @@
-"""Marca de agua y firma academica opcionales del reporte."""
+# MARCA DE AGUA Y FIRMA ACADEMICA OPCIONALES DEL REPORTE.
 
 from datetime import datetime
 from hashlib import sha256
@@ -8,7 +8,7 @@ from aplicacion.dominio.validaciones import limpiar_texto
 
 
 class ReporteDecorator(IReporteFinanciero):
-    """Envoltorio base que delega la emision al reporte recibido."""
+    # ENVOLTORIO BASE QUE DELEGA LA EMISION AL REPORTE RECIBIDO.
 
     def __init__(self, reporte_envuelto: IReporteFinanciero) -> None:
         if not isinstance(reporte_envuelto, IReporteFinanciero):
@@ -16,13 +16,13 @@ class ReporteDecorator(IReporteFinanciero):
         self._reporte_envuelto = reporte_envuelto
 
     def emitir(self) -> str:
-        """Delega la generacion del contenido al componente envuelto."""
+        # DELEGA LA GENERACION DEL CONTENIDO AL COMPONENTE ENVUELTO.
 
         return self._reporte_envuelto.emitir()
 
 
 class MarcaDeAguaDecorator(ReporteDecorator):
-    """Agrega una marca de agua textual sin cambiar el reporte base."""
+    # AGREGA UNA MARCA DE AGUA TEXTUAL SIN CAMBIAR EL REPORTE BASE.
 
     def __init__(
         self,
@@ -44,7 +44,7 @@ class MarcaDeAguaDecorator(ReporteDecorator):
 
 
 class FirmaDigitalDecorator(ReporteDecorator):
-    """Agrega una demostracion academica de integridad con SHA-256."""
+    # AGREGA UNA DEMOSTRACION ACADEMICA DE INTEGRIDAD CON SHA-256.
 
     def __init__(
         self,
@@ -57,7 +57,7 @@ class FirmaDigitalDecorator(ReporteDecorator):
     def emitir(self) -> str:
         # ============================================================
         # PATRON DECORATOR: FIRMA DIGITAL ACADEMICA
-        # Este bloque calcula un hash SHA-256 del contenido final y lo
+        # Este bloque tiene el contenido contenido final y lo
         # adjunta como evidencia academica de integridad documental.
         # Cumple: RF-08 y CU-09.
         # ============================================================

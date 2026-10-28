@@ -1,4 +1,4 @@
-"""Lectura segura de variables del entorno local."""
+# LECTURA SEGURA DE VARIABLES DEL ENTORNO LOCAL.
 
 import os
 from secrets import token_hex
@@ -10,7 +10,7 @@ load_dotenv()
 
 
 def leer_booleano(nombre: str, valor_inicial: bool = False) -> bool:
-    """Convierte una variable de entorno sencilla en verdadero o falso."""
+    # CONVIERTE UNA VARIABLE DE ENTORNO SENCILLA EN VERDADERO O FALSO.
 
     valor = os.getenv(nombre)
     if valor is None:
@@ -24,7 +24,7 @@ if not clave_configurada or clave_configurada == "cambiar_en_el_entorno_local":
 
 
 class ConfiguracionEntorno:
-    """Valores tecnicos necesarios para iniciar Flask."""
+    # VALORES TECNICOS NECESARIOS PARA INICIAR FLASK.
 
     # ============================================================
     # BLOQUE: PROTECCION DE LA SESION LOCAL

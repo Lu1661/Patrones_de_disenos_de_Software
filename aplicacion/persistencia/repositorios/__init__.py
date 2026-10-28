@@ -1,4 +1,4 @@
-"""Repositorios concretos para guardar y consultar informacion."""
+# REPOSITORIOS CONCRETOS PARA GUARDAR Y CONSULTAR INFORMACION.
 
 from aplicacion.persistencia.repositorios.repositorio_filiales import (
     RepositorioFiliales,

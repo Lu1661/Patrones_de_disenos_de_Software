@@ -1,4 +1,4 @@
-"""Creacion y configuracion inicial de la aplicacion Flask."""
+# CREACION Y CONFIGURACION INICIAL DE LA APLICACION FLASK.
 
 from pathlib import Path
 
@@ -22,7 +22,7 @@ from aplicacion.presentacion.controladores.controlador_ventas import ventas_bp
 
 
 def crear_aplicacion() -> Flask:
-    """Crea la instancia Flask y registra sus componentes iniciales."""
+    # CREA LA INSTANCIA FLASK Y REGISTRA SUS COMPONENTES INICIALES.
 
     ruta_aplicacion = Path(__file__).resolve().parent
 

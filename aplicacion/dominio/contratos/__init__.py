@@ -1,2 +1,2 @@
-"""Contratos minimos requeridos por el dominio."""
+# CONTRATOS MINIMOS REQUERIDOS POR EL DOMINIO.
 

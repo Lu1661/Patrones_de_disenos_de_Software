@@ -1,4 +1,4 @@
-"""Entidad que representa una tasa de conversion hacia EUR."""
+# ENTIDAD QUE REPRESENTA UNA TASA DE CONVERSION HACIA EUR.
 
 from dataclasses import dataclass
 from datetime import date
@@ -16,7 +16,7 @@ from aplicacion.dominio.validaciones import (
 
 @dataclass
 class TipoCambio:
-    """Tasa historica que convierte una divisa de origen hacia EUR."""
+    # TASA HISTORICA QUE CONVIERTE UNA DIVISA DE ORIGEN HACIA EUR.
 
     codigo_divisa_origen: str
     tasa: Decimal
@@ -57,7 +57,7 @@ class TipoCambio:
             raise ValueError("La tasa EUR hacia EUR debe ser igual a 1.")
 
     def convertir_a_eur(self, monto: Decimal | str | int) -> Decimal:
-        """Convierte un importe no negativo utilizando la tasa registrada."""
+        # CONVIERTE UN IMPORTE NO NEGATIVO UTILIZANDO LA TASA REGISTRADA.
 
         importe = validar_decimal_no_negativo(monto, "monto a convertir")
         return redondear_moneda(importe * self.tasa)

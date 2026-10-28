@@ -1,2 +1,2 @@
-"""Reglas y conceptos centrales del negocio SERF."""
+# REGLAS Y CONCEPTOS CENTRALES DEL NEGOCIO SERF.
 

@@ -1,4 +1,4 @@
-"""Componentes relacionados con los reportes financieros."""
+# COMPONENTES RELACIONADOS CON LOS REPORTES FINANCIEROS.
 
 from aplicacion.reportes.constructor_reporte import (
     DirectorReporte,

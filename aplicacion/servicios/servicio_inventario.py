@@ -1,4 +1,4 @@
-"""Proceso de consulta y actualizacion del inventario por filial."""
+# PROCESO DE CONSULTA Y ACTUALIZACION DEL INVENTARIO POR FILIAL.
 
 from aplicacion.dominio.entidades.inventario_filial import InventarioFilial
 from aplicacion.persistencia.repositorios.repositorio_inventario import (
@@ -8,23 +8,23 @@ from aplicacion.servicios.utilidades import convertir_entero, obtener_requerido
 
 
 class ServicioInventario:
-    """Expone operaciones simples sobre las existencias de una filial."""
+    # EXPONE OPERACIONES SIMPLES SOBRE LAS EXISTENCIAS DE UNA FILIAL.
 
     def __init__(self, repositorio: RepositorioInventario) -> None:
         self._repositorio = repositorio
 
     def listar_por_filial(self, id_filial: int) -> list[InventarioFilial]:
-        """Retorna el inventario correspondiente a una filial."""
+        # DEVUELVE EL INVENTARIO CORRESPONDIENTE A UNA FILIAL.
 
         return self._repositorio.listar_por_filial(id_filial)
 
     def listar_todos(self) -> list[InventarioFilial]:
-        """Retorna los precios locales para mostrarlos en el catalogo."""
+        # DEVUELVE LOS PRECIOS LOCALES PARA MOSTRARLOS EN EL CATALOGO.
 
         return self._repositorio.listar_todos()
 
     def reponer(self, datos: dict) -> InventarioFilial:
-        """Incrementa el stock y retorna el nuevo estado del inventario."""
+        # INCREMENTA EL STOCK Y DEVUELVE EL NUEVO ESTADO DEL INVENTARIO.
 
         id_filial = convertir_entero(
             obtener_requerido(datos, "id_filial"),

@@ -1,4 +1,4 @@
-"""Controlador del catalogo de productos importados."""
+# CONTROLADOR DEL CATALOGO DE PRODUCTOS IMPORTADOS.
 
 from flask import Blueprint
 
@@ -17,7 +17,7 @@ productos_bp = Blueprint("productos", __name__, url_prefix="/api/productos")
 
 @productos_bp.get("")
 def listar_productos():
-    """Retorna el catalogo corporativo de productos."""
+    # DEVUELVE EL CATALOGO CORPORATIVO DE PRODUCTOS.
 
     servicio = obtener_servicio("productos")
     return respuesta_exitosa(servicio.listar(), "Productos consultados.")
@@ -25,7 +25,7 @@ def listar_productos():
 
 @productos_bp.post("")
 def registrar_producto():
-    """Registra un producto importado junto con su stock inicial."""
+    # REGISTRA UN PRODUCTO IMPORTADO JUNTO CON SU STOCK INICIAL.
 
     servicio = obtener_servicio("productos")
     producto, inventario = servicio.registrar_con_stock(
@@ -41,7 +41,7 @@ def registrar_producto():
 @productos_bp.put("/<int:id_producto>")
 @requiere_administrador
 def actualizar_producto(id_producto: int):
-    """Actualiza la informacion corporativa de un producto."""
+    # ACTUALIZA LA INFORMACION CORPORATIVA DE UN PRODUCTO.
 
     servicio = obtener_servicio("productos")
     producto = servicio.actualizar(id_producto, obtener_datos_solicitud())
@@ -51,7 +51,7 @@ def actualizar_producto(id_producto: int):
 @productos_bp.delete("/<int:id_producto>")
 @requiere_administrador
 def eliminar_producto(id_producto: int):
-    """Desactiva un producto sin borrar inventarios ni ventas."""
+    # DESACTIVA UN PRODUCTO SIN BORRAR INVENTARIOS NI VENTAS.
 
     servicio = obtener_servicio("productos")
     producto = servicio.desactivar(id_producto)

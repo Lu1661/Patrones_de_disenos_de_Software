@@ -1,4 +1,4 @@
-"""Procesos de registro y consulta de filiales."""
+# PROCESOS DE REGISTRO Y CONSULTA DE FILIALES.
 
 from aplicacion.dominio.entidades.filial import Filial
 from aplicacion.persistencia.repositorios.repositorio_filiales import (
@@ -8,18 +8,18 @@ from aplicacion.servicios.utilidades import obtener_requerido
 
 
 class ServicioFiliales:
-    """Coordina las reglas sencillas de las sedes comerciales."""
+    # COORDINA LAS REGLAS SENCILLAS DE LAS SEDES COMERCIALES.
 
     def __init__(self, repositorio: RepositorioFiliales) -> None:
         self._repositorio = repositorio
 
     def listar(self) -> list[Filial]:
-        """Retorna todas las filiales registradas."""
+        # DEVUELVE TODAS LAS FILIALES REGISTRADAS.
 
         return self._repositorio.listar()
 
     def registrar(self, datos: dict) -> Filial:
-        """Valida y registra una nueva filial."""
+        # VALIDA Y REGISTRA UNA NUEVA FILIAL.
 
         filial = Filial(
             codigo=str(obtener_requerido(datos, "codigo")),
@@ -32,7 +32,7 @@ class ServicioFiliales:
         return filial
 
     def actualizar(self, id_filial: int, datos: dict) -> Filial:
-        """Actualiza una filial existente sin alterar sus operaciones."""
+        # ACTUALIZA UNA FILIAL EXISTENTE SIN ALTERAR SUS OPERACIONES.
 
         actual = self._repositorio.obtener_por_id(id_filial)
         if actual is None:
@@ -50,7 +50,7 @@ class ServicioFiliales:
         return filial
 
     def desactivar(self, id_filial: int) -> Filial:
-        """Desactiva una filial y conserva inventarios y ventas historicas."""
+        # DESACTIVA UNA FILIAL Y GUARDA INVENTARIOS Y VENTAS HISTORICAS.
 
         filial = self._repositorio.obtener_por_id(id_filial)
         if filial is None or not filial.activa:
