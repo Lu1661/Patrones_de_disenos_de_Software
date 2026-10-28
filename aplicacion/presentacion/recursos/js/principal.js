@@ -525,7 +525,6 @@ function mostrarReporte(reporte) {
                     ${filas ? "" : '<p class="estado-vacio visible">Periodo sin movimientos registrados.</p>'}
                 </section>
                 ${firma}
-                <details class="detalle-patrones"><summary>Ver estructura consolidada del reporte</summary><pre>${textoSeguro(reporte.contenido_emitido)}</pre></details>
             </div>
         </article>`;
     document.querySelector("#boton-imprimir-reporte").addEventListener("click", () => window.print());
