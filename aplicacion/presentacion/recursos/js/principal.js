@@ -493,7 +493,7 @@ function mostrarReporte(reporte) {
 
     const firma = reporte.firma ? `
         <section class="firma-reporte">
-            <h4>Firma digital académica</h4>
+            <h4>Firma digital</h4>
             <p><strong>Emisor:</strong> ${textoSeguro(reporte.firma.emisor)}</p>
             <p><strong>Fecha:</strong> ${textoSeguro(reporte.firma.fecha)}</p>
             <p><strong>Identificador:</strong> ${textoSeguro(reporte.firma.identificador)}</p>
