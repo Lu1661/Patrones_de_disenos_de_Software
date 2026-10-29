@@ -9,7 +9,7 @@ from aplicacion.dominio.validaciones import (
     redondear_moneda,
     redondear_tasa,
     validar_decimal_no_negativo,
-    validar_fecha_no_futura,
+    validar_fecha,
     validar_id_opcional,
 )
 
@@ -42,7 +42,7 @@ class TipoCambio:
             raise ValueError("La divisa de destino debe ser EUR.")
 
         self.tasa = redondear_tasa(self.tasa)
-        self.fecha_vigencia = validar_fecha_no_futura(
+        self.fecha_vigencia = validar_fecha(
             self.fecha_vigencia,
             "fecha de vigencia",
         )

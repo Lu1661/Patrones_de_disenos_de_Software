@@ -107,11 +107,19 @@ def validar_id_opcional(valor: int | None, campo: str) -> int | None:
     return validar_entero_positivo(valor, campo)
 
 
-def validar_fecha_no_futura(valor: date | datetime, campo: str) -> date | datetime:
-    # IMPIDE REGISTRAR IMPORTACIONES O VENTAS CON UNA FECHA FUTURA.
+def validar_fecha(valor: date | datetime, campo: str) -> date | datetime:
+    # COMPRUEBA QUE EL VALOR RECIBIDO SEA UNA FECHA VALIDA.
 
     if not isinstance(valor, (date, datetime)):
         raise ValueError(f"El campo {campo} debe ser una fecha valida.")
+
+    return valor
+
+
+def validar_fecha_no_futura(valor: date | datetime, campo: str) -> date | datetime:
+    # IMPIDE REGISTRAR IMPORTACIONES O VENTAS CON UNA FECHA FUTURA.
+
+    validar_fecha(valor, campo)
 
     fecha_comparable = valor.date() if isinstance(valor, datetime) else valor
     if fecha_comparable > date.today():

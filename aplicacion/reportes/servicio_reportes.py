@@ -334,6 +334,14 @@ class ServicioReportes:
                         "gasto_eur": detalle.subtotal_costo_eur,
                     }
                 )
+        filas.sort(
+            key=lambda fila: (
+                fila["filial"].casefold(),
+                fila["categoria"].casefold(),
+                -fila["total_local"],
+                fila["fecha_venta"],
+            )
+        )
         return filas
 
     @staticmethod

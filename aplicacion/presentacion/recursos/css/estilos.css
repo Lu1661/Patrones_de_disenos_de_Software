@@ -174,7 +174,7 @@ td[data-label="Código"] strong { white-space: nowrap; }
 .formulario-login .boton { width: 100%; margin-top: 4px; }
 .alerta-login { margin-bottom: 18px; padding: 11px 13px; border: 1px solid #e8baba; border-radius: 8px; color: #873434; background: #fff1f1; font-size: .8rem; }
 
-.cuadricula-reportes { display: grid; grid-template-columns: 310px minmax(0, 1fr); gap: 20px; align-items: start; }
+.cuadricula-reportes { display: grid; grid-template-columns: 270px minmax(0, 1fr); gap: 20px; align-items: start; }
 .panel-parametros-reporte { position: sticky; top: 20px; }
 .opcion-reporte { display: flex !important; align-items: center; gap: 9px !important; font-weight: 600 !important; }
 .opcion-reporte input { width: 17px; min-height: 17px; margin: 0; }
@@ -184,7 +184,10 @@ td[data-label="Código"] strong { white-space: nowrap; }
 .resumen-vacio-claro span { color: var(--verde); border-color: #bcd7d1; background: #edf7f4; }
 .resumen-vacio-claro p { color: var(--texto-suave); }
 
-.reporte-documento { position: relative; overflow: hidden; padding: 32px; border: 1px solid var(--borde); border-radius: 12px; background: #fff; box-shadow: var(--sombra); }
+.controles-reporte-externos { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 18px; }
+.reporte-documento { position: relative; }
+.hoja-reporte { position: relative; box-sizing: border-box; width: 100%; height: 1405px; overflow: hidden; padding: 32px; border: 1px solid var(--borde); border-radius: 6px; background: #fff; box-shadow: var(--sombra); }
+.hoja-reporte:not(.activa) { display: none; }
 .marca-agua-reporte { position: absolute; inset: 44% auto auto 50%; z-index: 0; color: rgb(30 91 130 / 7%); font-size: clamp(2rem, 6vw, 5rem); font-weight: 800; letter-spacing: .08em; pointer-events: none; transform: translate(-50%, -50%) rotate(-25deg); white-space: nowrap; }
 .contenido-reporte { position: relative; z-index: 1; }
 .cabecera-reporte { display: flex; justify-content: space-between; gap: 22px; padding-bottom: 20px; border-bottom: 2px solid var(--azul-oscuro); }
@@ -201,6 +204,20 @@ td[data-label="Código"] strong { white-space: nowrap; }
 .resultado-negativo strong { color: #a33c3c; }
 .seccion-reporte { margin-top: 25px; }
 .seccion-reporte h4 { margin: 0 0 14px; color: var(--azul-oscuro); font-size: .96rem; }
+.tabla-reporte { width: 100%; min-width: 0; table-layout: fixed; font-size: .67rem; }
+.tabla-reporte th, .tabla-reporte td { padding: 3px 5px; vertical-align: middle; overflow-wrap: anywhere; }
+.tabla-reporte th { white-space: normal; }
+.tabla-reporte tbody tr { height: 28.8px; }
+.tabla-reporte tbody td { height: 28.8px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; overflow-wrap: normal; }
+.tabla-reporte th:nth-child(1) { width: 11%; }
+.tabla-reporte th:nth-child(2) { width: 16%; }
+.tabla-reporte th:nth-child(3) { width: 9%; }
+.tabla-reporte th:nth-child(4) { width: 20%; }
+.tabla-reporte th:nth-child(5) { width: 8%; }
+.tabla-reporte th:nth-child(6) { width: 8%; }
+.tabla-reporte th:nth-child(7) { width: 10%; }
+.tabla-reporte th:nth-child(8), .tabla-reporte th:nth-child(9) { width: 9%; }
+.paginacion-reporte { justify-content: flex-start; margin: 0; }
 .grafico-filiales { display: grid; gap: 10px; }
 .barra-filial { display: grid; grid-template-columns: minmax(110px, 180px) minmax(120px, 1fr) auto; align-items: center; gap: 10px; font-size: .76rem; }
 .pista-barra { height: 11px; overflow: hidden; border-radius: 999px; background: #e6edf1; }
@@ -211,6 +228,13 @@ td[data-label="Código"] strong { white-space: nowrap; }
 .firma-reporte { margin-top: 24px; padding: 15px; border-left: 4px solid var(--verde); background: #edf7f4; }
 .firma-reporte h4 { margin: 0 0 8px; color: var(--verde); }
 .firma-reporte p { margin: 3px 0; color: #405765; font-size: .72rem; overflow-wrap: anywhere; }
+.hoja-en-medicion { position: absolute; visibility: hidden; pointer-events: none; }
+.contenido-firma-reporte .firma-reporte { margin-top: 0; }
+
+@media (max-width: 1320px) {
+    .cuadricula-reportes { grid-template-columns: 1fr; }
+    .panel-parametros-reporte { position: static; }
+}
 
 @media (max-width: 1120px) {
     .cuadricula-indicadores { grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -219,8 +243,6 @@ td[data-label="Código"] strong { white-space: nowrap; }
     .cabecera-filtros { align-items: flex-start; flex-direction: column; }
     .filtros-en-linea { width: 100%; flex-wrap: wrap; }
     .resumen-venta { min-height: 280px; }
-    .cuadricula-reportes { grid-template-columns: 1fr; }
-    .panel-parametros-reporte { position: static; }
     .metricas-reporte { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 
@@ -264,11 +286,16 @@ td[data-label="Código"] strong { white-space: nowrap; }
     tbody td { display: flex; justify-content: space-between; gap: 15px; padding: 8px 0; border-bottom: 1px solid #edf1f3; text-align: right; }
     tbody td:last-child { border-bottom: 0; }
     tbody td::before { content: attr(data-label); color: #687988; font-size: .68rem; font-weight: 800; letter-spacing: .03em; text-align: left; text-transform: uppercase; }
+    .tabla-reporte tbody tr, .tabla-reporte tbody td { height: auto; }
+    .tabla-reporte tbody td { overflow: visible; text-overflow: clip; white-space: normal; }
     .dato-principal { justify-items: end; }
     .acciones-formulario { display: grid; grid-template-columns: 1fr 1fr; }
     .paginacion { justify-content: center; }
     .notificacion { right: 14px; bottom: 14px; left: 14px; max-width: none; }
-    .reporte-documento { padding: 20px 16px; }
+    .controles-reporte-externos { align-items: stretch; flex-direction: column; }
+    .controles-reporte-externos .paginacion-reporte { justify-content: center; order: 2; }
+    .controles-reporte-externos .boton { width: 100%; }
+    .hoja-reporte { height: auto; min-height: 0; aspect-ratio: auto; padding: 20px 16px; }
     .cabecera-reporte { flex-direction: column; }
     .datos-emision { text-align: left; }
     .metricas-reporte { grid-template-columns: 1fr 1fr; }
@@ -278,21 +305,26 @@ td[data-label="Código"] strong { white-space: nowrap; }
 }
 
 @media print {
-    @page { margin: 14mm; }
+    @page { size: 241mm 372mm; margin: 0; }
     * { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
-    body { background: #fff; }
+    html, body { width: 241mm; margin: 0; padding: 0; background: #fff; }
     .barra-lateral, .encabezado, .notificacion, .fondo-menu,
     .seccion-modulo:not(#seccion-reportes), .encabezado-modulo,
-    .panel-parametros-reporte, .acciones-reporte { display: none !important; }
+    .panel-parametros-reporte, .acciones-reporte, .controles-reporte-externos { display: none !important; }
     .aplicacion, .area-principal, .contenido, #seccion-reportes,
     .cuadricula-reportes, .resultado-reporte { display: block !important; width: 100%; margin: 0; padding: 0; }
     .reporte-documento { overflow: visible; padding: 0; border: 0; box-shadow: none; }
+    .hoja-reporte, .hoja-reporte:not(.activa) { display: block !important; box-sizing: border-box; width: 241mm; height: 372mm; min-height: 372mm; max-height: 372mm; overflow: hidden; padding: 32px; border: 0; border-radius: 0; box-shadow: none; break-after: page; page-break-after: always; }
+    .hoja-reporte:last-child { break-after: auto; page-break-after: auto; }
+    .metricas-reporte { grid-template-columns: repeat(4, minmax(0, 1fr)); }
     .tabla-contenedor { overflow: visible; }
     table { display: table; }
     thead { position: static; display: table-header-group; width: auto; height: auto; overflow: visible; clip: auto; }
     tbody { display: table-row-group; }
     tr { display: table-row; }
     th, td { display: table-cell; }
+    tr { break-inside: avoid; page-break-inside: avoid; }
     tbody td::before { display: none; }
+    .firma-reporte { break-inside: avoid; page-break-inside: avoid; }
     .detalle-patrones { display: none; }
 }

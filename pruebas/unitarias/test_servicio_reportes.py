@@ -1,7 +1,8 @@
 # PRUEBAS UNITARIAS DEL SERVICIO QUE PREPARA LOS REPORTES.
 
-from datetime import date
+from datetime import date, datetime
 from decimal import Decimal
+from types import SimpleNamespace
 
 from aplicacion.dominio.entidades.detalle_venta import DetalleVenta
 from aplicacion.dominio.entidades.filial import Filial
@@ -121,3 +122,48 @@ def test_servicio_genera_reporte_vacio_para_filial_sin_ventas():
     assert reporte["total_ingresos_eur"] == Decimal("0.00")
     assert reporte["resultado_financiero_eur"] == Decimal("0.00")
     assert "Sin movimientos registrados" in reporte["contenido_emitido"]
+
+
+def test_detalle_del_reporte_se_ordena_por_filial_categoria_importe_y_fecha():
+    def crear_venta(factura, filial, fecha, producto, total):
+        detalle = SimpleNamespace(
+            id_producto=producto,
+            cantidad=1,
+            subtotal_local=Decimal(total),
+            subtotal_costo_eur=Decimal("10.00"),
+        )
+        return SimpleNamespace(
+            numero_factura=factura,
+            id_filial=filial,
+            fecha_venta=fecha,
+            codigo_divisa="PEN",
+            tasa_eur_aplicada=Decimal("0.25"),
+            detalles=[detalle],
+        )
+
+    ventas = [
+        crear_venta("F-04", 2, datetime(2026, 1, 4, 10, 0), 3, "900.00"),
+        crear_venta("F-03", 1, datetime(2026, 1, 5, 10, 0), 1, "300.00"),
+        crear_venta("F-01", 1, datetime(2026, 1, 3, 10, 0), 1, "500.00"),
+        crear_venta("F-02", 1, datetime(2026, 1, 2, 10, 0), 1, "300.00"),
+        crear_venta("F-05", 1, datetime(2026, 1, 1, 10, 0), 2, "700.00"),
+    ]
+    filiales = {
+        1: SimpleNamespace(nombre="Filial Alfa"),
+        2: SimpleNamespace(nombre="Filial Beta"),
+    }
+    productos = {
+        1: SimpleNamespace(nombre="Laptop", categoria="Laptop"),
+        2: SimpleNamespace(nombre="Telefono", categoria="Smartphone"),
+        3: SimpleNamespace(nombre="Router", categoria="Redes"),
+    }
+
+    filas = ServicioReportes._preparar_ventas(ventas, filiales, productos)
+
+    assert [fila["numero_factura"] for fila in filas] == [
+        "F-01",
+        "F-02",
+        "F-03",
+        "F-05",
+        "F-04",
+    ]

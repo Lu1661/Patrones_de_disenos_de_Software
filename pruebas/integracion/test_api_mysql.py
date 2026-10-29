@@ -148,7 +148,6 @@ def test_flujo_completo_api_mysql():
             "fecha_importacion": date.today().isoformat(),
             "id_filial": filial["id_filial"],
             "stock_inicial": 10,
-            "precio_venta_local": "120.00",
         }
         producto = publicar("/api/productos", producto_datos, 201)["datos"]["producto"]
         assert producto["codigo"] == codigo
@@ -161,7 +160,7 @@ def test_flujo_completo_api_mysql():
             for item in precios_catalogo.get_json()["datos"]
             if item["id_producto"] == producto["id_producto"]
         )
-        assert precio_producto["precio_venta_local"] == "120.00"
+        assert precio_producto["precio_venta_local"] == "62.40"
 
         tasa_editada = actualizar(
             f"/api/configuracion/tipos-cambio/{ids_tasas[0]}",
@@ -214,9 +213,9 @@ def test_flujo_completo_api_mysql():
             "precio_unitario_local": "9999.99",
         }
         venta = publicar("/api/ventas", venta_datos, 201)["datos"]
-        assert venta["detalles"][0]["precio_unitario_local"] == "120.00"
-        assert venta["total_local"] == "480.00"
-        assert venta["total_eur"] == "120.00"
+        assert venta["detalles"][0]["precio_unitario_local"] == "62.40"
+        assert venta["total_local"] == "249.60"
+        assert venta["total_eur"] == "62.40"
 
         inventario = cliente.get(
             f"/api/inventario?id_filial={filial['id_filial']}"
@@ -246,9 +245,9 @@ def test_flujo_completo_api_mysql():
             200,
         )["datos"]
         assert reporte["cantidad_ventas"] == 1
-        assert reporte["total_ingresos_eur"] == "120.00"
+        assert reporte["total_ingresos_eur"] == "62.40"
         assert reporte["total_gastos_eur"] == "52.00"
-        assert reporte["resultado_financiero_eur"] == "68.00"
+        assert reporte["resultado_financiero_eur"] == "10.40"
         assert len(reporte["firma"]["sha256"]) == 64
 
         producto_eliminado = eliminar(

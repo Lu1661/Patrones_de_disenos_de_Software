@@ -1,7 +1,10 @@
 # PROCESO DE REGISTRO Y CONSULTA DE PRODUCTOS IMPORTADOS.
 
+from decimal import Decimal
+
 from aplicacion.dominio.entidades.inventario_filial import InventarioFilial
 from aplicacion.dominio.entidades.producto_importado import ProductoImportado
+from aplicacion.dominio.validaciones import redondear_moneda
 from aplicacion.persistencia.conexion.conexion_mysql import ConexionMySQL
 from aplicacion.persistencia.repositorios.repositorio_filiales import (
     RepositorioFiliales,
@@ -24,6 +27,8 @@ from aplicacion.servicios.utilidades import (
 
 class ServicioProductos:
     # REGISTRA EL PRODUCTO Y SU STOCK INICIAL COMO UNA SOLA OPERACION.
+
+    FACTOR_PRECIO_VENTA = Decimal("1.20")
 
     def __init__(
         self,
@@ -72,6 +77,15 @@ class ServicioProductos:
         if tasa_cny is None:
             raise ValueError("No existe una tasa activa para CNY/EUR.")
 
+        tasa_local = self._repositorio_tasas.obtener_vigente(
+            filial.codigo_divisa,
+            fecha_importacion,
+        )
+        if tasa_local is None:
+            raise ValueError(
+                f"No existe una tasa activa para {filial.codigo_divisa}/EUR."
+            )
+
         producto = ProductoImportado.crear_con_conversion(
             codigo=str(obtener_requerido(datos, "codigo")),
             nombre=str(obtener_requerido(datos, "nombre")),
@@ -89,6 +103,12 @@ class ServicioProductos:
             obtener_requerido(datos, "stock_inicial"),
             "stock_inicial",
         )
+        precio_venta_local = redondear_moneda(
+            producto.costo_unitario_cny
+            * self.FACTOR_PRECIO_VENTA
+            * tasa_cny.tasa
+            / tasa_local.tasa
+        )
 
         with self._administrador_conexion.transaccion() as conexion:
             self._repositorio_productos.crear(producto, conexion)
@@ -96,10 +116,7 @@ class ServicioProductos:
                 id_filial=id_filial,
                 id_producto=producto.id_producto,
                 stock_disponible=stock_inicial,
-                precio_venta_local=obtener_requerido(
-                    datos,
-                    "precio_venta_local",
-                ),
+                precio_venta_local=precio_venta_local,
             )
             self._repositorio_inventario.crear(inventario, conexion)
 

@@ -96,23 +96,11 @@ class RepositorioTiposCambio(RepositorioBase):
         tipo_cambio: TipoCambio,
         conexion: MySQLConnectionAbstract | None = None,
     ) -> int:
-        # DESACTIVA LA TASA ANTERIOR Y REGISTRA LA NUEVA EN UNA OPERACION.
+        # REGISTRA LA TASA SIN BORRAR LA VIGENCIA ANTERIOR.
 
         with self._usar_conexion(conexion, escritura=True) as conexion_actual:
             cursor = conexion_actual.cursor()
             try:
-                if tipo_cambio.activa:
-                    cursor.execute(
-                        """
-                        UPDATE tipos_cambio
-                        SET activa = FALSE
-                        WHERE codigo_divisa_origen = %s
-                          AND codigo_divisa_destino = 'EUR'
-                          AND activa = TRUE
-                        """,
-                        (tipo_cambio.codigo_divisa_origen,),
-                    )
-
                 cursor.execute(
                     """
                     INSERT INTO tipos_cambio
@@ -134,26 +122,11 @@ class RepositorioTiposCambio(RepositorioBase):
                 cursor.close()
 
     def actualizar(self, tipo_cambio: TipoCambio) -> None:
-        # ACTUALIZA UNA TASA Y GUARDA UNA SOLA TASA ACTIVA POR DIVISA.
+        # ACTUALIZA UNA TASA SIN ALTERAR LAS OTRAS FECHAS GUARDADAS.
 
         with self._usar_conexion(escritura=True) as conexion:
             cursor = conexion.cursor()
             try:
-                if tipo_cambio.activa:
-                    cursor.execute(
-                        """
-                        UPDATE tipos_cambio
-                        SET activa = FALSE
-                        WHERE codigo_divisa_origen = %s
-                          AND codigo_divisa_destino = 'EUR'
-                          AND id_tipo_cambio <> %s
-                          AND activa = TRUE
-                        """,
-                        (
-                            tipo_cambio.codigo_divisa_origen,
-                            tipo_cambio.id_tipo_cambio,
-                        ),
-                    )
                 cursor.execute(
                     """
                     UPDATE tipos_cambio

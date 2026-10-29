@@ -18,6 +18,7 @@ const paginasActuales = {
     productos: 1,
     inventario: 1,
     ventas: 1,
+    reportes: 1,
 };
 let temporizadorNotificacion;
 
@@ -111,12 +112,50 @@ function formatearImporte(valor, codigo = "EUR") {
     }
 }
 
+function formatearFechaReporte(valor) {
+    if (!valor) return "—";
+    return new Intl.DateTimeFormat("es-PE", { dateStyle: "short" }).format(new Date(valor));
+}
+
 function obtenerFilial(idFilial) {
     return estado.filiales.find((filial) => Number(filial.id_filial) === Number(idFilial));
 }
 
 function obtenerProducto(idProducto) {
     return estado.productos.find((producto) => Number(producto.id_producto) === Number(idProducto));
+}
+
+function obtenerTasaVigente(codigoDivisa, fechaReferencia) {
+    const tasas = estado.tasas
+        .filter((tasa) => tasa.activa
+            && tasa.codigo_divisa_origen === codigoDivisa
+            && tasa.fecha_vigencia <= fechaReferencia)
+        .sort((primera, segunda) => segunda.fecha_vigencia.localeCompare(primera.fecha_vigencia));
+    return tasas[0] ? Number(tasas[0].tasa) : null;
+}
+
+function calcularPrecioVentaProducto() {
+    const formulario = document.querySelector("#formulario-producto");
+    const campoPrecio = formulario.elements.precio_venta_local;
+    const costoCny = Number(formulario.elements.costo_unitario_cny.value);
+    const filial = obtenerFilial(formulario.elements.id_filial.value);
+    const fecha = formulario.elements.fecha_importacion.value;
+
+    if (!Number.isFinite(costoCny) || costoCny <= 0 || !filial || !fecha) {
+        campoPrecio.value = "";
+        return;
+    }
+
+    const tasaCny = obtenerTasaVigente("CNY", fecha);
+    const tasaLocal = filial.codigo_divisa === "EUR"
+        ? 1
+        : obtenerTasaVigente(filial.codigo_divisa, fecha);
+    if (!tasaCny || !tasaLocal) {
+        campoPrecio.value = "";
+        return;
+    }
+
+    campoPrecio.value = (costoCny * 1.20 * tasaCny / tasaLocal).toFixed(2);
 }
 
 function obtenerInventariosProducto(idProducto) {
@@ -184,6 +223,7 @@ function mostrarModuloPaginado(modulo) {
     if (modulo === "productos") mostrarProductos(document.querySelector("#buscar-producto").value);
     if (modulo === "inventario") mostrarInventario();
     if (modulo === "ventas") mostrarVentas();
+    if (modulo === "reportes") mostrarHojaReporte();
 }
 
 function manejarPaginacion(evento) {
@@ -277,7 +317,7 @@ function mostrarTasas() {
             <td data-label="Divisa"><strong>${textoSeguro(tasa.codigo_divisa_origen)}/EUR</strong></td>
             <td data-label="Tasa EUR">${textoSeguro(tasa.tasa)}</td>
             <td data-label="Vigencia">${formatearFecha(tasa.fecha_vigencia)}</td>
-            <td data-label="Estado"><span class="insignia ${tasa.activa ? "insignia-correcta" : "insignia-neutra"}">${tasa.activa ? "Activa" : "Histórica"}</span></td>
+            <td data-label="Estado"><span class="insignia ${tasa.activa ? "insignia-correcta" : "insignia-neutra"}">${tasa.activa && tasa.fecha_vigencia > hoyISO() ? "Programada" : (tasa.activa ? "Activa" : "Histórica")}</span></td>
             ${esAdministrador ? `<td data-label="Acciones">${tasa.activa && tasa.codigo_divisa_origen !== "EUR" ? botonesAdministrativos("tasa", tasa.id_tipo_cambio) : ""}</td>` : ""}
         </tr>`).join("");
     document.querySelector("#vacio-tasas").classList.toggle("visible", estado.tasas.length === 0);
@@ -399,6 +439,7 @@ async function actualizarDatosGenerales() {
     mostrarTasas();
     mostrarProductos(document.querySelector("#buscar-producto").value);
     mostrarIndicadores();
+    calcularPrecioVentaProducto();
 }
 
 async function prepararVentaPorFilial(idFilial) {
@@ -462,8 +503,95 @@ function actualizarCamposPeriodoReporte() {
 // una tabla imprimible sin realizar calculos financieros en el navegador.
 // Cumple: RF-05 a RF-09 y CU-06 a CU-09.
 // ============================================================
+function crearFilasReporte(ventas) {
+    return ventas.map((venta) => `
+        <tr>
+            <td data-label="Factura"><strong>${textoSeguro(venta.numero_factura)}</strong></td>
+            <td data-label="Filial" title="${textoSeguro(venta.filial)}">${textoSeguro(venta.filial)}</td>
+            <td data-label="Categoría">${textoSeguro(venta.categoria)}</td>
+            <td data-label="Producto" title="${textoSeguro(venta.producto)}">${textoSeguro(venta.producto)}</td>
+            <td data-label="Fecha">${formatearFechaReporte(venta.fecha_venta)}</td>
+            <td data-label="Cantidad">${venta.cantidad}</td>
+            <td data-label="Venta local">${formatearImporte(venta.total_local, venta.codigo_divisa)}</td>
+            <td data-label="Ingreso EUR">${formatearImporte(venta.total_eur, "EUR")}</td>
+            <td data-label="Gasto EUR">${formatearImporte(venta.gasto_eur, "EUR")}</td>
+        </tr>`).join("");
+}
+
+function crearTablaReporte(ventas) {
+    const filas = crearFilasReporte(ventas);
+    return `
+        <div class="tabla-contenedor tabla-reporte-contenedor">
+            <table class="tabla-reporte">
+                <thead><tr><th>Factura</th><th>Filial</th><th>Categoría</th><th>Producto</th><th>Fecha</th><th>Cantidad</th><th>Venta local</th><th>Ingreso EUR</th><th>Gasto EUR</th></tr></thead>
+                <tbody>${filas}</tbody>
+            </table>
+        </div>
+        ${filas ? "" : '<p class="estado-vacio visible">Periodo sin movimientos registrados.</p>'}`;
+}
+
+function crearFirmaReporte(reporte) {
+    if (!reporte.firma) return "";
+    return `
+        <section class="firma-reporte">
+            <h4>Firma digital</h4>
+            <p><strong>Emisor:</strong> ${textoSeguro(reporte.firma.emisor)}</p>
+            <p><strong>Fecha:</strong> ${textoSeguro(reporte.firma.fecha)}</p>
+            <p><strong>Identificador:</strong> ${textoSeguro(reporte.firma.identificador)}</p>
+            <p><strong>SHA-256:</strong> ${textoSeguro(reporte.firma.sha256)}</p>
+        </section>`;
+}
+
+function moverFirmaSiNoCabe(marcaAgua, firma) {
+    if (!firma) return;
+    const documento = document.querySelector("#reporte-imprimible");
+    const hojas = documento.querySelectorAll(".hoja-reporte");
+    const ultimaHoja = hojas[hojas.length - 1];
+    const firmaVisible = ultimaHoja.querySelector(".firma-reporte");
+    if (!firmaVisible) return;
+
+    // La hoja se muestra un instante sin ser visible para medir la firma completa.
+    const estabaActiva = ultimaHoja.classList.contains("activa");
+    if (!estabaActiva) ultimaHoja.classList.add("activa", "hoja-en-medicion");
+    const limiteInferior = ultimaHoja.getBoundingClientRect().bottom - 32;
+    const firmaNoCabe = firmaVisible.getBoundingClientRect().bottom > limiteInferior;
+    if (!estabaActiva) ultimaHoja.classList.remove("activa", "hoja-en-medicion");
+    if (!firmaNoCabe) return;
+
+    firmaVisible.remove();
+    const hojaFirma = document.createElement("section");
+    hojaFirma.className = "hoja-reporte";
+    hojaFirma.dataset.pagina = String(hojas.length + 1);
+    hojaFirma.innerHTML = `
+        ${marcaAgua}
+        <div class="contenido-reporte contenido-firma-reporte">
+            ${firma}
+        </div>`;
+    documento.appendChild(hojaFirma);
+}
+
+function mostrarHojaReporte() {
+    const hojas = document.querySelectorAll("#reporte-imprimible .hoja-reporte");
+    if (!hojas.length || !estado.reporte) return;
+    paginasActuales.reportes = Math.min(Math.max(paginasActuales.reportes, 1), hojas.length);
+    hojas.forEach((hoja) => {
+        hoja.classList.toggle("activa", Number(hoja.dataset.pagina) === paginasActuales.reportes);
+    });
+    const contenedor = document.querySelector("#paginacion-reportes");
+    if (hojas.length <= 1) {
+        contenedor.innerHTML = "";
+        return;
+    }
+    const pagina = paginasActuales.reportes;
+    contenedor.innerHTML = `
+        <button class="boton-paginacion" type="button" data-paginacion="reportes" data-pagina="${pagina - 1}" ${pagina === 1 ? "disabled" : ""}>Anterior</button>
+        <span>Página ${pagina} de ${hojas.length}</span>
+        <button class="boton-paginacion" type="button" data-paginacion="reportes" data-pagina="${pagina + 1}" ${pagina === hojas.length ? "disabled" : ""}>Siguiente</button>`;
+}
+
 function mostrarReporte(reporte) {
     estado.reporte = reporte;
+    paginasActuales.reportes = 1;
     const maximoFilial = Math.max(
         ...reporte.comparativo_filiales.map((item) => Number(item.total_eur)),
         0,
@@ -480,54 +608,62 @@ function mostrarReporte(reporte) {
         }).join("")
         : '<p class="estado-vacio visible">No existen ventas para comparar.</p>';
 
-    const filas = reporte.ventas.map((venta) => `
-        <tr>
-            <td data-label="Factura"><strong>${textoSeguro(venta.numero_factura)}</strong><br><small>${formatearFecha(venta.fecha_venta, true)}</small></td>
-            <td data-label="Filial">${textoSeguro(venta.filial)}</td>
-            <td data-label="Producto">${textoSeguro(venta.producto)}<br><small>${textoSeguro(venta.categoria)}</small></td>
-            <td data-label="Cantidad">${venta.cantidad}</td>
-            <td data-label="Venta local">${formatearImporte(venta.total_local, venta.codigo_divisa)}</td>
-            <td data-label="Ingreso EUR">${formatearImporte(venta.total_eur, "EUR")}</td>
-            <td data-label="Gasto EUR">${formatearImporte(venta.gasto_eur, "EUR")}</td>
-        </tr>`).join("");
-
-    const firma = reporte.firma ? `
-        <section class="firma-reporte">
-            <h4>Firma digital</h4>
-            <p><strong>Emisor:</strong> ${textoSeguro(reporte.firma.emisor)}</p>
-            <p><strong>Fecha:</strong> ${textoSeguro(reporte.firma.fecha)}</p>
-            <p><strong>Identificador:</strong> ${textoSeguro(reporte.firma.identificador)}</p>
-            <p><strong>SHA-256:</strong> ${textoSeguro(reporte.firma.sha256)}</p>
-        </section>` : "";
+    // La primera hoja reserva espacio para el resumen y las siguientes
+    // aprovechan casi toda la pagina para mostrar el detalle de ventas.
+    const gruposVentas = [reporte.ventas.slice(0, 30)];
+    for (let inicio = 30; inicio < reporte.ventas.length; inicio += 40) {
+        gruposVentas.push(reporte.ventas.slice(inicio, inicio + 40));
+    }
+    const totalHojas = gruposVentas.length;
+    const marcaAgua = reporte.con_marca_agua
+        ? '<div class="marca-agua-reporte">CONFIDENCIAL</div>'
+        : "";
+    const firma = crearFirmaReporte(reporte);
     const claseResultado = Number(reporte.resultado_financiero_eur) >= 0
         ? "resultado-positivo"
         : "resultado-negativo";
 
+    const hojas = gruposVentas.map((ventasPagina, indice) => {
+        const numeroPagina = indice + 1;
+        const esPrimera = indice === 0;
+        const esUltima = numeroPagina === totalHojas;
+        const resumen = esPrimera ? `
+            <header class="cabecera-reporte">
+                <div><p class="etiqueta">FinanCorp S.A. · SERF</p><h3>${textoSeguro(reporte.titulo)}</h3><p>${textoSeguro(reporte.periodo)} · ${textoSeguro(reporte.alcance)}</p></div>
+                <div class="datos-emision"><strong>Generado ${formatearFecha(reporte.fecha_generacion, true)}</strong><span>Desde ${formatearFecha(reporte.fecha_inicio)} hasta ${formatearFecha(reporte.fecha_fin)}</span></div>
+            </header>
+            <section class="metricas-reporte">
+                <div class="metrica-reporte"><span>Ingresos</span><strong>${formatearImporte(reporte.total_ingresos_eur, "EUR")}</strong></div>
+                <div class="metrica-reporte"><span>Gastos de importación</span><strong>${formatearImporte(reporte.total_gastos_eur, "EUR")}</strong></div>
+                <div class="metrica-reporte ${claseResultado}"><span>Resultado financiero</span><strong>${formatearImporte(reporte.resultado_financiero_eur, "EUR")}</strong></div>
+                <div class="metrica-reporte"><span>Ventas</span><strong>${reporte.cantidad_ventas}</strong></div>
+            </section>
+            <section class="seccion-reporte comparativo-reporte"><h4>Comparación de ingresos por filial</h4><div class="grafico-filiales">${barras}</div></section>` : "";
+        return `
+            <section class="hoja-reporte ${esPrimera ? "activa" : ""}" data-pagina="${numeroPagina}">
+                ${marcaAgua}
+                <div class="contenido-reporte">
+                    ${resumen}
+                    <section class="seccion-reporte detalle-ventas-reporte">
+                        <h4>Detalle de ventas del periodo</h4>
+                        ${crearTablaReporte(ventasPagina)}
+                    </section>
+                    ${esUltima ? firma : ""}
+                </div>
+            </section>`;
+    }).join("");
+
     document.querySelector("#resultado-reporte").innerHTML = `
+        <div class="controles-reporte-externos">
+            <div class="paginacion paginacion-reporte" id="paginacion-reportes"></div>
+            <button class="boton boton-secundario" id="boton-imprimir-reporte" type="button">Imprimir o guardar como PDF</button>
+        </div>
         <article class="reporte-documento" id="reporte-imprimible">
-            ${reporte.con_marca_agua ? '<div class="marca-agua-reporte">CONFIDENCIAL</div>' : ""}
-            <div class="contenido-reporte">
-                <header class="cabecera-reporte">
-                    <div><p class="etiqueta">FinanCorp S.A. · SERF</p><h3>${textoSeguro(reporte.titulo)}</h3><p>${textoSeguro(reporte.periodo)} · ${textoSeguro(reporte.alcance)}</p></div>
-                    <div class="datos-emision"><strong>Generado ${formatearFecha(reporte.fecha_generacion, true)}</strong><span>Desde ${formatearFecha(reporte.fecha_inicio)} hasta ${formatearFecha(reporte.fecha_fin)}</span></div>
-                </header>
-                <div class="acciones-reporte"><button class="boton boton-secundario" id="boton-imprimir-reporte" type="button">Imprimir o guardar como PDF</button></div>
-                <section class="metricas-reporte">
-                    <div class="metrica-reporte"><span>Ingresos</span><strong>${formatearImporte(reporte.total_ingresos_eur, "EUR")}</strong></div>
-                    <div class="metrica-reporte"><span>Gastos de importación</span><strong>${formatearImporte(reporte.total_gastos_eur, "EUR")}</strong></div>
-                    <div class="metrica-reporte ${claseResultado}"><span>Resultado financiero</span><strong>${formatearImporte(reporte.resultado_financiero_eur, "EUR")}</strong></div>
-                    <div class="metrica-reporte"><span>Ventas</span><strong>${reporte.cantidad_ventas}</strong></div>
-                </section>
-                <section class="seccion-reporte"><h4>Comparación de ingresos por filial</h4><div class="grafico-filiales">${barras}</div></section>
-                <section class="seccion-reporte">
-                    <h4>Detalle de ventas del periodo</h4>
-                    <div class="tabla-contenedor"><table><thead><tr><th>Factura</th><th>Filial</th><th>Producto</th><th>Cantidad</th><th>Venta local</th><th>Ingreso EUR</th><th>Gasto EUR</th></tr></thead><tbody>${filas}</tbody></table></div>
-                    ${filas ? "" : '<p class="estado-vacio visible">Periodo sin movimientos registrados.</p>'}
-                </section>
-                ${firma}
-            </div>
+            ${hojas}
         </article>`;
+    moverFirmaSiNoCabe(marcaAgua, firma);
     document.querySelector("#boton-imprimir-reporte").addEventListener("click", () => window.print());
+    mostrarHojaReporte();
 }
 
 function restablecerFormularioTasa() {
@@ -554,11 +690,11 @@ function restablecerFormularioProducto() {
     delete formulario.dataset.id;
     formulario.elements.id_filial.disabled = false;
     formulario.elements.stock_inicial.disabled = false;
-    formulario.elements.precio_venta_local.disabled = false;
+    formulario.elements.precio_venta_local.disabled = true;
     formulario.reset();
     formulario.elements.fecha_importacion.value = hoyISO();
     document.querySelector("#titulo-formulario-producto").textContent = "Nuevo producto tecnológico";
-    document.querySelector("#ayuda-formulario-producto").textContent = "La tasa CNY/EUR debe estar configurada para calcular el costo corporativo.";
+    document.querySelector("#ayuda-formulario-producto").textContent = "";
     document.querySelector("#boton-limpiar-producto").textContent = "Limpiar";
     document.querySelector("#boton-guardar-producto").textContent = "Guardar producto";
 }
@@ -776,6 +912,9 @@ function prepararEventosDeConsulta() {
         catch (error) { mostrarNotificacion(error.message, true); }
     });
     document.querySelector("#producto-venta").addEventListener("change", actualizarDetalleStock);
+    document.querySelector("#formulario-producto [name='costo_unitario_cny']").addEventListener("input", calcularPrecioVentaProducto);
+    document.querySelector("#formulario-producto [name='id_filial']").addEventListener("change", calcularPrecioVentaProducto);
+    document.querySelector("#formulario-producto [name='fecha_importacion']").addEventListener("change", calcularPrecioVentaProducto);
     document.querySelector("#boton-consultar-ventas").addEventListener("click", async () => {
         try { await cargarVentas(); }
         catch (error) { mostrarNotificacion(error.message, true); }

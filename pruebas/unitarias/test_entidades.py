@@ -2,13 +2,16 @@
 
 from datetime import date, timedelta
 from decimal import Decimal
+from unittest.mock import Mock
 
 import pytest
 
 from aplicacion.dominio.entidades.detalle_venta import DetalleVenta
 from aplicacion.dominio.entidades.inventario_filial import InventarioFilial
 from aplicacion.dominio.entidades.producto_importado import ProductoImportado
+from aplicacion.dominio.entidades.tipo_cambio import TipoCambio
 from aplicacion.dominio.entidades.transaccion_venta import TransaccionVenta
+from aplicacion.servicios.servicio_tipo_cambio import ServicioTiposCambio
 
 
 # ============================================================
@@ -93,3 +96,38 @@ def test_producto_rechaza_fecha_futura_y_categoria_desconocida():
     datos["categoria"] = "Electrodomestico"
     with pytest.raises(ValueError, match="categoria"):
         ProductoImportado.crear_con_conversion(**datos)
+
+
+def test_tipo_cambio_admite_una_vigencia_futura():
+    tasa_programada = TipoCambio(
+        codigo_divisa_origen="CNY",
+        tasa="0.15000000",
+        fecha_vigencia=date.today() + timedelta(days=1),
+    )
+
+    assert tasa_programada.fecha_vigencia == date.today() + timedelta(days=1)
+
+
+def test_tasa_futura_no_reemplaza_la_tasa_actual_del_singleton():
+    repositorio = Mock()
+    configuracion = Mock()
+    tasa_actual = TipoCambio(
+        codigo_divisa_origen="CNY",
+        tasa="0.14000000",
+        fecha_vigencia=date.today(),
+    )
+    repositorio.obtener_vigente.return_value = tasa_actual
+    servicio = ServicioTiposCambio(repositorio, configuracion)
+
+    servicio.registrar(
+        {
+            "codigo_divisa_origen": "CNY",
+            "tasa": "0.15000000",
+            "fecha_vigencia": (date.today() + timedelta(days=1)).isoformat(),
+        }
+    )
+
+    configuracion.actualizar_tasa.assert_called_once_with(
+        "CNY",
+        Decimal("0.14000000"),
+    )
