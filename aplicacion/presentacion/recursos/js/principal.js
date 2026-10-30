@@ -7,6 +7,7 @@ const estado = {
     inventariosProductos: [],
     inventario: [],
     ventas: [],
+    ventasResumen: [],
     reporte: null,
 };
 
@@ -293,6 +294,162 @@ function mostrarIndicadores() {
     document.querySelector("#total-ventas").textContent = estado.ventas.length;
 }
 
+// ============================================================
+// BLOQUE: GRAFICOS DEL RESUMEN GENERAL
+// Agrupa los datos reales para mostrar los seis analisis principales.
+// ============================================================
+function mostrarGraficoVacio(id) {
+    document.querySelector(id).innerHTML = '<div class="grafico-vacio">No existen datos para mostrar.</div>';
+}
+
+function crearBarrasHorizontales(datos, formatearValor) {
+    if (!datos.length) return '<div class="grafico-vacio">No existen datos para mostrar.</div>';
+    const maximo = Math.max(...datos.map((item) => Number(item.valor)), 1);
+    return `<div class="lista-barras-dashboard">${datos.map((item) => `
+        <div class="fila-barra-dashboard">
+            <strong title="${textoSeguro(item.nombre)}">${textoSeguro(item.nombre)}</strong>
+            <span class="carril-dashboard"><span class="relleno-dashboard" style="width:${Math.max((Number(item.valor) / maximo) * 100, 1)}%"></span></span>
+            <span>${formatearValor(item.valor)}</span>
+        </div>`).join("")}</div>`;
+}
+
+function mostrarDashboardFiliales() {
+    const acumulado = new Map();
+    estado.ventasResumen.forEach((venta) => {
+        acumulado.set(venta.id_filial, (acumulado.get(venta.id_filial) || 0) + Number(venta.total_eur));
+    });
+    const datos = [...acumulado.entries()]
+        .map(([idFilial, valor]) => ({ nombre: obtenerFilial(idFilial)?.nombre || `Filial ${idFilial}`, valor }))
+        .sort((primero, segundo) => segundo.valor - primero.valor);
+    document.querySelector("#dashboard-filiales").innerHTML = crearBarrasHorizontales(
+        datos,
+        (valor) => formatearImporte(valor, "EUR"),
+    );
+}
+
+function mostrarDashboardEvolucion() {
+    if (!estado.ventasResumen.length) return mostrarGraficoVacio("#dashboard-evolucion");
+    const meses = Array(12).fill(0);
+    estado.ventasResumen.forEach((venta) => {
+        const mes = new Date(venta.fecha_venta).getMonth();
+        meses[mes] += Number(venta.total_eur);
+    });
+    const maximo = Math.max(...meses, 1);
+    const ancho = 700;
+    const alto = 210;
+    const margenX = 35;
+    const margenY = 22;
+    const puntos = meses.map((valor, indice) => {
+        const x = margenX + (indice * (ancho - margenX * 2) / 11);
+        const y = alto - margenY - ((valor / maximo) * (alto - margenY * 2));
+        return { x, y, valor };
+    });
+    const nombresMes = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"];
+    document.querySelector("#dashboard-evolucion").innerHTML = `
+        <svg class="linea-dashboard" viewBox="0 0 ${ancho} 245" role="img" aria-label="Evolución mensual de ventas">
+            <line class="guia" x1="${margenX}" y1="${alto - margenY}" x2="${ancho - margenX}" y2="${alto - margenY}"></line>
+            <polyline class="trazo" points="${puntos.map((punto) => `${punto.x},${punto.y}`).join(" ")}"></polyline>
+            ${puntos.map((punto, indice) => `<circle class="punto" cx="${punto.x}" cy="${punto.y}" r="5"><title>${nombresMes[indice]}: ${formatearImporte(punto.valor, "EUR")}</title></circle>`).join("")}
+            ${puntos.map((punto, indice) => `<text x="${punto.x}" y="235" text-anchor="middle">${nombresMes[indice]}</text>`).join("")}
+        </svg>`;
+}
+
+function mostrarDashboardInventario() {
+    const cantidades = { disponible: 0, bajo: 0, agotado: 0 };
+    estado.inventariosProductos.forEach((item) => {
+        const stock = Number(item.stock_disponible);
+        if (stock === 0) cantidades.agotado += 1;
+        else if (stock <= 10) cantidades.bajo += 1;
+        else cantidades.disponible += 1;
+    });
+    const total = cantidades.disponible + cantidades.bajo + cantidades.agotado;
+    if (!total) return mostrarGraficoVacio("#dashboard-inventario");
+    const disponible = (cantidades.disponible / total) * 100;
+    const bajo = (cantidades.bajo / total) * 100;
+    document.querySelector("#dashboard-inventario").innerHTML = `
+        <div class="resumen-dona-dashboard">
+            <div class="dona-dashboard" style="background:conic-gradient(#5ba897 0 ${disponible}%, #e3b65d ${disponible}% ${disponible + bajo}%, #df8a8a ${disponible + bajo}% 100%)">
+                <div class="centro-dona"><strong>${total}</strong><span>Productos</span></div>
+            </div>
+            <div class="leyenda-dashboard">
+                <div class="item-leyenda"><i style="background:#5ba897"></i><span>Disponible</span><strong>${cantidades.disponible}</strong></div>
+                <div class="item-leyenda"><i style="background:#e3b65d"></i><span>Stock bajo</span><strong>${cantidades.bajo}</strong></div>
+                <div class="item-leyenda"><i style="background:#df8a8a"></i><span>Sin stock</span><strong>${cantidades.agotado}</strong></div>
+            </div>
+        </div>`;
+}
+
+function detallesVentasResumen() {
+    return estado.ventasResumen.flatMap((venta) => venta.detalles || []);
+}
+
+function mostrarDashboardProductos() {
+    const acumulado = new Map();
+    detallesVentasResumen().forEach((detalle) => {
+        acumulado.set(detalle.id_producto, (acumulado.get(detalle.id_producto) || 0) + Number(detalle.cantidad));
+    });
+    const datos = [...acumulado.entries()]
+        .map(([idProducto, valor]) => ({ nombre: obtenerProducto(idProducto)?.nombre || `Producto ${idProducto}`, valor }))
+        .sort((primero, segundo) => segundo.valor - primero.valor)
+        .slice(0, 5);
+    document.querySelector("#dashboard-productos").innerHTML = crearBarrasHorizontales(
+        datos,
+        (valor) => `${valor} unid.`,
+    );
+}
+
+function crearBarrasVerticales(datos, formatearValor, clasePorDato = () => "") {
+    if (!datos.length) return '<div class="grafico-vacio">No existen datos para mostrar.</div>';
+    const maximo = Math.max(...datos.map((item) => Math.abs(Number(item.valor))), 1);
+    return `<div class="barras-verticales-dashboard">${datos.map((item) => `
+        <div class="columna-dashboard">
+            <strong>${formatearValor(item.valor)}</strong>
+            <div class="espacio-barra-vertical"><span class="barra-vertical ${clasePorDato(item)}" style="height:${Math.max((Math.abs(Number(item.valor)) / maximo) * 100, 2)}%"></span></div>
+            <span>${textoSeguro(item.nombre)}</span>
+        </div>`).join("")}</div>`;
+}
+
+function mostrarDashboardCategorias() {
+    const acumulado = new Map();
+    detallesVentasResumen().forEach((detalle) => {
+        const categoria = obtenerProducto(detalle.id_producto)?.categoria || "Sin categoría";
+        acumulado.set(categoria, (acumulado.get(categoria) || 0) + Number(detalle.cantidad));
+    });
+    const datos = [...acumulado.entries()]
+        .map(([nombre, valor]) => ({ nombre, valor }))
+        .sort((primero, segundo) => segundo.valor - primero.valor);
+    document.querySelector("#dashboard-categorias").innerHTML = crearBarrasVerticales(
+        datos,
+        (valor) => `${valor}`,
+        () => "verde",
+    );
+}
+
+function mostrarDashboardFinanciero() {
+    const ingresos = estado.ventasResumen.reduce((total, venta) => total + Number(venta.total_eur), 0);
+    const gastos = estado.ventasResumen.reduce((total, venta) => total + Number(venta.total_costo_eur), 0);
+    const resultado = ingresos - gastos;
+    const datos = [
+        { nombre: "Ingresos", valor: ingresos, clase: "verde" },
+        { nombre: "Gastos", valor: gastos, clase: "" },
+        { nombre: "Resultado", valor: resultado, clase: resultado < 0 ? "roja" : "verde" },
+    ];
+    document.querySelector("#dashboard-financiero").innerHTML = crearBarrasVerticales(
+        datos,
+        (valor) => formatearImporte(valor, "EUR"),
+        (item) => item.clase,
+    );
+}
+
+function mostrarDashboards() {
+    mostrarDashboardFiliales();
+    mostrarDashboardEvolucion();
+    mostrarDashboardInventario();
+    mostrarDashboardProductos();
+    mostrarDashboardCategorias();
+    mostrarDashboardFinanciero();
+}
+
 function mostrarFiliales() {
     const cuerpo = document.querySelector("#tabla-filiales");
     const filialesActivas = estado.filiales.filter((filial) => filial.activa);
@@ -365,14 +522,23 @@ function mostrarInventario() {
     const inventarioPagina = obtenerPagina(inventarioActivo, "inventario");
     document.querySelector("#tabla-inventario").innerHTML = inventarioPagina.map((item) => {
         const producto = obtenerProducto(item.id_producto);
-        const stockBajo = Number(item.stock_disponible) <= 5;
+        const stock = Number(item.stock_disponible);
+        let estadoStock = "Disponible";
+        let claseEstado = "insignia-correcta";
+        if (stock === 0) {
+            estadoStock = "Sin stock";
+            claseEstado = "insignia-sin-stock";
+        } else if (stock <= 10) {
+            estadoStock = "Stock bajo";
+            claseEstado = "insignia-alerta";
+        }
         return `
             <tr>
                 <td data-label="Código"><strong>${textoSeguro(producto?.codigo || item.id_producto)}</strong></td>
                 <td data-label="Producto">${textoSeguro(producto?.nombre || "Producto")}</td>
                 <td data-label="Stock"><strong>${item.stock_disponible}</strong></td>
                 <td data-label="Precio local">${formatearImporte(item.precio_venta_local, filial?.codigo_divisa || "EUR")}</td>
-                <td data-label="Estado"><span class="insignia ${stockBajo ? "insignia-alerta" : "insignia-correcta"}">${stockBajo ? "Stock bajo" : "Disponible"}</span></td>
+                <td data-label="Estado"><span class="insignia ${claseEstado}">${estadoStock}</span></td>
             </tr>`;
     }).join("");
     document.querySelector("#vacio-inventario").classList.toggle("visible", inventarioActivo.length === 0);
@@ -424,6 +590,17 @@ async function cargarVentas() {
     mostrarVentas();
 }
 
+async function cargarDatosResumen() {
+    const anio = new Date().getFullYear();
+    const parametros = new URLSearchParams({
+        fecha_inicio: `${anio}-01-01`,
+        fecha_fin: hoyISO(),
+    });
+    const respuesta = await solicitar(`/api/ventas?${parametros}`);
+    estado.ventasResumen = respuesta.datos;
+    mostrarDashboards();
+}
+
 async function actualizarDatosGenerales() {
     const [filiales, tasas, productos, inventariosProductos] = await Promise.all([
         solicitar("/api/configuracion/filiales"),
@@ -439,6 +616,7 @@ async function actualizarDatosGenerales() {
     mostrarTasas();
     mostrarProductos(document.querySelector("#buscar-producto").value);
     mostrarIndicadores();
+    mostrarDashboards();
     calcularPrecioVentaProducto();
 }
 
@@ -844,6 +1022,7 @@ function prepararFormularios() {
             const datos = datosFormulario(formulario);
             const respuesta = await solicitar("/api/inventario/reponer", { method: "POST", body: JSON.stringify(datos) });
             formulario.elements.cantidad.value = "";
+            await actualizarDatosGenerales();
             await cargarInventario(datos.id_filial);
             mostrarNotificacion(respuesta.mensaje);
         } catch (error) { mostrarNotificacion(error.message, true); }
@@ -862,6 +1041,8 @@ function prepararFormularios() {
             formulario.elements.fecha_venta.value = fechaHoraLocal();
             await prepararVentaPorFilial("");
             await cargarVentas();
+            await actualizarDatosGenerales();
+            await cargarDatosResumen();
             if (document.querySelector("#filtro-filial-inventario").value === idFilial) await cargarInventario(idFilial);
             mostrarNotificacion(respuesta.mensaje);
         } catch (error) { mostrarNotificacion(error.message, true); }
@@ -941,6 +1122,7 @@ async function iniciarAplicacion() {
     try {
         await actualizarDatosGenerales();
         await cargarVentas();
+        await cargarDatosResumen();
     } catch (error) {
         mostrarNotificacion(error.message, true);
     }
