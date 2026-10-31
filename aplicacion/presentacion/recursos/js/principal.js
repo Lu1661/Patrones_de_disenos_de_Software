@@ -259,6 +259,20 @@ function cerrarMenuMovil() {
     document.querySelector("#boton-menu").setAttribute("aria-expanded", "false");
 }
 
+// ============================================================
+// BLOQUE: BARRA LATERAL COMPACTA EN ESCRITORIO
+// Guarda la preferencia para conservar el mismo tamaño al volver a entrar.
+// ============================================================
+function cambiarTamanioBarra(contraida) {
+    const barra = document.querySelector("#barra-lateral");
+    const boton = document.querySelector("#boton-contraer-barra");
+    barra.classList.toggle("contraida", contraida);
+    boton.setAttribute("aria-expanded", String(!contraida));
+    boton.setAttribute("aria-label", contraida ? "Expandir menú" : "Contraer menú");
+    boton.title = contraida ? "Expandir menú" : "Contraer menú";
+    localStorage.setItem("serfBarraContraida", String(contraida));
+}
+
 function prepararNavegacion() {
     document.querySelectorAll("[data-seccion]").forEach((boton) => {
         boton.addEventListener("click", () => mostrarSeccion(boton.dataset.seccion));
@@ -273,6 +287,11 @@ function prepararNavegacion() {
         document.querySelector("#boton-menu").setAttribute("aria-expanded", String(abierta));
     });
     document.querySelector("#fondo-menu").addEventListener("click", cerrarMenuMovil);
+    const barraContraida = localStorage.getItem("serfBarraContraida") === "true";
+    cambiarTamanioBarra(barraContraida);
+    document.querySelector("#boton-contraer-barra").addEventListener("click", () => {
+        cambiarTamanioBarra(!document.querySelector("#barra-lateral").classList.contains("contraida"));
+    });
 }
 
 function llenarSelectoresFiliales() {

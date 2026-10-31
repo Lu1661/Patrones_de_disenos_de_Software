@@ -11,20 +11,41 @@
     <div class="aplicacion">
         <aside class="barra-lateral" id="barra-lateral">
             <div class="identidad">
-                <div>
+                <div class="marca-sistema">
                     <strong>FinanCorp</strong>
                     <span>Sistema SERF</span>
                 </div>
+                <button class="boton-contraer-barra" id="boton-contraer-barra" type="button" aria-label="Contraer menú" aria-expanded="true" title="Contraer menú">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m14 7-5 5 5 5"/></svg>
+                </button>
             </div>
 
             <nav class="navegacion" aria-label="Navegación principal">
                 <p class="titulo-navegacion">Menú principal</p>
-                <button class="enlace-navegacion activo" data-seccion="resumen" type="button">Resumen</button>
-                <button class="enlace-navegacion" data-seccion="configuracion" type="button">Configuración</button>
-                <button class="enlace-navegacion" data-seccion="productos" type="button">Productos</button>
-                <button class="enlace-navegacion" data-seccion="inventario" type="button">Inventario</button>
-                <button class="enlace-navegacion" data-seccion="ventas" type="button">Ventas</button>
-                <button class="enlace-navegacion" data-seccion="reportes" type="button">Reportes</button>
+                <button class="enlace-navegacion activo" data-seccion="resumen" type="button" title="Resumen">
+                    <span class="icono-navegacion"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11.5 12 4l9 7.5"/><path d="M5.5 10v10h13V10"/><path d="M9.5 20v-6h5v6"/></svg></span>
+                    <span class="texto-navegacion">Resumen</span>
+                </button>
+                <button class="enlace-navegacion" data-seccion="configuracion" type="button" title="Configuración">
+                    <span class="icono-navegacion"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1-2.8 2.8-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.6v.2h-4V21a1.7 1.7 0 0 0-1-1.6 1.7 1.7 0 0 0-1.9.3l-.1.1L4.2 17l.1-.1a1.7 1.7 0 0 0 .3-1.9A1.7 1.7 0 0 0 3 14H2.8v-4H3a1.7 1.7 0 0 0 1.6-1 1.7 1.7 0 0 0-.3-1.9L4.2 7 7 4.2l.1.1A1.7 1.7 0 0 0 9 4.6 1.7 1.7 0 0 0 10 3v-.2h4V3a1.7 1.7 0 0 0 1 1.6 1.7 1.7 0 0 0 1.9-.3l.1-.1L19.8 7l-.1.1a1.7 1.7 0 0 0-.3 1.9 1.7 1.7 0 0 0 1.6 1h.2v4H21a1.7 1.7 0 0 0-1.6 1Z"/></svg></span>
+                    <span class="texto-navegacion">Configuración</span>
+                </button>
+                <button class="enlace-navegacion" data-seccion="productos" type="button" title="Productos">
+                    <span class="icono-navegacion"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m4 7 8-4 8 4-8 4-8-4Z"/><path d="M4 7v10l8 4 8-4V7"/><path d="M12 11v10"/></svg></span>
+                    <span class="texto-navegacion">Productos</span>
+                </button>
+                <button class="enlace-navegacion" data-seccion="inventario" type="button" title="Inventario">
+                    <span class="icono-navegacion"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v5H4z"/><path d="M5 10h14v10H5z"/><path d="M9 14h6"/></svg></span>
+                    <span class="texto-navegacion">Inventario</span>
+                </button>
+                <button class="enlace-navegacion" data-seccion="ventas" type="button" title="Ventas">
+                    <span class="icono-navegacion"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="20" r="1"/><circle cx="18" cy="20" r="1"/><path d="M3 4h2l2.3 10.2a2 2 0 0 0 2 1.6h7.8a2 2 0 0 0 2-1.6L21 8H6"/></svg></span>
+                    <span class="texto-navegacion">Ventas</span>
+                </button>
+                <button class="enlace-navegacion" data-seccion="reportes" type="button" title="Reportes">
+                    <span class="icono-navegacion"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20V10"/><path d="M10 20V4"/><path d="M16 20v-7"/><path d="M22 20H2"/></svg></span>
+                    <span class="texto-navegacion">Reportes</span>
+                </button>
             </nav>
 
         </aside>
@@ -37,9 +58,13 @@
                     <h1 id="titulo-seccion">Resumen general</h1>
                 </div>
                 <div class="usuario-actual">
-                    <div><strong>{{ session.get('usuario_admin', 'admin') }}</strong><span>Administrador</span></div>
+                    <div class="etiqueta-usuario">
+                        <span>Usuario: <strong>{{ session.get('usuario_admin', 'admin') }}</strong></span>
+                        <span class="separador-usuario">|</span>
+                        <span>Rol: <strong>Administrador</strong></span>
+                    </div>
                     <form method="post" action="{{ url_for('autenticacion.logout') }}">
-                        <button class="boton-salir" type="submit">Salir</button>
+                        <button class="boton-salir" type="submit">Cerrar sesión</button>
                     </form>
                 </div>
             </header>
