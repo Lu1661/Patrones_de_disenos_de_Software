@@ -7,7 +7,7 @@
     <title>{% block titulo %}SERF{% endblock %}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/estilos.css') }}">
 </head>
-<body data-es-administrador="{{ 'true' if session.get('usuario_admin') else 'false' }}">
+<body data-es-administrador="{{ 'true' if session.get('usuario_admin') else 'false' }}" data-seccion-inicial="{{ seccion_inicial|default('resumen') }}">
     <div class="aplicacion">
         <aside class="barra-lateral" id="barra-lateral">
             <div class="identidad">

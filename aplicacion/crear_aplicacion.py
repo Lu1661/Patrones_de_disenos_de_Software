@@ -5,6 +5,7 @@ from pathlib import Path
 from flask import Flask, jsonify, redirect, request, session, url_for
 from mysql.connector import Error as ErrorMySQL
 from mysql.connector import IntegrityError
+from werkzeug.middleware.proxy_fix import ProxyFix
 
 from aplicacion.configuracion.configuracion_entorno import ConfiguracionEntorno
 from aplicacion.dependencias import configurar_dependencias
@@ -38,6 +39,13 @@ def crear_aplicacion() -> Flask:
         static_url_path="/recursos",
     )
     aplicacion.config.from_object(ConfiguracionEntorno)
+    if aplicacion.config["PROXY_CONFIABLE"]:
+        aplicacion.wsgi_app = ProxyFix(
+            aplicacion.wsgi_app,
+            x_for=1,
+            x_proto=1,
+            x_host=1,
+        )
     configurar_dependencias(aplicacion)
 
     aplicacion.register_blueprint(autenticacion_bp)

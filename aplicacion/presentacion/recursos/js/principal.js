@@ -22,6 +22,14 @@ const paginasActuales = {
     reportes: 1,
 };
 let temporizadorNotificacion;
+const rutasModulos = {
+    resumen: "/resumen",
+    configuracion: "/configuracion",
+    productos: "/productos",
+    inventario: "/inventario",
+    ventas: "/ventas",
+    reportes: "/reportes",
+};
 
 // ============================================================
 // BLOQUE: COMUNICACION CON EL BACKEND FLASK
@@ -240,7 +248,8 @@ function manejarPaginacion(evento) {
 // Cambia la seccion visible sin recargar la pagina y mantiene el menu
 // lateral utilizable tanto en escritorio como en dispositivos moviles.
 // ============================================================
-function mostrarSeccion(nombre) {
+function mostrarSeccion(nombre, actualizarRuta = true) {
+    if (!rutasModulos[nombre]) nombre = "resumen";
     document.querySelectorAll(".seccion-modulo").forEach((seccion) => {
         seccion.classList.toggle("activa", seccion.id === `seccion-${nombre}`);
     });
@@ -249,6 +258,9 @@ function mostrarSeccion(nombre) {
     });
     const seccion = document.querySelector(`#seccion-${nombre}`);
     document.querySelector("#titulo-seccion").textContent = seccion?.dataset.titulo || "SERF";
+    if (actualizarRuta && window.location.pathname !== rutasModulos[nombre]) {
+        window.history.pushState({ modulo: nombre }, "", rutasModulos[nombre]);
+    }
     cerrarMenuMovil();
     window.scrollTo({ top: 0, behavior: "smooth" });
 }
@@ -292,6 +304,13 @@ function prepararNavegacion() {
     document.querySelector("#boton-contraer-barra").addEventListener("click", () => {
         cambiarTamanioBarra(!document.querySelector("#barra-lateral").classList.contains("contraida"));
     });
+    window.addEventListener("popstate", () => {
+        const modulo = Object.keys(rutasModulos).find(
+            (nombre) => rutasModulos[nombre] === window.location.pathname,
+        ) || "resumen";
+        mostrarSeccion(modulo, false);
+    });
+    mostrarSeccion(document.body.dataset.seccionInicial || "resumen", false);
 }
 
 function llenarSelectoresFiliales() {

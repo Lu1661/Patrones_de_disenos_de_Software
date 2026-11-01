@@ -37,6 +37,9 @@ class ConfiguracionEntorno:
     SESSION_COOKIE_SAMESITE = "Lax"
     SESSION_COOKIE_SECURE = leer_booleano("COOKIE_SEGURA")
     MAX_CONTENT_LENGTH = 1024 * 1024
+    MAX_INTENTOS_LOGIN = 3
+    SEGUNDOS_BLOQUEO_LOGIN = int(os.getenv("SEGUNDOS_BLOQUEO_LOGIN", "900"))
+    PROXY_CONFIABLE = leer_booleano("PROXY_CONFIABLE")
 
     ADMIN_USUARIO = os.getenv("ADMIN_USUARIO", "admin")
     ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD", "admin")
