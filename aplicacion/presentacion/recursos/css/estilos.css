@@ -40,7 +40,14 @@ button { cursor: pointer; }
 .navegacion { display: grid; gap: 7px; margin-top: 28px; }
 .enlace-navegacion { display: flex; align-items: center; gap: 12px; width: 100%; padding: 12px; border: 0; border-radius: 9px; color: #c9d8e1; background: transparent; text-align: left; transition: .18s ease; }
 .enlace-navegacion:hover, .enlace-navegacion.activo { color: #fff; background: rgb(255 255 255 / 11%); }
-.area-principal { width: calc(100% - 250px); margin-left: 250px; }
+.area-principal {
+    width: calc(100% - 250px);
+    min-height: 100vh;
+    margin-left: 250px;
+    background:
+        linear-gradient(rgb(241 246 248 / 91%), rgb(235 241 244 / 90%)),
+        url("../imagenes/fondo_menus.jpg") center top / cover fixed;
+}
 .encabezado { display: flex; min-height: 88px; align-items: center; justify-content: space-between; gap: 24px; padding: 18px clamp(22px, 4vw, 54px); border-bottom: 1px solid var(--borde); background: #fff; }
 .encabezado h1 { margin: 2px 0 0; font-size: 1.35rem; color: var(--azul-oscuro); }
 .encabezado-superior { margin: 0; color: var(--texto-suave); font-size: .72rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
@@ -196,9 +203,9 @@ td[data-label="Código"] strong { white-space: nowrap; }
 .fondo-menu { display: none; }
 .oculto { display: none !important; }
 
-.pagina-login { display: grid; min-height: 100vh; place-items: center; padding: 24px; background: linear-gradient(rgb(7 27 42 / 58%), rgb(8 35 52 / 74%)), url("../imagenes/fondo_login.jfif") center / cover fixed; }
+.pagina-login { display: grid; min-height: 100vh; place-items: center; padding: 24px; background: linear-gradient(rgb(255 255 255 / 8%), rgb(20 24 27 / 16%)), url("../imagenes/fondo_menus.jpg") center / cover fixed; }
 .contenedor-login { width: min(430px, 100%); }
-.tarjeta-login { overflow: hidden; padding: 0 0 34px; border: 1px solid rgb(255 255 255 / 14%); border-radius: 14px; background: #17384d; box-shadow: 0 26px 70px rgb(3 18 29 / 42%); }
+.tarjeta-login { overflow: hidden; padding: 0 0 34px; border: 1px solid rgb(255 255 255 / 17%); border-radius: 14px; background: linear-gradient(145deg, #3b4045 0%, #24282c 46%, #111315 100%); box-shadow: inset 0 1px rgb(255 255 255 / 10%), 0 26px 70px rgb(3 10 14 / 44%); }
 .marca-login { display: flex; min-height: 220px; align-items: flex-end; gap: 12px; margin-bottom: 0; padding: 28px 32px; background: linear-gradient(180deg, rgb(9 34 50 / 10%), rgb(9 34 50 / 84%)), url("../imagenes/fondo_login.jfif") center / cover; }
 .marca-login div { display: flex; flex-direction: column; }
 .marca-login strong { color: #fff; font-size: 1.15rem; }
@@ -258,18 +265,19 @@ td[data-label="Código"] strong { white-space: nowrap; }
 .boton-salir { min-height: 36px; padding: 0 14px; border: 1px solid #fff; border-radius: 8px; color: #111; background: #fff; box-shadow: 0 4px 10px rgb(0 0 0 / 22%); transition: border-color .18s ease, color .18s ease, background .18s ease, transform .18s ease; }
 .boton-salir:hover { border-color: #d7dadd; color: #000; background: #e9ebed; transform: translateY(-1px); }
 
-#seccion-resumen .bienvenida { position: relative; overflow: hidden; padding: 28px 30px; border: 1px solid #d9e5ea; border-radius: 16px; background: linear-gradient(120deg, #fff 0%, #f3f8fa 58%, #eaf5f2 100%); box-shadow: 0 12px 32px rgb(18 52 77 / 7%); }
-#seccion-resumen .bienvenida::after { position: absolute; width: 220px; height: 220px; right: -120px; bottom: -150px; border: 1px solid rgb(22 122 111 / 12%); border-radius: 50%; box-shadow: 0 0 0 34px rgb(22 122 111 / 3%); content: ""; }
-#seccion-resumen .bienvenida > * { position: relative; z-index: 1; }
-#seccion-resumen .bienvenida h2 { margin-top: 8px; font-size: clamp(1.8rem, 3vw, 2.35rem); }
+#seccion-resumen .bienvenida, .encabezado-modulo { position: relative; overflow: hidden; padding: 28px 30px; border: 1px solid #d9e5ea; border-radius: 16px; background: linear-gradient(120deg, #fff 0%, #f3f8fa 58%, #eaf5f2 100%); box-shadow: 0 12px 32px rgb(18 52 77 / 7%); }
+#seccion-resumen .bienvenida::after, .encabezado-modulo::after { position: absolute; width: 220px; height: 220px; right: -120px; bottom: -150px; border: 1px solid rgb(22 122 111 / 12%); border-radius: 50%; box-shadow: 0 0 0 34px rgb(22 122 111 / 3%); content: ""; }
+#seccion-resumen .bienvenida > *, .encabezado-modulo > * { position: relative; z-index: 1; }
+#seccion-resumen .bienvenida h2, .encabezado-modulo h2 { margin-top: 8px; font-size: clamp(1.8rem, 3vw, 2.35rem); }
 #seccion-resumen .fecha-actual { border-color: #d2e2e6; box-shadow: 0 5px 15px rgb(18 52 77 / 5%); }
-#seccion-resumen .indicador { position: relative; overflow: hidden; min-height: 118px; border-color: #dce6eb; box-shadow: 0 10px 26px rgb(18 52 77 / 7%); transition: transform .18s ease, box-shadow .18s ease; }
-#seccion-resumen .indicador::before { position: absolute; height: 4px; inset: 0 0 auto; background: var(--azul); content: ""; }
+#seccion-resumen .indicador { position: relative; overflow: hidden; min-height: 118px; padding: 24px 26px; border-color: #d5e2e8; background: linear-gradient(145deg, #fff 0%, #f8fafb 58%, #eef4f6 100%); box-shadow: 0 14px 30px rgb(18 52 77 / 11%); transition: transform .18s ease, border-color .18s ease, box-shadow .18s ease; }
+#seccion-resumen .indicador::before { position: absolute; height: 5px; inset: 0 0 auto; background: var(--azul); box-shadow: 0 2px 7px rgb(30 91 130 / 18%); content: ""; }
 #seccion-resumen .indicador:nth-child(2)::before { background: var(--verde); }
 #seccion-resumen .indicador:nth-child(3)::before { background: #b58b45; }
 #seccion-resumen .indicador:nth-child(4)::before { background: #675e9c; }
-#seccion-resumen .indicador:hover { box-shadow: 0 15px 32px rgb(18 52 77 / 11%); transform: translateY(-2px); }
-#seccion-resumen .indicador strong { font-size: 1.85rem; }
+#seccion-resumen .indicador:hover { border-color: #c4d6df; box-shadow: 0 19px 38px rgb(18 52 77 / 15%); transform: translateY(-3px); }
+#seccion-resumen .indicador strong { font-size: 2.08rem; font-weight: 800; letter-spacing: -.035em; }
+#seccion-resumen .indicador div span { margin-top: 9px; color: #536777; font-size: .82rem; font-weight: 500; }
 #seccion-resumen .cuadricula-doble > .panel { border-color: #dce6eb; box-shadow: 0 10px 26px rgb(18 52 77 / 7%); }
 #seccion-resumen .accesos-directos button { min-height: 126px; border-color: #dce6eb; background: linear-gradient(145deg, #fff, #f8fafb); transition: transform .18s ease, border-color .18s ease, box-shadow .18s ease; }
 #seccion-resumen .accesos-directos button:hover { border-color: #9ebfcb; box-shadow: 0 9px 18px rgb(18 52 77 / 8%); transform: translateY(-2px); }
@@ -285,6 +293,39 @@ td[data-label="Código"] strong { white-space: nowrap; }
 .panel-parametros-reporte .cabecera-panel { margin: -24px -24px 22px; padding: 22px 24px 18px; border-bottom: 1px solid #e3eaee; background: #f8fafb; }
 .panel-parametros-reporte .boton-primario { box-shadow: 0 7px 16px rgb(30 91 130 / 16%); transition: transform .18s ease, box-shadow .18s ease; }
 .panel-parametros-reporte .boton-primario:hover { box-shadow: 0 10px 22px rgb(30 91 130 / 22%); transform: translateY(-1px); }
+
+/* CABECERAS INTERNAS DE LOS MODULOS */
+.panel > .cabecera-panel {
+    margin: -24px -24px 22px;
+    padding: 19px 24px 18px;
+    border-bottom: 1px solid #496478;
+    border-radius: 12px 12px 0 0;
+    color: #fff;
+    background: linear-gradient(145deg, #3a586d 0%, #1d4058 45%, #0d293d 100%);
+    box-shadow: inset 0 1px rgb(255 255 255 / 18%), 0 7px 18px rgb(10 35 52 / 15%);
+}
+.panel > .cabecera-panel h3 { color: #fff; }
+.panel > .cabecera-panel p,
+.panel > .cabecera-panel .etiqueta,
+.panel > .cabecera-panel label { color: #e6f0f5; }
+.panel > .cabecera-panel input,
+.panel > .cabecera-panel select,
+.panel > .cabecera-panel textarea,
+.panel > .cabecera-panel .buscador {
+    color: #111;
+    background: #fff;
+}
+.panel > .cabecera-panel input::placeholder,
+.panel > .cabecera-panel textarea::placeholder { color: #687785; }
+.panel > .cabecera-panel .boton-secundario {
+    color: #111;
+    border-color: #fff;
+    background: #fff;
+}
+.panel-parametros-reporte .cabecera-panel {
+    border-bottom-color: #496478;
+    background: linear-gradient(145deg, #3a586d 0%, #1d4058 45%, #0d293d 100%);
+}
 
 .cuadricula-reportes { display: grid; grid-template-columns: 270px minmax(0, 1fr); gap: 20px; align-items: start; }
 .panel-parametros-reporte { position: sticky; top: 20px; }
@@ -440,6 +481,7 @@ td[data-label="Código"] strong { white-space: nowrap; }
     .panel-parametros-reporte, .acciones-reporte, .controles-reporte-externos { display: none !important; }
     .aplicacion, .area-principal, .contenido, #seccion-reportes,
     .cuadricula-reportes, .resultado-reporte { display: block !important; width: 100%; margin: 0; padding: 0; }
+    .area-principal { background: #fff !important; }
     .reporte-documento { overflow: visible; padding: 0; border: 0; box-shadow: none; }
     .hoja-reporte, .hoja-reporte:not(.activa) { display: block !important; box-sizing: border-box; width: 241mm; height: 372mm; min-height: 372mm; max-height: 372mm; overflow: hidden; padding: 32px; border: 0; border-radius: 0; box-shadow: none; break-after: page; page-break-after: always; }
     .hoja-reporte:last-child { break-after: auto; page-break-after: auto; }
