@@ -105,7 +105,7 @@
     <div class="cuadricula-doble al-inicio">
         <article class="panel">
             <div class="cabecera-panel"><div><h3>Tasas registradas</h3><p>Historial más reciente de conversiones.</p></div></div>
-            <div class="tabla-contenedor"><table><thead><tr><th>Divisa</th><th>Tasa EUR</th><th>Vigencia</th><th>Estado</th>{% if session.get('usuario_admin') %}<th>Acciones</th>{% endif %}</tr></thead><tbody id="tabla-tasas"></tbody></table></div>
+            <div class="tabla-contenedor"><table><thead><tr><th>Divisa</th><th>Tipo de cambio</th><th>Tasa EUR</th><th>Vigencia</th><th>Estado</th>{% if session.get('usuario_admin') %}<th>Acciones</th>{% endif %}</tr></thead><tbody id="tabla-tasas"></tbody></table></div>
             <p class="estado-vacio" id="vacio-tasas">No existen tasas registradas.</p>
             <div class="paginacion" id="paginacion-tasas"></div>
         </article>

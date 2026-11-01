@@ -30,6 +30,12 @@ const rutasModulos = {
     ventas: "/ventas",
     reportes: "/reportes",
 };
+const tiposCambioEuro = {
+    CNY: "¥ 7.43",
+    PEN: "S/ 3.87",
+    USD: "US$ 1.12",
+    EUR: "€ 1.00",
+};
 
 // ============================================================
 // BLOQUE: COMUNICACION CON EL BACKEND FLASK
@@ -510,6 +516,7 @@ function mostrarTasas() {
     document.querySelector("#tabla-tasas").innerHTML = tasasPagina.map((tasa) => `
         <tr>
             <td data-label="Divisa"><strong>${textoSeguro(tasa.codigo_divisa_origen)}/EUR</strong></td>
+            <td data-label="Tipo de cambio">${textoSeguro(tiposCambioEuro[tasa.codigo_divisa_origen] || "—")}</td>
             <td data-label="Tasa EUR">${textoSeguro(tasa.tasa)}</td>
             <td data-label="Vigencia">${formatearFecha(tasa.fecha_vigencia)}</td>
             <td data-label="Estado"><span class="insignia ${tasa.activa ? "insignia-correcta" : "insignia-neutra"}">${tasa.activa && tasa.fecha_vigencia > hoyISO() ? "Programada" : (tasa.activa ? "Activa" : "Histórica")}</span></td>
