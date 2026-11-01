@@ -29,7 +29,7 @@
             <div class="aviso-intentos-login aviso-bloqueo-login" id="contador-login" data-segundos-restantes="{{ segundos_bloqueo }}">
                 Vuelve a intentarlo en <strong id="tiempo-login">10:00</strong>.
             </div>
-            {% else %}
+            {% elif mensaje_error %}
             <div class="aviso-intentos-login">
                 {% if intentos_restantes == 1 %}
                 Te queda <strong>1</strong> intento.
