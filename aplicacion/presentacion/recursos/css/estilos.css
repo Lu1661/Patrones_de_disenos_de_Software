@@ -220,6 +220,9 @@ td[data-label="Código"] strong { white-space: nowrap; }
 .formulario-login .boton { width: 100%; min-height: 44px; margin-top: 7px; border: 0; border-radius: 9px; background: linear-gradient(90deg, #176d8e, #178778); box-shadow: 0 9px 20px rgb(2 20 30 / 24%); }
 .formulario-login .boton:hover { background: linear-gradient(90deg, #1b789b, #1a9585); }
 .alerta-login { margin: 0 32px 18px; padding: 11px 13px; border: 1px solid #e8baba; border-radius: 8px; color: #873434; background: #fff1f1; font-size: .8rem; }
+.aviso-intentos-login { margin: 0 32px 18px; padding: 10px 13px; border: 1px solid rgb(119 209 195 / 32%); border-radius: 8px; color: #d8ebe8; background: rgb(23 135 120 / 15%); font-size: .8rem; text-align: center; }
+.aviso-bloqueo-login { border-color: rgb(232 186 186 / 38%); color: #ffe7e7; background: rgb(135 52 52 / 22%); }
+.formulario-login .boton:disabled { cursor: not-allowed; opacity: .58; }
 
 /* Apariencia principal de las areas generales del sistema. */
 .barra-lateral { overflow: hidden; background: linear-gradient(180deg, #102f46 0%, #123c57 58%, #123f50 100%); box-shadow: 8px 0 30px rgb(18 52 77 / 9%); transition: width .24s ease, padding .24s ease, transform .22s ease; }
@@ -469,6 +472,7 @@ td[data-label="Código"] strong { white-space: nowrap; }
     .descripcion-login { margin-right: 24px; margin-left: 24px; }
     .formulario-login { padding: 0 24px; }
     .alerta-login { margin-right: 24px; margin-left: 24px; }
+    .aviso-intentos-login { margin-right: 24px; margin-left: 24px; }
     .titulo-navegacion { margin-left: 10px; }
 }
 

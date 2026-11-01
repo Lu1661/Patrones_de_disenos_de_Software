@@ -25,19 +25,34 @@
             <div class="alerta-login" role="alert">{{ mensaje_error }}</div>
             {% endif %}
 
+            {% if segundos_bloqueo %}
+            <div class="aviso-intentos-login aviso-bloqueo-login" id="contador-login" data-segundos-restantes="{{ segundos_bloqueo }}">
+                Vuelve a intentarlo en <strong id="tiempo-login">10:00</strong>.
+            </div>
+            {% else %}
+            <div class="aviso-intentos-login">
+                {% if intentos_restantes == 1 %}
+                Te queda <strong>1</strong> intento.
+                {% else %}
+                Te quedan <strong>{{ intentos_restantes }}</strong> intentos.
+                {% endif %}
+            </div>
+            {% endif %}
+
             <form class="formulario formulario-login" method="post" action="{{ url_for('autenticacion.login') }}">
                 <label>
                     Usuario
-                    <input type="text" name="usuario" autocomplete="username" required autofocus>
+                    <input type="text" name="usuario" autocomplete="username" required autofocus {% if segundos_bloqueo %}disabled{% endif %}>
                 </label>
                 <label>
                     Contraseña
-                    <input type="password" name="password" autocomplete="current-password" required>
+                    <input type="password" name="password" autocomplete="current-password" required {% if segundos_bloqueo %}disabled{% endif %}>
                 </label>
-                <button class="boton boton-primario" type="submit">Ingresar al sistema</button>
+                <button class="boton boton-primario" type="submit" {% if segundos_bloqueo %}disabled{% endif %}>Ingresar al sistema</button>
             </form>
 
         </section>
     </main>
+    <script src="{{ url_for('static', filename='js/login.js') }}"></script>
 </body>
 </html>

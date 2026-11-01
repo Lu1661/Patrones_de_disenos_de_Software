@@ -2,6 +2,7 @@
 
 from functools import wraps
 from hmac import compare_digest
+from math import ceil
 from threading import Lock
 from time import time
 
@@ -22,28 +23,37 @@ intentos_acceso = {}
 bloqueo_intentos = Lock()
 
 
-def clave_intento(usuario: str) -> str:
-    # IDENTIFICA LOS INTENTOS POR USUARIO Y DIRECCION DE CONEXION.
+def clave_intento() -> str:
+    # IDENTIFICA LOS INTENTOS MEDIANTE LA DIRECCION DE CONEXION.
 
-    return f"{request.remote_addr or 'desconocida'}:{usuario.lower()}"
+    return request.remote_addr or "desconocida"
 
 
-def acceso_bloqueado(clave: str) -> bool:
-    # REVISA SI LA ESPERA TEMPORAL TODAVIA SIGUE ACTIVA.
+def intentos_disponibles(clave: str) -> int:
+    # INFORMA CUANTOS INTENTOS QUEDAN ANTES DEL BLOQUEO.
+
+    with bloqueo_intentos:
+        registro = intentos_acceso.get(clave)
+        usados = registro["cantidad"] if registro else 0
+    return max(0, current_app.config["MAX_INTENTOS_LOGIN"] - usados)
+
+
+def segundos_bloqueo_restantes(clave: str) -> int:
+    # CALCULA CUANTO TIEMPO FALTA PARA VOLVER A INTENTAR EL ACCESO.
 
     ahora = time()
     with bloqueo_intentos:
         registro = intentos_acceso.get(clave)
         if not registro:
-            return False
+            return 0
         if registro["bloqueado_hasta"] > ahora:
-            return True
+            return ceil(registro["bloqueado_hasta"] - ahora)
         if registro["bloqueado_hasta"]:
             intentos_acceso.pop(clave, None)
-    return False
+    return 0
 
 
-def registrar_fallo(clave: str) -> bool:
+def registrar_fallo(clave: str) -> tuple[bool, int]:
     # CUENTA TRES FALLOS Y ACTIVA UNA PAUSA TEMPORAL.
 
     ahora = time()
@@ -58,8 +68,9 @@ def registrar_fallo(clave: str) -> bool:
             registro["bloqueado_hasta"] = (
                 ahora + current_app.config["SEGUNDOS_BLOQUEO_LOGIN"]
             )
-            return True
-    return False
+            return True, 0
+        restantes = current_app.config["MAX_INTENTOS_LOGIN"] - registro["cantidad"]
+    return False, restantes
 
 
 def requiere_administrador(funcion):
@@ -98,16 +109,20 @@ def login():
 
     mensaje_error = None
     estado_http = 200
+    clave = clave_intento()
+    segundos_bloqueo = segundos_bloqueo_restantes(clave)
+    intentos_restantes = 0 if segundos_bloqueo else intentos_disponibles(clave)
 
     if request.method == "POST":
         usuario = request.form.get("usuario", "").strip()
         password = request.form.get("password", "")
-        clave = clave_intento(usuario)
 
-        if acceso_bloqueado(clave):
+        if segundos_bloqueo:
             return render_template(
                 "login.html",
-                mensaje_error="Demasiados intentos. Intenta nuevamente más tarde.",
+                mensaje_error="Acceso bloqueado temporalmente.",
+                intentos_restantes=0,
+                segundos_bloqueo=segundos_bloqueo,
             ), 429
 
         usuario_valido = compare_digest(usuario, current_app.config["ADMIN_USUARIO"])
@@ -123,14 +138,21 @@ def login():
             session["usuario_admin"] = usuario
             return redirect(url_for("inicio.mostrar_modulo", modulo="resumen"))
 
-        if registrar_fallo(clave):
-            mensaje_error = "Demasiados intentos. Intenta nuevamente más tarde."
+        bloqueado, intentos_restantes = registrar_fallo(clave)
+        if bloqueado:
+            mensaje_error = "Acceso bloqueado temporalmente."
+            segundos_bloqueo = current_app.config["SEGUNDOS_BLOQUEO_LOGIN"]
             estado_http = 429
         else:
             mensaje_error = "Usuario o contraseña incorrectos."
             estado_http = 401
 
-    return render_template("login.html", mensaje_error=mensaje_error), estado_http
+    return render_template(
+        "login.html",
+        mensaje_error=mensaje_error,
+        intentos_restantes=intentos_restantes,
+        segundos_bloqueo=segundos_bloqueo,
+    ), estado_http
 
 
 @autenticacion_bp.post("/logout")
