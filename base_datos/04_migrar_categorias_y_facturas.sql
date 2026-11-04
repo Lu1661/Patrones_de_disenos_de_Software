@@ -8,7 +8,8 @@ SET NAMES utf8mb4;
 
 CREATE TABLE categorias_productos (
     id_categoria BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
-    nombre VARCHAR(50) NOT NULL,
+    nombre VARCHAR(50)
+        CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
     activa BOOLEAN NOT NULL DEFAULT TRUE,
     fecha_creacion TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (id_categoria),
@@ -24,7 +25,8 @@ VALUES
 
 ALTER TABLE productos_importados
     DROP CHECK chk_productos_categoria,
-    MODIFY categoria VARCHAR(50) NOT NULL,
+    MODIFY categoria VARCHAR(50)
+        CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
     ADD CONSTRAINT fk_productos_categoria
         FOREIGN KEY (categoria)
         REFERENCES categorias_productos (nombre)
