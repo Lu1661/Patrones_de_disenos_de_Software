@@ -24,6 +24,8 @@ class RepositorioFiliales(RepositorioBase, IRepositorioConsulta[Filial]):
             codigo_divisa=fila["codigo_divisa"],
             activa=bool(fila["activa"]),
             id_filial=fila["id_filial"],
+            serie_factura=fila["serie_factura"],
+            ultimo_correlativo_factura=fila["ultimo_correlativo_factura"],
         )
 
     def listar(self) -> list[Filial]:
@@ -31,7 +33,8 @@ class RepositorioFiliales(RepositorioBase, IRepositorioConsulta[Filial]):
 
         consulta = """
             SELECT id_filial, codigo, nombre, pais, ciudad,
-                   codigo_divisa, activa
+                   codigo_divisa, activa, serie_factura,
+                   ultimo_correlativo_factura
             FROM filiales
             ORDER BY nombre
         """
@@ -53,7 +56,8 @@ class RepositorioFiliales(RepositorioBase, IRepositorioConsulta[Filial]):
 
         consulta = """
             SELECT id_filial, codigo, nombre, pais, ciudad,
-                   codigo_divisa, activa
+                   codigo_divisa, activa, serie_factura,
+                   ultimo_correlativo_factura
             FROM filiales
             WHERE id_filial = %s
         """
@@ -75,8 +79,9 @@ class RepositorioFiliales(RepositorioBase, IRepositorioConsulta[Filial]):
 
         consulta = """
             INSERT INTO filiales
-                (codigo, nombre, pais, ciudad, codigo_divisa, activa)
-            VALUES (%s, %s, %s, %s, %s, %s)
+                (codigo, nombre, pais, ciudad, codigo_divisa, activa,
+                 serie_factura, ultimo_correlativo_factura)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
         """
         parametros = (
             filial.codigo,
@@ -85,6 +90,8 @@ class RepositorioFiliales(RepositorioBase, IRepositorioConsulta[Filial]):
             filial.ciudad,
             filial.codigo_divisa,
             filial.activa,
+            filial.serie_factura,
+            filial.ultimo_correlativo_factura,
         )
         with self._usar_conexion(conexion, escritura=True) as conexion_actual:
             cursor = conexion_actual.cursor()
@@ -94,6 +101,83 @@ class RepositorioFiliales(RepositorioBase, IRepositorioConsulta[Filial]):
                 return cursor.lastrowid
             finally:
                 cursor.close()
+
+    def obtener_siguiente_serie(self) -> str:
+        # CALCULA LA SERIE QUE LE CORRESPONDE A UNA NUEVA FILIAL.
+
+        consulta = """
+            SELECT COALESCE(MAX(CAST(SUBSTRING(serie_factura, 2) AS UNSIGNED)), 0)
+                   AS ultima_serie
+            FROM filiales
+        """
+        with self._usar_conexion() as conexion:
+            cursor = conexion.cursor(dictionary=True)
+            try:
+                cursor.execute(consulta)
+                siguiente = int(cursor.fetchone()["ultima_serie"]) + 1
+            finally:
+                cursor.close()
+        if siguiente > 999:
+            raise ValueError("No existen mas series disponibles para filiales.")
+        return f"F{siguiente:03d}"
+
+    def previsualizar_siguiente_factura(self, id_filial: int) -> str:
+        # MUESTRA EL SIGUIENTE NUMERO SIN RESERVARLO TODAVIA.
+
+        consulta = """
+            SELECT serie_factura, ultimo_correlativo_factura
+            FROM filiales
+            WHERE id_filial = %s AND activa = TRUE
+        """
+        with self._usar_conexion() as conexion:
+            cursor = conexion.cursor(dictionary=True)
+            try:
+                cursor.execute(consulta, (id_filial,))
+                fila = cursor.fetchone()
+            finally:
+                cursor.close()
+        if fila is None:
+            raise ValueError("La filial indicada no existe o esta inactiva.")
+        siguiente = int(fila["ultimo_correlativo_factura"]) + 1
+        if siguiente > 999999:
+            raise ValueError("La filial alcanzo el limite de facturas permitido.")
+        return f"{fila['serie_factura']}-{siguiente:06d}"
+
+    def reservar_siguiente_factura(
+        self,
+        id_filial: int,
+        conexion: MySQLConnectionAbstract,
+    ) -> str:
+        # RESERVA EL CORRELATIVO DENTRO DE LA MISMA TRANSACCION DE LA VENTA.
+
+        cursor = conexion.cursor(dictionary=True)
+        try:
+            cursor.execute(
+                """
+                SELECT serie_factura, ultimo_correlativo_factura
+                FROM filiales
+                WHERE id_filial = %s AND activa = TRUE
+                FOR UPDATE
+                """,
+                (id_filial,),
+            )
+            fila = cursor.fetchone()
+            if fila is None:
+                raise ValueError("La filial indicada no existe o esta inactiva.")
+            siguiente = int(fila["ultimo_correlativo_factura"]) + 1
+            if siguiente > 999999:
+                raise ValueError("La filial alcanzo el limite de facturas permitido.")
+            cursor.execute(
+                """
+                UPDATE filiales
+                SET ultimo_correlativo_factura = %s
+                WHERE id_filial = %s
+                """,
+                (siguiente, id_filial),
+            )
+            return f"{fila['serie_factura']}-{siguiente:06d}"
+        finally:
+            cursor.close()
 
     def actualizar(self, filial: Filial) -> None:
         # ACTUALIZA LOS DATOS ADMINISTRATIVOS DE UNA FILIAL EXISTENTE.

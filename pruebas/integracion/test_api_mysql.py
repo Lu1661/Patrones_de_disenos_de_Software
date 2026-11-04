@@ -56,7 +56,8 @@ def test_flujo_completo_api_mysql():
     sufijo = secrets.token_hex(4).upper()
     codigo_filial = f"PY-{sufijo}"
     codigo = f"PY-COD-{sufijo}"
-    factura = f"PY-FV-{sufijo}"
+    categoria_nombre = f"Categoria {sufijo}"
+    id_venta_creada = None
     ids_activos = {}
     ids_tasas = []
 
@@ -138,11 +139,17 @@ def test_flujo_completo_api_mysql():
             },
             201,
         )["datos"]
+        categoria = publicar(
+            "/api/productos/categorias",
+            {"nombre": categoria_nombre},
+            201,
+        )["datos"]
+        assert categoria["nombre"] == categoria_nombre
         producto_datos = {
             "codigo": codigo,
             "nombre": "Producto Pytest",
             "descripcion_tecnica": "Producto temporal de integracion",
-            "categoria": "Laptop",
+            "categoria": categoria_nombre,
             "costo_unitario_cny": "100.00",
             "proveedor": "Proveedor Pytest",
             "fecha_importacion": date.today().isoformat(),
@@ -190,7 +197,7 @@ def test_flujo_completo_api_mysql():
                 "codigo": codigo,
                 "nombre": "Producto Pytest Editado",
                 "descripcion_tecnica": "Producto temporal editado",
-                "categoria": "Laptop",
+                "categoria": categoria_nombre,
                 "costo_unitario_cny": "100.00",
                 "proveedor": "Proveedor Pytest",
                 "fecha_importacion": date.today().isoformat(),
@@ -202,7 +209,6 @@ def test_flujo_completo_api_mysql():
         assert duplicado["exito"] is False
 
         venta_datos = {
-            "numero_factura": factura,
             "id_filial": filial["id_filial"],
             "id_producto": producto["id_producto"],
             "cantidad": 4,
@@ -213,16 +219,31 @@ def test_flujo_completo_api_mysql():
             "precio_unitario_local": "9999.99",
         }
         venta = publicar("/api/ventas", venta_datos, 201)["datos"]
+        id_venta_creada = venta["id_venta"]
+        assert venta["numero_factura"].startswith(filial["serie_factura"] + "-")
         assert venta["detalles"][0]["precio_unitario_local"] == "62.40"
         assert venta["total_local"] == "249.60"
         assert venta["total_eur"] == "62.40"
+
+        consulta_factura = cliente.get(
+            "/api/ventas",
+            query_string={
+                "fecha_inicio": date.today().replace(day=1).isoformat(),
+                "fecha_fin": date.today().isoformat(),
+                "numero_factura": venta["numero_factura"],
+            },
+        )
+        assert consulta_factura.status_code == 200
+        assert [
+            item["numero_factura"]
+            for item in consulta_factura.get_json()["datos"]
+        ] == [venta["numero_factura"]]
 
         inventario = cliente.get(
             f"/api/inventario?id_filial={filial['id_filial']}"
         ).get_json()["datos"]
         assert inventario[0]["stock_disponible"] == 6
 
-        venta_datos["numero_factura"] = f"{factura}-SIN-STOCK"
         venta_datos["cantidad"] = 99
         sin_stock = publicar("/api/ventas", venta_datos, 400)
         assert sin_stock["mensaje"] == "Stock insuficiente. Disponible: 6."
@@ -282,10 +303,11 @@ def test_flujo_completo_api_mysql():
         assert cursor.fetchone()["activa"] == 0
     finally:
         try:
-            cursor.execute(
-                "DELETE FROM ventas WHERE numero_factura LIKE %s",
-                (f"{factura}%",),
-            )
+            if id_venta_creada is not None:
+                cursor.execute(
+                    "DELETE FROM ventas WHERE id_venta = %s",
+                    (id_venta_creada,),
+                )
             cursor.execute(
                 "SELECT id_producto FROM productos_importados WHERE codigo=%s",
                 (codigo,),
@@ -304,6 +326,10 @@ def test_flujo_completo_api_mysql():
                     tuple(productos),
                 )
             cursor.execute("DELETE FROM filiales WHERE codigo=%s", (codigo_filial,))
+            cursor.execute(
+                "DELETE FROM categorias_productos WHERE nombre=%s",
+                (categoria_nombre,),
+            )
             if ids_tasas:
                 marcadores = ",".join(["%s"] * len(ids_tasas))
                 cursor.execute(
@@ -336,11 +362,12 @@ def test_flujo_completo_api_mysql():
                 (codigo,),
             )
             assert cursor.fetchone()["total"] == 0
-            cursor.execute(
-                "SELECT COUNT(*) AS total FROM ventas WHERE numero_factura LIKE %s",
-                (f"{factura}%",),
-            )
-            assert cursor.fetchone()["total"] == 0
+            if id_venta_creada is not None:
+                cursor.execute(
+                    "SELECT COUNT(*) AS total FROM ventas WHERE id_venta = %s",
+                    (id_venta_creada,),
+                )
+                assert cursor.fetchone()["total"] == 0
         finally:
             cursor.close()
             conexion.close()

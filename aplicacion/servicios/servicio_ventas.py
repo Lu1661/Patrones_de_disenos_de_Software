@@ -90,6 +90,10 @@ class ServicioVentas:
             )
 
         with self._administrador_conexion.transaccion() as conexion:
+            numero_factura = self._repositorio_filiales.reservar_siguiente_factura(
+                id_filial,
+                conexion,
+            )
             inventario = self._repositorio_inventario.obtener(
                 id_filial,
                 id_producto,
@@ -125,9 +129,7 @@ class ServicioVentas:
                 costo_unitario_eur=producto.costo_unitario_eur,
             )
             venta = TransaccionVenta(
-                numero_factura=str(
-                    obtener_requerido(datos, "numero_factura")
-                ),
+                numero_factura=numero_factura,
                 id_filial=id_filial,
                 fecha_venta=fecha_venta,
                 cliente=str(obtener_requerido(datos, "cliente")),
@@ -148,11 +150,17 @@ class ServicioVentas:
 
         return venta
 
+    def obtener_siguiente_factura(self, id_filial: int) -> str:
+        # DEVUELVE EL NUMERO QUE SE MOSTRARA ANTES DE CONFIRMAR LA VENTA.
+
+        return self._repositorio_filiales.previsualizar_siguiente_factura(id_filial)
+
     def listar_por_periodo(
         self,
         fecha_inicio: date,
         fecha_fin: date,
         id_filial: int | None = None,
+        numero_factura: str | None = None,
     ) -> list[TransaccionVenta]:
         # DEVUELVE LAS VENTAS QUE UTILIZARAN LAS CONSULTAS Y REPORTES.
 
@@ -162,5 +170,6 @@ class ServicioVentas:
             fecha_inicio,
             fecha_fin,
             id_filial,
+            numero_factura,
         )
 

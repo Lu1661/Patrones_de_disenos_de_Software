@@ -34,10 +34,29 @@ def listar_ventas():
         if id_filial_recibido not in (None, "")
         else None
     )
+    numero_factura = request.args.get("numero_factura", "").strip().upper() or None
 
     servicio = obtener_servicio("ventas")
-    ventas = servicio.listar_por_periodo(fecha_inicio, fecha_fin, id_filial)
+    ventas = servicio.listar_por_periodo(
+        fecha_inicio,
+        fecha_fin,
+        id_filial,
+        numero_factura,
+    )
     return respuesta_exitosa(ventas, "Ventas consultadas.")
+
+
+@ventas_bp.get("/siguiente-factura")
+def obtener_siguiente_factura():
+    # MUESTRA EL SIGUIENTE COMPROBANTE PARA LA FILIAL SELECCIONADA.
+
+    id_filial = convertir_entero(request.args.get("id_filial"), "id_filial")
+    servicio = obtener_servicio("ventas")
+    numero = servicio.obtener_siguiente_factura(id_filial)
+    return respuesta_exitosa(
+        {"numero_factura": numero},
+        "Siguiente numero de factura consultado.",
+    )
 
 
 @ventas_bp.post("")

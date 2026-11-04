@@ -4,6 +4,7 @@ const estado = {
     filiales: [],
     tasas: [],
     productos: [],
+    categorias: [],
     inventariosProductos: [],
     inventario: [],
     ventas: [],
@@ -331,6 +332,18 @@ function llenarSelectoresFiliales() {
     });
 }
 
+function llenarSelectorCategorias() {
+    const selector = document.querySelector("#categoria-producto");
+    const valorActual = selector.value;
+    selector.innerHTML = '<option value="">Seleccionar</option>' + estado.categorias
+        .filter((categoria) => categoria.activa)
+        .map((categoria) => `<option value="${textoSeguro(categoria.nombre)}">${textoSeguro(categoria.nombre)}</option>`)
+        .join("");
+    if ([...selector.options].some((opcion) => opcion.value === valorActual)) {
+        selector.value = valorActual;
+    }
+}
+
 function mostrarIndicadores() {
     document.querySelector("#total-filiales").textContent = estado.filiales.filter((filial) => filial.activa).length;
     document.querySelector("#total-productos").textContent = estado.productos.filter((producto) => producto.activo).length;
@@ -517,7 +530,7 @@ function mostrarTasas() {
         <tr>
             <td data-label="Divisa"><strong>${textoSeguro(tasa.codigo_divisa_origen)}/EUR</strong></td>
             <td data-label="Tipo de cambio">${textoSeguro(tiposCambioEuro[tasa.codigo_divisa_origen] || "—")}</td>
-            <td data-label="Tasa EUR">${textoSeguro(tasa.tasa)}</td>
+            <td data-label="Tasa de conversión">${textoSeguro(tasa.tasa)}</td>
             <td data-label="Vigencia">${formatearFecha(tasa.fecha_vigencia)}</td>
             <td data-label="Estado"><span class="insignia ${tasa.activa ? "insignia-correcta" : "insignia-neutra"}">${tasa.activa && tasa.fecha_vigencia > hoyISO() ? "Programada" : (tasa.activa ? "Activa" : "Histórica")}</span></td>
             ${esAdministrador ? `<td data-label="Acciones">${tasa.activa && tasa.codigo_divisa_origen !== "EUR" ? botonesAdministrativos("tasa", tasa.id_tipo_cambio) : ""}</td>` : ""}
@@ -627,8 +640,10 @@ async function cargarVentas() {
     const desde = document.querySelector("#ventas-desde").value;
     const hasta = document.querySelector("#ventas-hasta").value;
     const filial = document.querySelector("#ventas-filial").value;
+    const numeroFactura = document.querySelector("#ventas-factura").value.trim().toUpperCase();
     const parametros = new URLSearchParams({ fecha_inicio: desde, fecha_fin: hasta });
     if (filial) parametros.set("id_filial", filial);
+    if (numeroFactura) parametros.set("numero_factura", numeroFactura);
     const respuesta = await solicitar(`/api/ventas?${parametros}`);
     estado.ventas = respuesta.datos;
     paginasActuales.ventas = 1;
@@ -647,16 +662,19 @@ async function cargarDatosResumen() {
 }
 
 async function actualizarDatosGenerales() {
-    const [filiales, tasas, productos, inventariosProductos] = await Promise.all([
+    const [filiales, tasas, productos, inventariosProductos, categorias] = await Promise.all([
         solicitar("/api/configuracion/filiales"),
         solicitar("/api/configuracion/tipos-cambio"),
         solicitar("/api/productos"),
         solicitar("/api/inventario/catalogo"),
+        solicitar("/api/productos/categorias"),
     ]);
     estado.filiales = filiales.datos;
     estado.tasas = tasas.datos;
     estado.productos = productos.datos;
     estado.inventariosProductos = inventariosProductos.datos;
+    estado.categorias = categorias.datos;
+    llenarSelectorCategorias();
     mostrarFiliales();
     mostrarTasas();
     mostrarProductos(document.querySelector("#buscar-producto").value);
@@ -667,6 +685,8 @@ async function actualizarDatosGenerales() {
 
 async function prepararVentaPorFilial(idFilial) {
     const selector = document.querySelector("#producto-venta");
+    const campoFactura = document.querySelector("#formulario-venta [name='numero_factura']");
+    campoFactura.value = "";
     document.querySelector("#precio-unitario-venta").value = "";
     document.querySelector("#detalle-stock").textContent = "Consultando productos disponibles...";
     if (!idFilial) {
@@ -674,7 +694,11 @@ async function prepararVentaPorFilial(idFilial) {
         document.querySelector("#detalle-stock").textContent = "Selecciona un producto para consultar su disponibilidad.";
         return;
     }
-    const respuesta = await solicitar(`/api/inventario?id_filial=${encodeURIComponent(idFilial)}`);
+    const [respuesta, factura] = await Promise.all([
+        solicitar(`/api/inventario?id_filial=${encodeURIComponent(idFilial)}`),
+        solicitar(`/api/ventas/siguiente-factura?id_filial=${encodeURIComponent(idFilial)}`),
+    ]);
+    campoFactura.value = factura.datos.numero_factura;
     const disponibles = respuesta.datos.filter((item) => (
         Number(item.stock_disponible) > 0
         && obtenerProducto(item.id_producto)?.activo
@@ -920,6 +944,39 @@ function restablecerFormularioProducto() {
     document.querySelector("#ayuda-formulario-producto").textContent = "";
     document.querySelector("#boton-limpiar-producto").textContent = "Limpiar";
     document.querySelector("#boton-guardar-producto").textContent = "Guardar producto";
+    cancelarAltaCategoria();
+}
+
+function mostrarAltaCategoria() {
+    document.querySelector("#alta-categoria")?.classList.remove("oculto");
+    document.querySelector("#nombre-nueva-categoria")?.focus();
+}
+
+function cancelarAltaCategoria() {
+    const panel = document.querySelector("#alta-categoria");
+    const campo = document.querySelector("#nombre-nueva-categoria");
+    panel?.classList.add("oculto");
+    if (campo) campo.value = "";
+}
+
+async function guardarCategoria() {
+    const campo = document.querySelector("#nombre-nueva-categoria");
+    const nombre = campo?.value.trim();
+    if (!nombre) return mostrarNotificacion("Ingresa el nombre de la categoría.", true);
+    try {
+        const respuesta = await solicitar("/api/productos/categorias", {
+            method: "POST",
+            body: JSON.stringify({ nombre }),
+        });
+        const categorias = await solicitar("/api/productos/categorias");
+        estado.categorias = categorias.datos;
+        llenarSelectorCategorias();
+        document.querySelector("#categoria-producto").value = respuesta.datos.nombre;
+        cancelarAltaCategoria();
+        mostrarNotificacion(respuesta.mensaje);
+    } catch (error) {
+        mostrarNotificacion(error.message, true);
+    }
 }
 
 function editarTasa(idTipoCambio) {
@@ -1119,6 +1176,9 @@ function prepararEventosDeConsulta() {
     document.querySelector("#boton-cancelar-tasa").addEventListener("click", restablecerFormularioTasa);
     document.querySelector("#boton-cancelar-filial").addEventListener("click", restablecerFormularioFilial);
     document.querySelector("#boton-limpiar-producto").addEventListener("click", restablecerFormularioProducto);
+    document.querySelector("#boton-mostrar-categoria")?.addEventListener("click", mostrarAltaCategoria);
+    document.querySelector("#boton-cancelar-categoria")?.addEventListener("click", cancelarAltaCategoria);
+    document.querySelector("#boton-guardar-categoria")?.addEventListener("click", guardarCategoria);
     document.querySelector("#buscar-producto").addEventListener("input", (evento) => {
         paginasActuales.productos = 1;
         mostrarProductos(evento.target.value);
@@ -1144,6 +1204,9 @@ function prepararEventosDeConsulta() {
     document.querySelector("#boton-consultar-ventas").addEventListener("click", async () => {
         try { await cargarVentas(); }
         catch (error) { mostrarNotificacion(error.message, true); }
+    });
+    document.querySelector("#ventas-factura").addEventListener("input", (evento) => {
+        evento.target.value = evento.target.value.toUpperCase().replace(/[^F0-9-]/g, "").slice(0, 11);
     });
     document.querySelector("#tipo-reporte").addEventListener("change", actualizarCamposPeriodoReporte);
 }

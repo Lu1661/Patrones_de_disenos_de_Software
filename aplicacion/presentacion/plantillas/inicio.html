@@ -105,7 +105,7 @@
     <div class="cuadricula-doble al-inicio">
         <article class="panel">
             <div class="cabecera-panel"><div><h3>Tasas registradas</h3><p>Historial más reciente de conversiones.</p></div></div>
-            <div class="tabla-contenedor"><table><thead><tr><th>Divisa</th><th>Tipo de cambio</th><th>Tasa EUR</th><th>Vigencia</th><th>Estado</th>{% if session.get('usuario_admin') %}<th>Acciones</th>{% endif %}</tr></thead><tbody id="tabla-tasas"></tbody></table></div>
+            <div class="tabla-contenedor"><table><thead><tr><th>Divisa</th><th>Tipo de cambio</th><th>Tasa de conversión</th><th>Vigencia</th><th>Estado</th>{% if session.get('usuario_admin') %}<th>Acciones</th>{% endif %}</tr></thead><tbody id="tabla-tasas"></tbody></table></div>
             <p class="estado-vacio" id="vacio-tasas">No existen tasas registradas.</p>
             <div class="paginacion" id="paginacion-tasas"></div>
         </article>
@@ -129,8 +129,12 @@
             <div class="fila-campos tres-columnas">
                 <label>Código<input name="codigo" maxlength="30" placeholder="LAP-001" required></label>
                 <label>Nombre comercial<input name="nombre" placeholder="Laptop Business 14" required></label>
-                <label>Categoría<select name="categoria" required><option value="">Seleccionar</option><option>Laptop</option><option>Smartphone</option><option>Accesorio</option><option>Redes</option></select></label>
+                <div class="campo-categoria">
+                    <label>Categoría<select name="categoria" id="categoria-producto" required><option value="">Seleccionar</option></select></label>
+                    {% if session.get('usuario_admin') %}<button class="boton-enlace" id="boton-mostrar-categoria" type="button">Agregar categoría</button>{% endif %}
+                </div>
             </div>
+            {% if session.get('usuario_admin') %}<div class="alta-categoria oculto" id="alta-categoria"><label>Nueva categoría<input id="nombre-nueva-categoria" maxlength="50" placeholder="Ejemplo: Tablet"></label><button class="boton boton-secundario" id="boton-guardar-categoria" type="button">Guardar categoría</button><button class="boton boton-fantasma" id="boton-cancelar-categoria" type="button">Cancelar</button></div>{% endif %}
             <label>Descripción técnica<textarea name="descripcion_tecnica" rows="3" placeholder="Características principales del producto" required></textarea></label>
             <div class="fila-campos tres-columnas">
                 <label>Costo unitario CNY<input name="costo_unitario_cny" type="number" min="0.01" step="0.01" required></label>
@@ -194,7 +198,7 @@
             <div class="cabecera-panel"><div><h3>Registrar nueva venta</h3><p>El stock se descontará al confirmar la operación.</p></div></div>
             <form id="formulario-venta" class="formulario">
                 <div class="fila-campos">
-                    <label>Número de factura<input name="numero_factura" maxlength="40" placeholder="F001-000001" required></label>
+                    <label>Número de factura<input name="numero_factura" maxlength="11" pattern="F[0-9]{3}-[0-9]{6}" placeholder="Selecciona una filial" readonly required></label>
                     <label>Fecha de venta<input name="fecha_venta" type="datetime-local" required></label>
                 </div>
                 <label>Filial<select name="id_filial" id="filial-venta" class="selector-filiales" required><option value="">Seleccionar filial</option></select></label>
@@ -227,6 +231,7 @@
                 <label>Desde<input id="ventas-desde" type="date"></label>
                 <label>Hasta<input id="ventas-hasta" type="date"></label>
                 <label>Filial<select id="ventas-filial" class="selector-filiales"><option value="">Todas</option></select></label>
+                <label>Número de factura<input id="ventas-factura" type="search" maxlength="11" placeholder="F001-000001"></label>
                 <button class="boton boton-secundario" id="boton-consultar-ventas" type="button">Consultar</button>
             </div>
         </div>

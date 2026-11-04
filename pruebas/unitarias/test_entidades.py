@@ -60,7 +60,7 @@ def test_venta_calcula_ingresos_gastos_y_resultado_en_eur():
         costo_unitario_eur="13.00",
     )
     venta = TransaccionVenta(
-        numero_factura="F001-1",
+        numero_factura="F001-000001",
         id_filial=1,
         fecha_venta=date.today(),
         cliente="Cliente de prueba",
@@ -77,7 +77,7 @@ def test_venta_calcula_ingresos_gastos_y_resultado_en_eur():
     assert venta.resultado_financiero_eur == Decimal("34.00")
 
 
-def test_producto_rechaza_fecha_futura_y_categoria_desconocida():
+def test_producto_rechaza_fecha_futura_y_categoria_demasiado_larga():
     datos = {
         "codigo": "LAP-002",
         "nombre": "Laptop futura",
@@ -93,9 +93,25 @@ def test_producto_rechaza_fecha_futura_y_categoria_desconocida():
         ProductoImportado.crear_con_conversion(**datos)
 
     datos["fecha_importacion"] = date.today()
-    datos["categoria"] = "Electrodomestico"
+    datos["categoria"] = "X" * 51
     with pytest.raises(ValueError, match="categoria"):
         ProductoImportado.crear_con_conversion(**datos)
+
+
+def test_venta_rechaza_numero_de_factura_con_formato_invalido():
+    detalle = DetalleVenta(1, 1, "10.00", "5.00")
+    with pytest.raises(ValueError, match="formato F001-000001"):
+        TransaccionVenta(
+            numero_factura="F0X2-EEE002",
+            id_filial=1,
+            fecha_venta=date.today(),
+            cliente="Cliente",
+            vendedor="Vendedor",
+            metodo_pago="Efectivo",
+            codigo_divisa="PEN",
+            tasa_eur_aplicada="0.25000000",
+            detalles=[detalle],
+        )
 
 
 def test_tipo_cambio_admite_una_vigencia_futura():

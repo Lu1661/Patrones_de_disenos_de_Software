@@ -27,6 +27,7 @@ class ServicioFiliales:
             pais=str(obtener_requerido(datos, "pais")),
             ciudad=str(obtener_requerido(datos, "ciudad")),
             codigo_divisa=str(obtener_requerido(datos, "codigo_divisa")),
+            serie_factura=self._repositorio.obtener_siguiente_serie(),
         )
         self._repositorio.crear(filial)
         return filial
@@ -45,6 +46,8 @@ class ServicioFiliales:
             codigo_divisa=str(obtener_requerido(datos, "codigo_divisa")),
             activa=actual.activa,
             id_filial=id_filial,
+            serie_factura=actual.serie_factura,
+            ultimo_correlativo_factura=actual.ultimo_correlativo_factura,
         )
         self._repositorio.actualizar(filial)
         return filial

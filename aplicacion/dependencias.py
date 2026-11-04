@@ -8,6 +8,9 @@ from aplicacion.persistencia.conexion.conexion_mysql import ConexionMySQL
 from aplicacion.persistencia.repositorios.repositorio_filiales import (
     RepositorioFiliales,
 )
+from aplicacion.persistencia.repositorios.repositorio_categorias import (
+    RepositorioCategorias,
+)
 from aplicacion.persistencia.repositorios.repositorio_inventario import (
     RepositorioInventario,
 )
@@ -23,6 +26,7 @@ from aplicacion.persistencia.repositorios.repositorio_ventas import (
 from aplicacion.reportes.servicio_reportes import ServicioReportes
 from aplicacion.servicios.fachada_serf import FachadaSERF
 from aplicacion.servicios import (
+    ServicioCategorias,
     ServicioFiliales,
     ServicioInventario,
     ServicioProductos,
@@ -55,6 +59,7 @@ def configurar_dependencias(aplicacion: Flask) -> None:
         password=password,
     )
     repositorio_filiales = RepositorioFiliales(administrador)
+    repositorio_categorias = RepositorioCategorias(administrador)
     repositorio_tasas = RepositorioTiposCambio(administrador)
     repositorio_productos = RepositorioProductos(administrador)
     repositorio_inventario = RepositorioInventario(administrador)
@@ -62,7 +67,9 @@ def configurar_dependencias(aplicacion: Flask) -> None:
     configuracion = ConfiguracionGlobal.obtener_instancia()
 
     servicio_tasas = ServicioTiposCambio(repositorio_tasas, configuracion)
+    servicio_categorias = ServicioCategorias(repositorio_categorias)
     servicios = {
+        "categorias": servicio_categorias,
         "filiales": ServicioFiliales(repositorio_filiales),
         "tipos_cambio": servicio_tasas,
         "productos": ServicioProductos(
@@ -71,6 +78,7 @@ def configurar_dependencias(aplicacion: Flask) -> None:
             repositorio_inventario,
             repositorio_filiales,
             repositorio_tasas,
+            servicio_categorias,
         ),
         "inventario": ServicioInventario(repositorio_inventario),
         "ventas": ServicioVentas(

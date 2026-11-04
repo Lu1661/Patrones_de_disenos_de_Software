@@ -267,6 +267,16 @@ td[data-label="Código"] strong { white-space: nowrap; }
 .separador-usuario { color: #9da4aa !important; }
 .boton-salir { min-height: 36px; padding: 0 14px; border: 1px solid #fff; border-radius: 8px; color: #111; background: #fff; box-shadow: 0 4px 10px rgb(0 0 0 / 22%); transition: border-color .18s ease, color .18s ease, background .18s ease, transform .18s ease; }
 .boton-salir:hover { border-color: #d7dadd; color: #000; background: #e9ebed; transform: translateY(-1px); }
+.encabezado > div:not(.usuario-actual) { min-width: 0; flex: 1 1 auto; }
+.usuario-actual { min-width: 0; flex: 0 0 auto; }
+.usuario-actual form { flex: 0 0 auto; }
+.boton-salir { white-space: nowrap; }
+
+.campo-categoria { display: grid; gap: 5px; }
+.campo-categoria label { gap: 8px; }
+.boton-enlace { width: max-content; padding: 0; border: 0; color: #1e628c; background: transparent; cursor: pointer; font: inherit; font-size: .76rem; font-weight: 800; }
+.boton-enlace:hover { color: #124461; text-decoration: underline; }
+.alta-categoria { display: grid; grid-template-columns: minmax(220px, 1fr) auto auto; align-items: end; gap: 10px; padding: 14px; border: 1px solid #cadbe3; border-radius: 10px; background: #f2f7f9; }
 
 #seccion-resumen .bienvenida, .encabezado-modulo { position: relative; overflow: hidden; padding: 28px 30px; border: 1px solid #d9e5ea; border-radius: 16px; background: linear-gradient(120deg, #fff 0%, #f3f8fa 58%, #eaf5f2 100%); box-shadow: 0 12px 32px rgb(18 52 77 / 7%); }
 #seccion-resumen .bienvenida::after, .encabezado-modulo::after { position: absolute; width: 220px; height: 220px; right: -120px; bottom: -150px; border: 1px solid rgb(22 122 111 / 12%); border-radius: 50%; box-shadow: 0 0 0 34px rgb(22 122 111 / 3%); content: ""; }
@@ -404,6 +414,12 @@ td[data-label="Código"] strong { white-space: nowrap; }
     .fila-barra-dashboard { grid-template-columns: minmax(95px, .8fr) minmax(120px, 2fr) auto; }
 }
 
+@media (max-width: 1040px) {
+    .encabezado { gap: 14px; padding-right: 22px; padding-left: 22px; }
+    .etiqueta-usuario { align-items: flex-start !important; flex-direction: column !important; gap: 2px; }
+    .separador-usuario { display: none; }
+}
+
 @media (max-width: 820px) {
     .barra-lateral { transform: translateX(-100%); transition: transform .22s ease; }
     .barra-lateral.abierta { transform: none; }
@@ -411,7 +427,8 @@ td[data-label="Código"] strong { white-space: nowrap; }
     .area-principal { width: 100%; margin-left: 0; }
     .boton-menu { display: block; }
     .boton-contraer-barra { display: none; }
-    .usuario-actual div { display: none; }
+    .usuario-actual { padding-left: 0; border-left: 0; }
+    .usuario-actual .etiqueta-usuario { display: none !important; }
     .contenido { padding-top: 26px; }
     .cuadricula-inventario { grid-template-columns: 1fr; }
     .panel-reposicion { position: static; }
@@ -429,6 +446,7 @@ td[data-label="Código"] strong { white-space: nowrap; }
     .indicador { min-height: 102px; align-items: flex-start; padding: 15px; flex-direction: column; gap: 10px; }
     .indicador strong { font-size: 1.35rem; }
     .accesos-directos, .fila-campos, .tres-columnas { grid-template-columns: 1fr; }
+    .alta-categoria { grid-template-columns: 1fr; }
     .panel { padding: 18px; }
     .panel-dashboard { min-height: 0; }
     .fila-barra-dashboard { grid-template-columns: 90px minmax(90px, 1fr); }

@@ -1,5 +1,6 @@
 # SERVICIOS QUE COORDINAN LAS REGLAS DEL NEGOCIO.
 
+from aplicacion.servicios.servicio_categorias import ServicioCategorias
 from aplicacion.servicios.servicio_filiales import ServicioFiliales
 from aplicacion.servicios.servicio_inventario import ServicioInventario
 from aplicacion.servicios.servicio_productos import ServicioProductos
@@ -8,10 +9,10 @@ from aplicacion.servicios.servicio_ventas import ServicioVentas
 
 
 __all__ = [
+    "ServicioCategorias",
     "ServicioFiliales",
     "ServicioInventario",
     "ServicioProductos",
     "ServicioTiposCambio",
     "ServicioVentas",
 ]
-

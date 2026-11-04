@@ -3,6 +3,7 @@
 from dataclasses import dataclass, field
 from datetime import date, datetime, time
 from decimal import Decimal
+import re
 
 from aplicacion.dominio.entidades.detalle_venta import DetalleVenta
 from aplicacion.dominio.validaciones import (
@@ -45,6 +46,10 @@ class TransaccionVenta:
             self.numero_factura,
             "numero de factura",
         ).upper()
+        if not re.fullmatch(r"F[0-9]{3}-[0-9]{6}", self.numero_factura):
+            raise ValueError(
+                "El numero de factura debe tener el formato F001-000001."
+            )
         self.id_filial = validar_entero_positivo(self.id_filial, "id de filial")
         self.fecha_venta = validar_fecha_no_futura(
             self.fecha_venta,

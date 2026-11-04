@@ -15,6 +15,8 @@ def test_precio_local_agrega_veinte_por_ciento_y_convierte_a_soles():
     repositorio_inventario = MagicMock()
     repositorio_filiales = MagicMock()
     repositorio_tasas = MagicMock()
+    servicio_categorias = MagicMock()
+    servicio_categorias.obtener_activa.return_value.nombre = "Laptop"
 
     repositorio_filiales.obtener_por_id.return_value = Filial(
         codigo="PE-LIM-01",
@@ -42,6 +44,7 @@ def test_precio_local_agrega_veinte_por_ciento_y_convierte_a_soles():
         repositorio_inventario,
         repositorio_filiales,
         repositorio_tasas,
+        servicio_categorias,
     )
 
     _producto, inventario = servicio.registrar_con_stock(

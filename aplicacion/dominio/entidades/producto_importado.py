@@ -14,9 +14,6 @@ from aplicacion.dominio.validaciones import (
 )
 
 
-CATEGORIAS_PERMITIDAS = ("Laptop", "Smartphone", "Accesorio", "Redes")
-
-
 @dataclass
 class ProductoImportado:
     # PRODUCTO TECNOLOGICO COMPRADO EN CNY Y VALORIZADO EN EUR.
@@ -45,7 +42,9 @@ class ProductoImportado:
             self.descripcion_tecnica,
             "descripcion tecnica",
         )
-        self.categoria = self._normalizar_categoria(self.categoria)
+        self.categoria = limpiar_texto(self.categoria, "categoria")
+        if len(self.categoria) > 50:
+            raise ValueError("La categoria no puede superar 50 caracteres.")
         self.costo_unitario_cny = redondear_moneda(
             validar_decimal_positivo(self.costo_unitario_cny, "costo en CNY")
         )
@@ -61,17 +60,6 @@ class ProductoImportado:
 
         if not isinstance(self.activo, bool):
             raise ValueError("El estado del producto debe ser verdadero o falso.")
-
-    @staticmethod
-    def _normalizar_categoria(categoria: str) -> str:
-        # DEVUELVE LA ESCRITURA OFICIAL DE UNA CATEGORIA PERMITIDA.
-
-        valor = limpiar_texto(categoria, "categoria")
-        for categoria_permitida in CATEGORIAS_PERMITIDAS:
-            if categoria_permitida.lower() == valor.lower():
-                return categoria_permitida
-        opciones = ", ".join(CATEGORIAS_PERMITIDAS)
-        raise ValueError(f"La categoria debe ser una de estas opciones: {opciones}.")
 
     @classmethod
     def crear_con_conversion(

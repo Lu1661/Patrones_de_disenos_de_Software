@@ -93,6 +93,7 @@ class RepositorioVentas(RepositorioBase):
         fecha_inicio: date,
         fecha_fin: date,
         id_filial: int | None = None,
+        numero_factura: str | None = None,
     ) -> list[TransaccionVenta]:
         # LISTA VENTAS PARA CONSTRUIR REPORTES POR PERIODO Y FILIAL.
 
@@ -103,6 +104,9 @@ class RepositorioVentas(RepositorioBase):
         if id_filial is not None:
             condicion += " AND id_filial = %s"
             parametros += (id_filial,)
+        if numero_factura:
+            condicion += " AND numero_factura = %s"
+            parametros += (numero_factura.strip().upper(),)
 
         with self._usar_conexion() as conexion:
             return self._consultar_ventas(conexion, condicion, parametros)

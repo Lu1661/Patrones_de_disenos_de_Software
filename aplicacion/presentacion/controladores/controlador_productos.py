@@ -23,6 +23,24 @@ def listar_productos():
     return respuesta_exitosa(servicio.listar(), "Productos consultados.")
 
 
+@productos_bp.get("/categorias")
+def listar_categorias():
+    # DEVUELVE LAS CATEGORIAS ADMINISTRADAS DESDE MYSQL.
+
+    servicio = obtener_servicio("categorias")
+    return respuesta_exitosa(servicio.listar(), "Categorias consultadas.")
+
+
+@productos_bp.post("/categorias")
+@requiere_administrador
+def registrar_categoria():
+    # AGREGA UNA CATEGORIA PARA UTILIZARLA EN EL REGISTRO DE PRODUCTOS.
+
+    servicio = obtener_servicio("categorias")
+    categoria = servicio.registrar(obtener_datos_solicitud())
+    return respuesta_exitosa(categoria, "Categoria registrada correctamente.", 201)
+
+
 @productos_bp.post("")
 def registrar_producto():
     # REGISTRA UN PRODUCTO IMPORTADO JUNTO CON SU STOCK INICIAL.

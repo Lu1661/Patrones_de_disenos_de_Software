@@ -61,7 +61,8 @@ def test_login_protege_el_sistema_y_permite_cerrar_sesion(monkeypatch):
     assert "serf_sesion=" in cookie_sesion
     assert "HttpOnly" in cookie_sesion
     assert "SameSite=Lax" in cookie_sesion
-    assert cliente.get("/").status_code == 200
+    assert cliente.get("/").status_code == 302
+    assert cliente.get("/resumen").status_code == 200
 
     respuesta = cliente.get("/api/productos")
     assert respuesta.status_code == 503

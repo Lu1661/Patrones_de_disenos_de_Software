@@ -38,18 +38,25 @@ CREATE TABLE IF NOT EXISTS filiales (
     pais VARCHAR(80) NOT NULL,
     ciudad VARCHAR(80) NOT NULL,
     codigo_divisa CHAR(3) NOT NULL,
+    serie_factura CHAR(4) NOT NULL,
+    ultimo_correlativo_factura INT UNSIGNED NOT NULL DEFAULT 0,
     activa BOOLEAN NOT NULL DEFAULT TRUE,
     fecha_creacion TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     fecha_actualizacion TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
         ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY (id_filial),
     UNIQUE KEY uq_filiales_codigo (codigo),
+    UNIQUE KEY uq_filiales_serie_factura (serie_factura),
     KEY idx_filiales_divisa (codigo_divisa),
     CONSTRAINT fk_filiales_divisa
         FOREIGN KEY (codigo_divisa)
         REFERENCES divisas (codigo_iso)
         ON UPDATE CASCADE
-        ON DELETE RESTRICT
+        ON DELETE RESTRICT,
+    CONSTRAINT chk_filiales_serie_factura
+        CHECK (serie_factura REGEXP '^F[0-9]{3}$'),
+    CONSTRAINT chk_filiales_correlativo_factura
+        CHECK (ultimo_correlativo_factura <= 999999)
 ) ENGINE = InnoDB;
 
 -- ============================================================
@@ -95,6 +102,20 @@ CREATE TABLE IF NOT EXISTS tipos_cambio (
 ) ENGINE = InnoDB;
 
 -- ============================================================
+-- BLOQUE: CATEGORIAS DE PRODUCTOS
+-- Este bloque permite ampliar las clasificaciones del catalogo sin
+-- modificar el codigo del formulario ni las reglas del producto.
+-- ============================================================
+CREATE TABLE IF NOT EXISTS categorias_productos (
+    id_categoria BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    nombre VARCHAR(50) NOT NULL,
+    activa BOOLEAN NOT NULL DEFAULT TRUE,
+    fecha_creacion TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (id_categoria),
+    UNIQUE KEY uq_categorias_productos_nombre (nombre)
+) ENGINE = InnoDB;
+
+-- ============================================================
 -- BLOQUE: CATALOGO DE PRODUCTOS IMPORTADOS
 -- Este bloque registra los datos tecnicos y costos de los productos
 -- adquiridos en CNY y convertidos a EUR al momento del ingreso.
@@ -105,7 +126,7 @@ CREATE TABLE IF NOT EXISTS productos_importados (
     codigo VARCHAR(30) NOT NULL,
     nombre VARCHAR(120) NOT NULL,
     descripcion_tecnica TEXT NOT NULL,
-    categoria VARCHAR(20) NOT NULL,
+    categoria VARCHAR(50) NOT NULL,
     costo_unitario_cny DECIMAL(14,2) NOT NULL,
     costo_unitario_eur DECIMAL(14,2) NOT NULL,
     proveedor VARCHAR(120) NOT NULL,
@@ -118,8 +139,11 @@ CREATE TABLE IF NOT EXISTS productos_importados (
     UNIQUE KEY uq_productos_codigo (codigo),
     KEY idx_productos_nombre (nombre),
     KEY idx_productos_categoria (categoria),
-    CONSTRAINT chk_productos_categoria
-        CHECK (categoria IN ('Laptop', 'Smartphone', 'Accesorio', 'Redes')),
+    CONSTRAINT fk_productos_categoria
+        FOREIGN KEY (categoria)
+        REFERENCES categorias_productos (nombre)
+        ON UPDATE CASCADE
+        ON DELETE RESTRICT,
     CONSTRAINT chk_productos_costo_cny
         CHECK (costo_unitario_cny > 0),
     CONSTRAINT chk_productos_costo_eur
@@ -169,7 +193,7 @@ CREATE TABLE IF NOT EXISTS inventarios_filial (
 -- ============================================================
 CREATE TABLE IF NOT EXISTS ventas (
     id_venta BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
-    numero_factura VARCHAR(40) NOT NULL,
+    numero_factura CHAR(11) NOT NULL,
     id_filial BIGINT UNSIGNED NOT NULL,
     fecha_venta DATETIME NOT NULL,
     cliente VARCHAR(120) NOT NULL,
@@ -196,6 +220,8 @@ CREATE TABLE IF NOT EXISTS ventas (
         ON DELETE RESTRICT,
     CONSTRAINT chk_ventas_metodo_pago
         CHECK (metodo_pago IN ('Efectivo', 'Tarjeta', 'Transferencia')),
+    CONSTRAINT chk_ventas_numero_factura
+        CHECK (numero_factura REGEXP '^F[0-9]{3}-[0-9]{6}$'),
     CONSTRAINT chk_ventas_tasa
         CHECK (tasa_eur_aplicada > 0),
     CONSTRAINT chk_ventas_total_local

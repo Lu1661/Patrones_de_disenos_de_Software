@@ -22,6 +22,17 @@ VALUES
     ('USD', 'Dolar estadounidense', '$', TRUE);
 
 -- ============================================================
+-- BLOQUE: CATEGORIAS INICIALES DEL CATALOGO
+-- Estas opciones pueden ampliarse luego desde el modulo Productos.
+-- ============================================================
+INSERT IGNORE INTO categorias_productos (nombre, activa)
+VALUES
+    ('Laptop', TRUE),
+    ('Smartphone', TRUE),
+    ('Accesorio', TRUE),
+    ('Redes', TRUE);
+
+-- ============================================================
 -- BLOQUE: EQUIVALENCIA FIJA DE LA MONEDA CORPORATIVA
 -- Un importe expresado en EUR se mantiene sin conversion.
 -- Las demas tasas se registraran desde el modulo de configuracion.

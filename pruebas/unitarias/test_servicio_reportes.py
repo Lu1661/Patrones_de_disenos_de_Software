@@ -57,7 +57,7 @@ def crear_servicio_con_una_venta(
         id_producto=1,
     )
     venta = TransaccionVenta(
-        numero_factura="F001-1",
+        numero_factura="F001-000001",
         id_filial=1,
         fecha_venta=date.today(),
         cliente="Cliente de prueba",

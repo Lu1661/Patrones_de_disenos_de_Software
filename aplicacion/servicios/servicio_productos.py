@@ -9,6 +9,7 @@ from aplicacion.persistencia.conexion.conexion_mysql import ConexionMySQL
 from aplicacion.persistencia.repositorios.repositorio_filiales import (
     RepositorioFiliales,
 )
+from aplicacion.servicios.servicio_categorias import ServicioCategorias
 from aplicacion.persistencia.repositorios.repositorio_inventario import (
     RepositorioInventario,
 )
@@ -37,12 +38,14 @@ class ServicioProductos:
         repositorio_inventario: RepositorioInventario,
         repositorio_filiales: RepositorioFiliales,
         repositorio_tasas: RepositorioTiposCambio,
+        servicio_categorias: ServicioCategorias,
     ) -> None:
         self._administrador_conexion = administrador_conexion
         self._repositorio_productos = repositorio_productos
         self._repositorio_inventario = repositorio_inventario
         self._repositorio_filiales = repositorio_filiales
         self._repositorio_tasas = repositorio_tasas
+        self._servicio_categorias = servicio_categorias
 
     def listar(self) -> list[ProductoImportado]:
         # DEVUELVE TODOS LOS PRODUCTOS REGISTRADOS.
@@ -86,13 +89,16 @@ class ServicioProductos:
                 f"No existe una tasa activa para {filial.codigo_divisa}/EUR."
             )
 
+        categoria = self._servicio_categorias.obtener_activa(
+            str(obtener_requerido(datos, "categoria"))
+        )
         producto = ProductoImportado.crear_con_conversion(
             codigo=str(obtener_requerido(datos, "codigo")),
             nombre=str(obtener_requerido(datos, "nombre")),
             descripcion_tecnica=str(
                 obtener_requerido(datos, "descripcion_tecnica")
             ),
-            categoria=str(obtener_requerido(datos, "categoria")),
+            categoria=categoria.nombre,
             costo_unitario_cny=obtener_requerido(datos, "costo_unitario_cny"),
             tasa_cny_eur=tasa_cny.tasa,
             proveedor=str(obtener_requerido(datos, "proveedor")),
@@ -138,13 +144,16 @@ class ServicioProductos:
         )
         if tasa_cny is None:
             raise ValueError("No existe una tasa activa para CNY/EUR.")
+        categoria = self._servicio_categorias.obtener_activa(
+            str(obtener_requerido(datos, "categoria"))
+        )
         producto = ProductoImportado.crear_con_conversion(
             codigo=str(obtener_requerido(datos, "codigo")),
             nombre=str(obtener_requerido(datos, "nombre")),
             descripcion_tecnica=str(
                 obtener_requerido(datos, "descripcion_tecnica")
             ),
-            categoria=str(obtener_requerido(datos, "categoria")),
+            categoria=categoria.nombre,
             costo_unitario_cny=obtener_requerido(datos, "costo_unitario_cny"),
             tasa_cny_eur=tasa_cny.tasa,
             proveedor=str(obtener_requerido(datos, "proveedor")),
