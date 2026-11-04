@@ -1,6 +1,6 @@
 # CONTROLADOR DE LA PANTALLA INICIAL.
 
-from flask import Blueprint, abort, redirect, render_template, url_for
+from flask import Blueprint, abort, redirect, render_template, session, url_for
 
 
 inicio_bp = Blueprint("inicio", __name__)
@@ -34,6 +34,8 @@ def mostrar_modulo(modulo: str) -> str:
     # ============================================================
     if modulo not in MODULOS_DISPONIBLES:
         abort(404)
+    if modulo not in session.get("permisos", []):
+        abort(403)
 
     return render_template("inicio.html", seccion_inicial=modulo)
 

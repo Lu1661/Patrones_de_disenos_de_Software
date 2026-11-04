@@ -1,4 +1,4 @@
-# CONTROLADOR DEL ACCESO ADMINISTRATIVO AL SISTEMA.
+# CONTROLADOR DEL ACCESO Y LOS PERMISOS DEL SISTEMA.
 
 from functools import wraps
 from hmac import compare_digest
@@ -23,10 +23,42 @@ intentos_acceso = {}
 bloqueo_intentos = Lock()
 
 
-def clave_intento() -> str:
-    # IDENTIFICA LOS INTENTOS MEDIANTE LA DIRECCION DE CONEXION.
+PERMISOS_POR_ROL = {
+    "administrador": (
+        "resumen",
+        "configuracion",
+        "productos",
+        "inventario",
+        "ventas",
+        "reportes",
+    ),
+    "supervisor": (
+        "resumen",
+        "productos",
+        "inventario",
+        "ventas",
+        "reportes",
+    ),
+    "vendedor": (
+        "resumen",
+        "productos",
+        "ventas",
+    ),
+}
 
-    return request.remote_addr or "desconocida"
+NOMBRES_ROL = {
+    "administrador": "Administrador",
+    "supervisor": "Supervisor",
+    "vendedor": "Vendedor",
+}
+
+
+def clave_intento(usuario: str = "") -> str:
+    # IDENTIFICA LOS INTENTOS POR DIRECCION Y CUENTA INGRESADA.
+
+    direccion = request.remote_addr or "desconocida"
+    cuenta = usuario.strip().lower() or "sin_usuario"
+    return f"{direccion}:{cuenta}"
 
 
 def intentos_disponibles(clave: str) -> int:
@@ -83,7 +115,7 @@ def requiere_administrador(funcion):
         # Este bloque protege las modificaciones aunque alguien intente
         # llamar la API directamente sin utilizar los botones del sistema.
         # ============================================================
-        if not session.get("usuario_admin"):
+        if session.get("rol") != "administrador":
             return jsonify(
                 {
                     "exito": False,
@@ -95,27 +127,70 @@ def requiere_administrador(funcion):
     return funcion_protegida
 
 
+def requiere_permiso(modulo: str):
+    # PROTEGE UN ENDPOINT SEGUN LOS MODULOS ASIGNADOS AL ROL.
+
+    def decorador(funcion):
+        @wraps(funcion)
+        def funcion_protegida(*args, **kwargs):
+            if modulo not in session.get("permisos", []):
+                return jsonify(
+                    {
+                        "exito": False,
+                        "mensaje": "Tu rol no tiene permiso para esta operacion.",
+                    }
+                ), 403
+            return funcion(*args, **kwargs)
+
+        return funcion_protegida
+
+    return decorador
+
+
+def obtener_cuentas_configuradas() -> tuple[dict, ...]:
+    # ARMA LAS CUENTAS DESDE VARIABLES PRIVADAS DEL ENTORNO.
+
+    return (
+        {
+            "usuario": current_app.config["ADMIN_USUARIO"],
+            "password": current_app.config["ADMIN_PASSWORD"],
+            "rol": "administrador",
+        },
+        {
+            "usuario": current_app.config["SUPERVISOR_USUARIO"],
+            "password": current_app.config["SUPERVISOR_PASSWORD"],
+            "rol": "supervisor",
+        },
+        {
+            "usuario": current_app.config["VENDEDOR_USUARIO"],
+            "password": current_app.config["VENDEDOR_PASSWORD"],
+            "rol": "vendedor",
+        },
+    )
+
+
 @autenticacion_bp.route("/login", methods=["GET", "POST"])
 def login():
-    # VALIDA LAS CREDENCIALES ADMINISTRATIVAS ANTES DE INGRESAR.
+    # VALIDA LAS CREDENCIALES Y GUARDA EL ROL CORRESPONDIENTE.
 
     # ============================================================
     # BLOQUE: VALIDACION DEL ACCESO ADMINISTRATIVO
     # Este bloque compara los datos del formulario con la cuenta
     # configurada para el proyecto y crea la sesion del usuario.
     # ============================================================
-    if session.get("usuario_admin"):
+    if session.get("usuario"):
         return redirect(url_for("inicio.mostrar_modulo", modulo="resumen"))
 
     mensaje_error = None
     estado_http = 200
-    clave = clave_intento()
-    segundos_bloqueo = segundos_bloqueo_restantes(clave)
-    intentos_restantes = 0 if segundos_bloqueo else intentos_disponibles(clave)
+    segundos_bloqueo = 0
+    intentos_restantes = current_app.config["MAX_INTENTOS_LOGIN"]
 
     if request.method == "POST":
         usuario = request.form.get("usuario", "").strip()
         password = request.form.get("password", "")
+        clave = clave_intento(usuario)
+        segundos_bloqueo = segundos_bloqueo_restantes(clave)
 
         if segundos_bloqueo:
             return render_template(
@@ -125,17 +200,27 @@ def login():
                 segundos_bloqueo=segundos_bloqueo,
             ), 429
 
-        usuario_valido = compare_digest(usuario, current_app.config["ADMIN_USUARIO"])
-        password_valido = compare_digest(
-            password,
-            current_app.config["ADMIN_PASSWORD"],
-        )
+        cuenta_valida = None
+        for cuenta in obtener_cuentas_configuradas():
+            usuario_configurado = cuenta["usuario"]
+            password_configurado = cuenta["password"]
+            if not usuario_configurado or not password_configurado:
+                continue
+            usuario_valido = compare_digest(usuario, usuario_configurado)
+            password_valido = compare_digest(password, password_configurado)
+            if usuario_valido and password_valido:
+                cuenta_valida = cuenta
+                break
 
-        if usuario_valido and password_valido:
+        if cuenta_valida:
             with bloqueo_intentos:
                 intentos_acceso.pop(clave, None)
             session.clear()
-            session["usuario_admin"] = usuario
+            rol = cuenta_valida["rol"]
+            session["usuario"] = cuenta_valida["usuario"]
+            session["rol"] = rol
+            session["nombre_rol"] = NOMBRES_ROL[rol]
+            session["permisos"] = list(PERMISOS_POR_ROL[rol])
             return redirect(url_for("inicio.mostrar_modulo", modulo="resumen"))
 
         bloqueado, intentos_restantes = registrar_fallo(clave)
@@ -157,7 +242,7 @@ def login():
 
 @autenticacion_bp.post("/logout")
 def logout():
-    # CIERRA LA SESION ADMINISTRATIVA Y REGRESA AL LOGIN.
+    # CIERRA LA SESION ACTUAL Y REGRESA AL LOGIN.
 
     # ============================================================
     # BLOQUE: CIERRE DE SESION

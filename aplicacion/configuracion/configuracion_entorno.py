@@ -41,8 +41,14 @@ class ConfiguracionEntorno:
     SEGUNDOS_BLOQUEO_LOGIN = int(os.getenv("SEGUNDOS_BLOQUEO_LOGIN", "600"))
     PROXY_CONFIABLE = leer_booleano("PROXY_CONFIABLE")
 
-    ADMIN_USUARIO = os.getenv("ADMIN_USUARIO", "admin")
-    ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD", "admin")
+    # LAS TRES CUENTAS SE DEFINEN FUERA DEL CODIGO PARA NO PUBLICAR
+    # CONTRASEÑAS REALES EN EL REPOSITORIO DEL PROYECTO.
+    ADMIN_USUARIO = os.getenv("ADMIN_USUARIO", "").strip()
+    ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD", "")
+    SUPERVISOR_USUARIO = os.getenv("SUPERVISOR_USUARIO", "").strip()
+    SUPERVISOR_PASSWORD = os.getenv("SUPERVISOR_PASSWORD", "")
+    VENDEDOR_USUARIO = os.getenv("VENDEDOR_USUARIO", "").strip()
+    VENDEDOR_PASSWORD = os.getenv("VENDEDOR_PASSWORD", "")
     MYSQL_HOST = os.getenv("MYSQL_HOST", "localhost")
     MYSQL_PORT = int(os.getenv("MYSQL_PORT", "3306"))
     MYSQL_BASE_DATOS = os.getenv("MYSQL_BASE_DATOS", "financorp_db")

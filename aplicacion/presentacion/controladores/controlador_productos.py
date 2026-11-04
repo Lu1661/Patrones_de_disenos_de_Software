@@ -5,6 +5,7 @@ from flask import Blueprint
 from aplicacion.dependencias import obtener_servicio
 from aplicacion.presentacion.controladores.controlador_autenticacion import (
     requiere_administrador,
+    requiere_permiso,
 )
 from aplicacion.presentacion.respuestas import (
     obtener_datos_solicitud,
@@ -42,6 +43,7 @@ def registrar_categoria():
 
 
 @productos_bp.post("")
+@requiere_permiso("productos")
 def registrar_producto():
     # REGISTRA UN PRODUCTO IMPORTADO JUNTO CON SU STOCK INICIAL.
 

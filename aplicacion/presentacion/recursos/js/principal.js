@@ -13,6 +13,9 @@ const estado = {
 };
 
 const esAdministrador = document.body.dataset.esAdministrador === "true";
+const permisosModulos = new Set(
+    (document.body.dataset.permisos || "").split(",").filter(Boolean),
+);
 const registrosPorPagina = 10;
 const paginasActuales = {
     tasas: 1,
@@ -256,7 +259,11 @@ function manejarPaginacion(evento) {
 // lateral utilizable tanto en escritorio como en dispositivos moviles.
 // ============================================================
 function mostrarSeccion(nombre, actualizarRuta = true) {
-    if (!rutasModulos[nombre]) nombre = "resumen";
+    if (!rutasModulos[nombre] || !permisosModulos.has(nombre)) {
+        nombre = permisosModulos.has("resumen")
+            ? "resumen"
+            : [...permisosModulos][0];
+    }
     document.querySelectorAll(".seccion-modulo").forEach((seccion) => {
         seccion.classList.toggle("activa", seccion.id === `seccion-${nombre}`);
     });
@@ -695,7 +702,7 @@ async function prepararVentaPorFilial(idFilial) {
         return;
     }
     const [respuesta, factura] = await Promise.all([
-        solicitar(`/api/inventario?id_filial=${encodeURIComponent(idFilial)}`),
+        solicitar(`/api/ventas/productos-disponibles?id_filial=${encodeURIComponent(idFilial)}`),
         solicitar(`/api/ventas/siguiente-factura?id_filial=${encodeURIComponent(idFilial)}`),
     ]);
     campoFactura.value = factura.datos.numero_factura;

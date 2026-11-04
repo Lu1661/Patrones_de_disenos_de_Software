@@ -58,14 +58,14 @@ def crear_aplicacion() -> Flask:
 
     # ============================================================
     # BLOQUE: PROTECCION GENERAL DE PANTALLAS Y API
-    # Este bloque exige una sesion administrativa para usar el sistema.
+    # Este bloque exige una sesion valida para usar el sistema.
     # Las peticiones de la API reciben JSON y las pantallas van al login.
     # ============================================================
     @aplicacion.before_request
-    def comprobar_sesion_administrativa():
+    def comprobar_sesion_activa():
         rutas_libres = {"autenticacion.login", "static"}
 
-        if request.endpoint in rutas_libres or session.get("usuario_admin"):
+        if request.endpoint in rutas_libres or session.get("usuario"):
             return None
 
         if request.path.startswith("/api/"):

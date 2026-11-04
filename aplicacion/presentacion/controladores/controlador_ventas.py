@@ -5,6 +5,9 @@ from datetime import date
 from flask import Blueprint, request
 
 from aplicacion.dependencias import obtener_servicio
+from aplicacion.presentacion.controladores.controlador_autenticacion import (
+    requiere_permiso,
+)
 from aplicacion.presentacion.respuestas import (
     obtener_datos_solicitud,
     respuesta_exitosa,
@@ -16,6 +19,7 @@ ventas_bp = Blueprint("ventas", __name__, url_prefix="/api/ventas")
 
 
 @ventas_bp.get("")
+@requiere_permiso("ventas")
 def listar_ventas():
     # CONSULTA VENTAS POR PERIODO Y, OPCIONALMENTE, POR FILIAL.
 
@@ -47,6 +51,7 @@ def listar_ventas():
 
 
 @ventas_bp.get("/siguiente-factura")
+@requiere_permiso("ventas")
 def obtener_siguiente_factura():
     # MUESTRA EL SIGUIENTE COMPROBANTE PARA LA FILIAL SELECCIONADA.
 
@@ -59,7 +64,19 @@ def obtener_siguiente_factura():
     )
 
 
+@ventas_bp.get("/productos-disponibles")
+@requiere_permiso("ventas")
+def listar_productos_disponibles():
+    # ENTREGA EL STOCK QUE NECESITA EL FORMULARIO DE VENTAS.
+
+    id_filial = convertir_entero(request.args.get("id_filial"), "id_filial")
+    servicio = obtener_servicio("inventario")
+    inventario = servicio.listar_por_filial(id_filial)
+    return respuesta_exitosa(inventario, "Productos disponibles consultados.")
+
+
 @ventas_bp.post("")
+@requiere_permiso("ventas")
 def registrar_venta():
     # REGISTRA EL COMPROBANTE Y DESCUENTA EL STOCK EN UNA SOLA OPERACION.
 

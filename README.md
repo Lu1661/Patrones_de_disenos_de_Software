@@ -72,7 +72,14 @@ python ejecutar.py
 
 La aplicación estará disponible en `http://127.0.0.1:5000`.
 
-El usuario y la contraseña local se encuentran en `ARRANQUE.txt`. También pueden cambiarse con las variables `ADMIN_USUARIO` y `ADMIN_PASSWORD` del archivo `.env`.
+Los accesos locales se encuentran en `ARRANQUE.txt`, archivo privado que no
+pertenece al repositorio. El sistema utiliza los roles Administrador,
+Supervisor y Vendedor; sus cuentas se configuran mediante las variables
+`ADMIN_*`, `SUPERVISOR_*` y `VENDEDOR_*` del archivo `.env`.
+
+Los permisos se aplican tanto en los menús como en las rutas del backend. El
+Administrador utiliza todos los módulos, el Supervisor no ingresa a
+Configuración y el Vendedor trabaja con Resumen, Productos y Ventas.
 
 ## Orden básico de uso
 

@@ -7,7 +7,7 @@
     <title>{% block titulo %}SERF{% endblock %}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/estilos.css') }}">
 </head>
-<body data-es-administrador="{{ 'true' if session.get('usuario_admin') else 'false' }}" data-seccion-inicial="{{ seccion_inicial|default('resumen') }}">
+<body data-es-administrador="{{ 'true' if session.get('rol') == 'administrador' else 'false' }}" data-permisos="{{ session.get('permisos', [])|join(',') }}" data-seccion-inicial="{{ seccion_inicial|default('resumen') }}">
     <div class="aplicacion">
         <aside class="barra-lateral" id="barra-lateral">
             <div class="identidad">
@@ -22,30 +22,42 @@
 
             <nav class="navegacion" aria-label="Navegación principal">
                 <p class="titulo-navegacion">Menú principal</p>
+                {% if 'resumen' in session.get('permisos', []) %}
                 <button class="enlace-navegacion activo" data-seccion="resumen" type="button" title="Resumen">
                     <span class="icono-navegacion"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11.5 12 4l9 7.5"/><path d="M5.5 10v10h13V10"/><path d="M9.5 20v-6h5v6"/></svg></span>
                     <span class="texto-navegacion">Resumen</span>
                 </button>
+                {% endif %}
+                {% if 'configuracion' in session.get('permisos', []) %}
                 <button class="enlace-navegacion" data-seccion="configuracion" type="button" title="Configuración">
                     <span class="icono-navegacion"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1-2.8 2.8-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.6v.2h-4V21a1.7 1.7 0 0 0-1-1.6 1.7 1.7 0 0 0-1.9.3l-.1.1L4.2 17l.1-.1a1.7 1.7 0 0 0 .3-1.9A1.7 1.7 0 0 0 3 14H2.8v-4H3a1.7 1.7 0 0 0 1.6-1 1.7 1.7 0 0 0-.3-1.9L4.2 7 7 4.2l.1.1A1.7 1.7 0 0 0 9 4.6 1.7 1.7 0 0 0 10 3v-.2h4V3a1.7 1.7 0 0 0 1 1.6 1.7 1.7 0 0 0 1.9-.3l.1-.1L19.8 7l-.1.1a1.7 1.7 0 0 0-.3 1.9 1.7 1.7 0 0 0 1.6 1h.2v4H21a1.7 1.7 0 0 0-1.6 1Z"/></svg></span>
                     <span class="texto-navegacion">Configuración</span>
                 </button>
+                {% endif %}
+                {% if 'productos' in session.get('permisos', []) %}
                 <button class="enlace-navegacion" data-seccion="productos" type="button" title="Productos">
                     <span class="icono-navegacion"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m4 7 8-4 8 4-8 4-8-4Z"/><path d="M4 7v10l8 4 8-4V7"/><path d="M12 11v10"/></svg></span>
                     <span class="texto-navegacion">Productos</span>
                 </button>
+                {% endif %}
+                {% if 'inventario' in session.get('permisos', []) %}
                 <button class="enlace-navegacion" data-seccion="inventario" type="button" title="Inventario">
                     <span class="icono-navegacion"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v5H4z"/><path d="M5 10h14v10H5z"/><path d="M9 14h6"/></svg></span>
                     <span class="texto-navegacion">Inventario</span>
                 </button>
+                {% endif %}
+                {% if 'ventas' in session.get('permisos', []) %}
                 <button class="enlace-navegacion" data-seccion="ventas" type="button" title="Ventas">
                     <span class="icono-navegacion"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="20" r="1"/><circle cx="18" cy="20" r="1"/><path d="M3 4h2l2.3 10.2a2 2 0 0 0 2 1.6h7.8a2 2 0 0 0 2-1.6L21 8H6"/></svg></span>
                     <span class="texto-navegacion">Ventas</span>
                 </button>
+                {% endif %}
+                {% if 'reportes' in session.get('permisos', []) %}
                 <button class="enlace-navegacion" data-seccion="reportes" type="button" title="Reportes">
                     <span class="icono-navegacion"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20V10"/><path d="M10 20V4"/><path d="M16 20v-7"/><path d="M22 20H2"/></svg></span>
                     <span class="texto-navegacion">Reportes</span>
                 </button>
+                {% endif %}
             </nav>
 
         </aside>
@@ -59,9 +71,9 @@
                 </div>
                 <div class="usuario-actual">
                     <div class="etiqueta-usuario">
-                        <span>Usuario: <strong>{{ session.get('usuario_admin', 'admin') }}</strong></span>
+                        <span>Usuario: <strong>{{ session.get('usuario', '') }}</strong></span>
                         <span class="separador-usuario">|</span>
-                        <span>Rol: <strong>Administrador</strong></span>
+                        <span>Rol: <strong>{{ session.get('nombre_rol', '') }}</strong></span>
                     </div>
                     <form method="post" action="{{ url_for('autenticacion.logout') }}">
                         <button class="boton-salir" type="submit">Cerrar sesión</button>

@@ -3,6 +3,9 @@
 from flask import Blueprint, request
 
 from aplicacion.dependencias import obtener_servicio
+from aplicacion.presentacion.controladores.controlador_autenticacion import (
+    requiere_permiso,
+)
 from aplicacion.presentacion.respuestas import (
     obtener_datos_solicitud,
     respuesta_exitosa,
@@ -23,6 +26,7 @@ def listar_inventario_catalogo():
 
 
 @inventario_bp.get("")
+@requiere_permiso("inventario")
 def listar_inventario():
     # DEVUELVE LAS EXISTENCIAS DE LA FILIAL INDICADA.
 
@@ -33,6 +37,7 @@ def listar_inventario():
 
 
 @inventario_bp.post("/reponer")
+@requiere_permiso("inventario")
 def reponer_inventario():
     # INCREMENTA EL STOCK DE UN PRODUCTO YA ASIGNADO A UNA FILIAL.
 

@@ -105,13 +105,13 @@
     <div class="cuadricula-doble al-inicio">
         <article class="panel">
             <div class="cabecera-panel"><div><h3>Tasas registradas</h3><p>Historial más reciente de conversiones.</p></div></div>
-            <div class="tabla-contenedor"><table><thead><tr><th>Divisa</th><th>Tipo de cambio</th><th>Tasa de conversión</th><th>Vigencia</th><th>Estado</th>{% if session.get('usuario_admin') %}<th>Acciones</th>{% endif %}</tr></thead><tbody id="tabla-tasas"></tbody></table></div>
+            <div class="tabla-contenedor"><table><thead><tr><th>Divisa</th><th>Tipo de cambio</th><th>Tasa de conversión</th><th>Vigencia</th><th>Estado</th>{% if session.get('rol') == 'administrador' %}<th>Acciones</th>{% endif %}</tr></thead><tbody id="tabla-tasas"></tbody></table></div>
             <p class="estado-vacio" id="vacio-tasas">No existen tasas registradas.</p>
             <div class="paginacion" id="paginacion-tasas"></div>
         </article>
         <article class="panel">
             <div class="cabecera-panel"><div><h3>Filiales registradas</h3><p>Sedes comerciales disponibles.</p></div></div>
-            <div class="tabla-contenedor"><table><thead><tr><th>Código</th><th>Filial</th><th>Ubicación</th><th>Moneda</th>{% if session.get('usuario_admin') %}<th>Acciones</th>{% endif %}</tr></thead><tbody id="tabla-filiales"></tbody></table></div>
+            <div class="tabla-contenedor"><table><thead><tr><th>Código</th><th>Filial</th><th>Ubicación</th><th>Moneda</th>{% if session.get('rol') == 'administrador' %}<th>Acciones</th>{% endif %}</tr></thead><tbody id="tabla-filiales"></tbody></table></div>
             <p class="estado-vacio" id="vacio-filiales">No existen filiales registradas.</p>
             <div class="paginacion" id="paginacion-filiales"></div>
         </article>
@@ -131,10 +131,10 @@
                 <label>Nombre comercial<input name="nombre" placeholder="Laptop Business 14" required></label>
                 <div class="campo-categoria">
                     <label>Categoría<select name="categoria" id="categoria-producto" required><option value="">Seleccionar</option></select></label>
-                    {% if session.get('usuario_admin') %}<button class="boton-enlace" id="boton-mostrar-categoria" type="button">Agregar categoría</button>{% endif %}
+                    {% if session.get('rol') == 'administrador' %}<button class="boton-enlace" id="boton-mostrar-categoria" type="button">Agregar categoría</button>{% endif %}
                 </div>
             </div>
-            {% if session.get('usuario_admin') %}<div class="alta-categoria oculto" id="alta-categoria"><label>Nueva categoría<input id="nombre-nueva-categoria" maxlength="50" placeholder="Ejemplo: Tablet"></label><button class="boton boton-secundario" id="boton-guardar-categoria" type="button">Guardar categoría</button><button class="boton boton-fantasma" id="boton-cancelar-categoria" type="button">Cancelar</button></div>{% endif %}
+            {% if session.get('rol') == 'administrador' %}<div class="alta-categoria oculto" id="alta-categoria"><label>Nueva categoría<input id="nombre-nueva-categoria" maxlength="50" placeholder="Ejemplo: Tablet"></label><button class="boton boton-secundario" id="boton-guardar-categoria" type="button">Guardar categoría</button><button class="boton boton-fantasma" id="boton-cancelar-categoria" type="button">Cancelar</button></div>{% endif %}
             <label>Descripción técnica<textarea name="descripcion_tecnica" rows="3" placeholder="Características principales del producto" required></textarea></label>
             <div class="fila-campos tres-columnas">
                 <label>Costo unitario CNY<input name="costo_unitario_cny" type="number" min="0.01" step="0.01" required></label>
@@ -152,7 +152,7 @@
 
     <article class="panel">
         <div class="cabecera-panel"><div><h3>Catálogo de productos</h3><p>Costos originales y valorización corporativa.</p></div><input class="buscador" id="buscar-producto" type="search" placeholder="Buscar por código o nombre"></div>
-        <div class="tabla-contenedor"><table><thead><tr><th>Código</th><th>Producto</th><th>Categoría</th><th>Costo CNY</th><th>Costo EUR</th><th>Importación</th><th>Filial</th><th>Precio venta</th>{% if session.get('usuario_admin') %}<th>Acciones</th>{% endif %}</tr></thead><tbody id="tabla-productos"></tbody></table></div>
+        <div class="tabla-contenedor"><table><thead><tr><th>Código</th><th>Producto</th><th>Categoría</th><th>Costo CNY</th><th>Costo EUR</th><th>Importación</th><th>Filial</th><th>Precio venta</th>{% if session.get('rol') == 'administrador' %}<th>Acciones</th>{% endif %}</tr></thead><tbody id="tabla-productos"></tbody></table></div>
         <p class="estado-vacio" id="vacio-productos">No existen productos registrados.</p>
         <div class="paginacion" id="paginacion-productos"></div>
     </article>

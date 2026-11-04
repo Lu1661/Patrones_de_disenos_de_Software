@@ -28,6 +28,7 @@ def listar_filiales():
 
 
 @configuracion_bp.post("/filiales")
+@requiere_administrador
 def registrar_filial():
     # REGISTRA UNA SEDE COMERCIAL CON SU MONEDA LOCAL.
 
@@ -65,6 +66,7 @@ def listar_tipos_cambio():
 
 
 @configuracion_bp.post("/tipos-cambio")
+@requiere_administrador
 def registrar_tipo_cambio():
     # REGISTRA UNA NUEVA TASA VIGENTE HACIA EUR.
 
